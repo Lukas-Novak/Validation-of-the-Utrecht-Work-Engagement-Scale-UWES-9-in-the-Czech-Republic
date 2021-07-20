@@ -1,0 +1,720 @@
+---
+title             : "Validation of the Utrecht Work Engagement Scale (UWES) in the Czech Republic"
+shorttitle        : "Validation of UWES"
+author: 
+  - name          : "Haveri Martin"
+    affiliation   : "1"
+    role:         # Contributorship roles (e.g., CRediT, https://casrai.org/credit/)
+      - Conceptualization
+      - Writing - Original Draft Preparation
+      - Writing - Review & Editing
+  - name          : "Lukas Novak"
+    address       : "Univerzitni 244/22, 771 11, Olomouc, Czech Republic"
+    email         : "lukas.novak@oushi.upol.cz"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    role:
+      - Writing - Review & Editing, 
+      - Writing - Original Draft Preparation
+      - Writing - Review & Editing
+      - statistical analysis
+  - name          : "Iva Polackova Solcova"
+    affiliation   : "1,2"
+    role:
+      - Writing - Review & Editing
+  - name          : "Peter Tavel"
+    affiliation   : "1"
+    role:
+      - Writing - Review & Editing
+
+affiliation:
+  - id            : "1"
+    institution   : "Palacky University Olomouc - Social Health Institute"
+  - id            : "2"
+    institution   : "The Czech Academy of Sciences, Institute of Psychology, Prague, Czech Republic"
+
+
+authornote: |
+
+
+
+abstract: |
+  One or two sentences providing a **basic introduction** to the field,  comprehensible to a scientist in any discipline.
+  
+  Two to three sentences of **more detailed background**, comprehensible  to scientists in related disciplines.
+  
+  One sentence clearly stating the **general problem** being addressed by  this particular study.
+  
+  One sentence summarizing the main result (with the words "**here we show**" or their equivalent).
+  
+  Two or three sentences explaining what the **main result** reveals in direct comparison to what was thought to be the case previously, or how the  main result adds to previous knowledge.
+  
+  One or two sentences to put the results into a more **general context**.
+  
+  Two or three sentences to provide a **broader perspective**, readily comprehensible to a scientist in any discipline.
+  
+  <!-- https://tinyurl.com/ybremelq -->
+  
+keywords          : "keywords"
+wordcount         : "X"
+
+bibliography      : ["r-references.bib"]
+
+floatsintext      : no
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : yes
+mask              : no
+draft             : no
+
+documentclass     : "apa6"
+classoption       : "man"
+output            : papaja::apa6_word
+---
+
+```{r setup, include = FALSE}
+library("papaja")
+r_refs("r-references.bib")
+```
+
+```{r analysis-preferences}
+# Seed for random number generation
+set.seed(87257413)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+```
+
+```{r loading libraries, include=FALSE}
+packages=c("psych","dplyr","lavaan","base","foreign","Routliers","MVN","parameters", "EFA.MRFA","RGenData","semPlot","psycho","apa","corx","effectsize","qwraps2","finalfit","ggstatsplot","dunn.test","devtools","rticles","ICC.Sample.Size","tidyverse","magrittr","osfr","expss","gtsummary","huxtable","equaltestMI","haven","rcompanion","ufs","semTools","semPlot","insight","flextable") 
+
+# Install packages not yet installed
+installed_packages <- packages %in% rownames(installed.packages())
+if (any(installed_packages == FALSE)) {
+  install.packages(packages[!installed_packages], repos = "https://cran.r-project.org/")
+}
+# Packages loading
+invisible(lapply(packages, library, character.only = TRUE))
+#________________________________________________________________________-
+# instal MissMach currently not on the CRAN
+miss.mach.url= "https://cran.r-project.org/src/contrib/Archive/MissMech/MissMech_1.0.2.tar.gz"
+Miss.Pack=any(rownames(installed.packages()) == "MissMech")
+if (any(Miss.Pack == FALSE)) {
+  install.packages(miss.mach.url, repos=NULL, type="source")
+}
+library(MissMech)
+#________________________________________________________________________-
+# instal citr currently not on the CRAN
+Miss.Pack=any(rownames(installed.packages()) == "citr")
+if (any(Miss.Pack == FALSE)) {
+  devtools::install_github("crsh/citr")
+}
+library("citr")
+#________________________________________________________________________-
+# install papaja currently not on the CRAN
+Miss.Pack=any(rownames(installed.packages()) == "papaja")
+if (any(Miss.Pack == FALSE)) {
+  devtools::install_github("crsh/papaja")
+}
+library("papaja")
+#________________________________________________________________________-
+```
+
+# Introduction
+
+\newpage
+
+# Methods
+  
+```{r data load and variable recode, include=FALSE}
+path_to_dat = paste0(getwd(),"/Data")
+data.raw=readRDS(paste0(path_to_dat,"/UWES_study.Rds"))
+#_______________________________________________________________________
+# variable recode
+data.rec = data.raw %>% 
+  rename("Faith" = "Religiosity") %>% 
+  # mutate(across(starts_with(c("obtize_","hlth_","OASIS_","ODSIS_")), ~ as.numeric(.))) %>% # this can be deleted if not used    
+  # mutate(OASIS = rowSums(across(starts_with("OASIS_")))) %>%  # this can be deleted if not used
+  # mutate(ODSIS = rowSums(across(starts_with("ODSIS_")))) %>%  # this can be deleted if not used
+  # rename(hlth_for_wom_pain_in_the_small_ = hlth_women_pain_in_small_etc) %>%  # this can be deleted if not used
+  mutate(UWES = rowSums(across(starts_with("UWES_")))) %>%  # this can be deleted if not used
+  mutate(Education = recode_factor(Education, 
+                                   "Basic school" = "Basic school", 
+                                   "Vocational school or non - maturity high school" = "Vocational school or non - maturity high school",
+                                   "High school" = "High school",
+                                   "Higher vocational school" = "Higher vocational school or University",
+                                   "University bachelor" = "Higher vocational school or University",
+                                   "University master" = "Higher vocational school or University",
+                                   "University Dr" = "Higher vocational school or University",
+                                   "other: Ph.D." = "Higher vocational school or University"), 
+                    Economical_status = recode_factor(Economical_status, 
+                                            "Student" = "Without work",
+                                            "Invalidy pensioner" = "Pensioner", 
+                                            "Employed" = "Working",
+                                            "Enterpreanuer" = "Working",
+                                            "Not working" = "Without work",
+                                            "Pensioner"="Pensioner",
+                                            "Maternity leave"="Without work",
+                                            "Without work" = "Without work",
+                                            "In household" = "Without work",
+                                            "other: invalidní duchod" = "Pensioner",
+                                             .default = NA_character_),
+         Faith = recode_factor(Faith,
+                               "Yes, I am a member or church/rel.society" = "Yes, I am a member of church",
+                               "Yes, but I am not a member of church/rel.society" = "Yes, but I am not a member of a church"))
+
+# filtering only those being working
+data.work = data.rec %>% 
+  filter(Economical_status == "Working")
+
+# selecting only high quality respondents
+data = data.work %>% 
+  filter(low_q_res == "HQ") 
+
+
+# if not used the following can be deleted
+#................................................................................
+# data.vacc = data.vacc %>% 
+#     mutate(hlth_depression_anxiety = case_when(
+#     hlth_psych_anxiety == "1" | 
+#     hlth_psych_depress == "1" ~ 1, 
+#     TRUE ~ 0
+#   ))
+
+# summ of all deseases
+# data.vacc = data.vacc %>% 
+#   mutate(General_health = rowSums(across(starts_with(c("hlth_")))))
+#................................................................................
+
+# per.male_female.pa=table(data.pa$Gender)/length(data.pa$Gender) 
+per.male_female.s1=table(data$Gender)/length(data$Gender) 
+```
+
+```{r outliers screening Sample 1, inconsistent responding detection, include=FALSE}
+# calculating MAD 
+out_MAD.1.dat=outliers_mad(data$UWES, b = 1.4826,threshold = 2.5, na.rm = T) 
+```
+
+```{r missing data analysis, include=FALSE}
+MCAR.t=MissMech::TestMCARNormality(data = select(.data = data, starts_with(c("UWES_",
+                                                                             "BFI_",
+                                                                             "vyska",
+                                                                             "vaha",
+                                                                             "worked_years",
+                                                                             "work_contract_length"))))
+```
+
+```{r multivariate normality, include=FALSE}
+# MULTIVARIATE NORMALITY 
+# UWES
+mvn(data = select(.data = data, starts_with("UWES_")),
+    mvnTest = "mardia", univariatePlot = "histogram")
+
+# summary: normality in UWES can be rejected  
+```
+
+```{r Homoscedasticity_and_other_assumptions, include=FALSE}
+# fake regression 
+random=rchisq(nrow(data), 5) # generate random data
+fake_regres=lm(random~., data= data %>% select(starts_with("UWES_"))) # run fake regression
+# run diagnostics plots 
+plot(fake_regres) 
+# testing homogenity of variances
+bp.t.1 = car::ncvTest(fake_regres) # homogeneity of variances can be rejected
+# bp.t.1=lmtest::bptest(fake_regres) 
+```
+
+## Participants  
+  From the survey, we excluded participants being either without work (*n* = `r nrow(filter(data.rec, Economical_status == "Without work"))`) or pensioners (*n* = `r nrow(filter(data.rec, Economical_status == "Pensioner"))`) resulting in `r nrow(data.work)` participants. To increase data quality, we removed subjects finishing the survey in a short period of time i.e. < 15 minutes (*n* = `r nrow(filter(data.rec, status == "SPEEDER"))`). The survey typically lasted > 30 minutes. We also excluded respondents answering discrepantly to quality check items (*n* = `r nrow(data.work)-nrow(data)-nrow(filter(data.rec, status == "SPEEDER"))`). These items included information about weight, height and age. Tolerance in these control questions was set on 2 kilograms, 2 centimeters, and 2 years respectively. After removal of these subjects, the final number of participants was `r nrow(data)` (Age: *M* = `r mean(data$Age, na.rm = T) %>% round(digits = 2)`, *SD* = `r sd(data$Age, na.rm = T) %>% round(digits = 2)`, Females: `r round(per.male_female.s1[["Female"]]*100,digits = 2)`%).   
+
+## Measures
+
+### Utrecht Work Engagement Scale (UWES)
+  .................... 
+
+## Data analysis
+
+Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, df = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`).
+
+
+
+
+ Therefore, statistical test not assuming Gaussian distribution were used. Visual screening of residual plot suggested slight heteroscedasticity (Sample 1), which was not supported by Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, *df* = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`).  
+  
+  To explore the dimensionality of the OASIS, Confirmatory Factor Analysis (CFA) on the first sample (*n* = `r nrow(data)`) was performed. As the OASIS was developed as a unidimensional scale, only one factor model was evaluated. Power analysis suggested that for the purposes of the CFA, at least 1021 participants is needed. More details about power analysis procedure can be found in preregistration form (https://osf.io/yxm9g). Adequacy of correlation matrix was assessed by Bartlett test and also by Kaiser Meyer Olkin (KMO) measure. Absolute model fit was explored by the following indicators: Standardized Root Mean Square Residual (SRMR) and by Root Mean Square Error of Approximation (RMSEA). In these indicators, values < 0.08 suggest acceptable fit and < 0.05 a good fit [@civelek2018essentials; @hoe_issues_2008; @vandenberg_review_2000; @hooper_structural_2008]. The Comparative Fit index (CFI) and Tucker-Lewis index (TLI) were used to evaluate incremental fit of the model. Values of the TLI and CFI > 0.95 suggest an acceptable fit [@jackson_reporting_2009] and values > 0.97 a good fit [@schermelleh_engel_evaluating_2003]. Model implied and observed covariance was compared by the chi-square test. As manifest variables have five categories, based on recommendation of @distefano_comparison_2014, we used Diagonally Weighted Least Squares estimator (DWLS) to fit our model. Polychoric correlations were utilized during fitting procedure. 
+  
+  Measurement equivalence was tested via multigroup CFA. Invariance of the measurement was explored in gender (males,famales) and also in clinical and non - clinical population. The first equivalence analysis was conducted on the Sample 1, the second analysis on the Sample 2. If $\Delta$ CFA was > 0.01, than good fit of a nested model was rejected. Internal consistency of OASIS was assessed by Cronbach’s alpha and  McDonald’s omega. Convergent, divergent and concurent validity was inspected by zero - order Spearman correlation coefficient and by analysis of covariance (ANCOVA). In ANCOVA (Sample 2), outcome variable was gender, predictor the OASIS score and neuroticism as a covariate. Correlation analysis (Sample 2, 3), was conducted to verify H3 - H14. Temporal stability of the OASIS score will be examined by two-way random effects intracalss correlation coefficient. Time interval between the first and the second administration of the OASIS was one week (Sample 2). Evaluation of the cutt-of points was conducted using Receiver Operating Characteristics (ROC) analysis. Youden's index was calculated to find out optimal compromise between sensitivity and specificity. The ROC and the Youden's index calculation was done on the Sample 2.    
+  
+  Differences between socio-demographic groups in the OASIS (Sample 1) were examined via Wilcoxon signed rank test and by Kruskal–Wallis test (non-parametric ANOVA). Post-hoc analysis will consist of Dunn test and Games-Howell test. Degree of an effect for socio-demographic comparison was estimated by Vargha and Delaney $\hat{A}$ [@vargha_critique_2000], in which values of $\hat{A}$ between 0.56 - 0.64 indicates small effect; 0.64 - 0.71 medium effect and > 0.71 a large effect. Descriptive and inferential statistics procedures were done in the `r cite_r()` using the following libraries: *lavaan* [@R-lavaan], *papaja* [@R-papaja] *psych* [@R-psych], *usf* [@R-ufs].     
+  
+# Results
+
+## Socio-demographic results
+
+```{r socio-demographic group comparison and descriptives, include=FALSE}
+# OASIS
+# Gender
+car::leveneTest(as.numeric(data$OASIS) ~ data$Gender, data = data, center = mean) # heteroscedasticity
+# Education
+car::leveneTest(as.numeric(data$OASIS) ~ data$Education, data = data, center = mean) # heteroscedasticity
+# Religiosity
+car::leveneTest(as.numeric(data$OASIS) ~ data$Religiosity, data = data, center = mean) # heteroscedasticity
+# Socio-economic status
+car::leveneTest(as.numeric(data$OASIS) ~ data$Economical_status, data = data, center = mean) # heteroscedasticity
+# Family status
+car::leveneTest(as.numeric(data$OASIS) ~ data$Family_status, data = data, center = mean) # heteroscedasticity
+# Gender
+car::leveneTest(as.numeric(data$OASIS) ~ data$Gender, data = data, center = mean) # heteroscedasticity
+#....................................................................................................................
+# as normality and homoscedasticicy assumption is broken, Games-Howel as well as Dunn test will be used to snspect relationships between socio-demographic variables. We reported in the main text only those results, which were significant in both of these post-hoc tests.
+#............................................................
+#............................................................
+# Welch test for Gemder 
+t.t.gender.oa=t.test(OASIS ~ Gender, data = data, var.equal = FALSE)
+# 
+# Wilcoxon signed rank test - Gender
+mvu.g.OASIS=wilcox.test(OASIS ~ Gender, data = data)
+# ES
+mvu.g.OASIS.es=rstatix::wilcox_effsize(OASIS ~ Gender, data = data, p.adjust.method = "bonferroni")
+#............................................................
+#............................................................
+# Games-Howell for Education 
+oa.edu=rstatix::games_howell_test(OASIS ~ Education, data = data, detailed = T) # no relationsihps
+# Dunn test for Education
+dunn.test(data$OASIS, data$Education, list = T, altp = T, method = "bonferroni", kw=T, label = T, table = T)
+#.....................................
+#.....................................
+#.....................................
+# Games-Howell for Religiosity 
+oa.rel=rstatix::games_howell_test(OASIS ~ Religiosity, data = data, detailed = T)
+# Dunn test for Religiosity
+dunn.test(data$OASIS, data$Religiosity, list = T, altp = T, method = "bonferroni", kw=T, label = T, table = T)
+# effect size for Religiosity 
+  VDA.oa.Religiosity.1=multiVDA(x = data$OASIS, g = data$Religiosity, statistic = "VDA", digits = 2) %>% as.data.frame() %>% 
+  mutate(VDA = as.numeric(pairs.VDA)) %>%  filter(pairs.Comparison == "Religious, not member of a  church - Not religious") %>%  select(VDA) %>% as.matrix()
+#.....................................
+#.....................................
+#.....................................
+# Family status
+oa.famst=rstatix::games_howell_test(OASIS ~ Family_status, data = data, detailed = T)
+# Dunn test for Family status
+dunn.test(data$OASIS, data$Family_status, list = T, altp = T, method = "bonferroni", kw=T, label = T, table = T)
+# effect size for Family status 
+  VDA.oa.fs=multiVDA(x = data$OASIS, g = data$Family_status, statistic = "VDA", digits = 2) %>% as.data.frame() %>% 
+  mutate(VDA = as.numeric(pairs.VDA)) %>%  filter(pairs.Comparison == "In partnership/married - Widow/widower") %>%  select(VDA) %>% as.matrix()
+#.....................................
+#.....................................
+#.....................................
+# Socio-economic status
+oa.eco=rstatix::games_howell_test(OASIS ~ Economical_status, data = data, detailed = T)
+# Dunn test for Socio-economic status
+dunn.test(data$OASIS, data$Economical_status, list = T, altp = T, method = "bonferroni", kw=T, label = T, table = T)
+# effect size for Socio-economic status
+#
+# administrative workers
+  VDA.oa.fs.admv=multiVDA(x = data$OASIS, g = data$Economical_status, statistic = "VDA", digits = 2) %>% as.data.frame() %>% 
+  mutate(VDA = as.numeric(pairs.VDA)) %>%  filter(pairs.Comparison == "Manual worker - Administrative worker") %>%  select(VDA) %>% as.matrix()
+  # employee in services
+  VDA.oa.fs.em.ser=multiVDA(x = data$OASIS, g = data$Economical_status, statistic = "VDA", digits = 2) %>% as.data.frame() %>% 
+  mutate(VDA = as.numeric(pairs.VDA)) %>%  filter(pairs.Comparison == "Manual worker - Employee in services") %>%  select(VDA) %>% as.matrix()
+  # pensioners 
+   VDA.oa.fs.pens=multiVDA(x = data$OASIS, g = data$Economical_status, statistic = "VDA", digits = 2) %>% as.data.frame() %>% 
+  mutate(VDA = as.numeric(pairs.VDA)) %>%  filter(pairs.Comparison == "Manual worker - Pensioner") %>%  select(VDA) %>% as.matrix()
+   # Student 
+  VDA.oa.fs.stud=multiVDA(x = data$OASIS, g = data$Economical_status, statistic = "VDA", digits = 2) %>% as.data.frame() %>% 
+  mutate(VDA = as.numeric(pairs.VDA)) %>%  filter(pairs.Comparison == "Manual worker - Student") %>%  select(VDA) %>% as.matrix()
+  # pensioner vs mental worker 
+    VDA.oa.ment.pens=multiVDA(x = data$OASIS, g = data$Economical_status, statistic = "VDA", digits = 2) %>% as.data.frame() %>% 
+  mutate(VDA = as.numeric(pairs.VDA)) %>%  filter(pairs.Comparison == "Mental worker (medical doctor..) - Pensioner") %>%  select(VDA) %>% as.matrix()
+#.....................................
+#.....................................
+#.....................................
+#....................................................................................................................
+# descriptive statisics of the whall sample
+# descr.sens.spec.data = sens.spec.data %>%  # removing SPSS labels
+#   mutate(Gender =  factor(x = Gender, ordered = F))
+# 
+# descr.ret.data = ret.data %>%  # removing SPSS labels
+#   mutate(Gender =  factor(x = Gender, ordered = F))
+# 
+# dsec.whall.dat = data %>% 
+#   select(Age, Gender) %>% 
+#   bind_rows(data.pa) %>%
+#   select(Age, Gender) %>% 
+#   bind_rows(descr.sens.spec.data) %>% 
+#   select(Age, Gender) %>% 
+#   bind_rows(descr.ret.data) %>% 
+#   select(Age, Gender)
+```
+
+Results revealed that females reached significantly higher score in OASIS as compared to males (W = `r mvu.g.OASIS$statistic`, `r format_p(mvu.g.OASIS$p.value)`, *r* = `r round(mvu.g.OASIS.es$effsize[[1]],digits = 2)`). In addition, religious not being part of a church reached significantly higher score in OASIS as compared with not Religious t(`r round(filter(oa.rel, group1 == "Religious, not member of a  church" & group2 == "Not religious")$df,digits = 2)`) = `r round(filter(oa.rel, group1 == "Religious, not member of a  church" & group2 == "Not religious")$statistic,digits = 2)`, `r filter(oa.rel, group1 == "Religious, not member of a  church" & group2 == "Not religious")$p.adj %>% format_p`, $\hat{A}$ = `r VDA.oa.Religiosity.1[1]`). In addition, there were differences in anxiety in family status: widow and widowers have significantly higher levels of anxiety as compared with those who were married or in partnership (t(`r round(filter(oa.famst, group1 == "Divorced" & group2 == "Widow/widower")$df,digits = 2)`) = `r round(filter(oa.famst, group1 == "Divorced" & group2 == "Widow/widower")$statistic,digits = 2)`, `r filter(oa.famst, group1 == "Divorced" & group2 == "Widow/widower")$p.adj %>% format_p`, $\hat{A}$ = `r VDA.oa.fs[1]`). In socio-economic status, we found significantly higher anxiety levels in administrative workers (t(`r round(filter(oa.eco, group1 == "Manual worker" & group2 == "Administrative worker")$df,digits = 2)`) = `r round(filter(oa.eco, group1 == "Manual worker" & group2 == "Administrative worker")$statistic,digits = 2)`, `r filter(oa.eco, group1 == "Manual worker" & group2 == "Administrative worker")$p.adj %>% format_p`, $\hat{A}$ = `r VDA.oa.fs.admv[1]`), employees in services (t(`r round(filter(oa.eco, group1 == "Manual worker" & group2 == "Employee in services")$df,digits = 2)`) = `r round(filter(oa.eco, group1 == "Manual worker" & group2 == "Employee in services")$statistic,digits = 2)`, `r filter(oa.eco, group1 == "Manual worker" & group2 == "Employee in services")$p.adj %>% format_p`, $\hat{A}$ = `r VDA.oa.fs.em.ser[1]`), Pensioners (t(`r round(filter(oa.eco, group1 == "Manual worker" & group2 == "Pensioner")$df,digits = 2)`) = `r round(filter(oa.eco, group1 == "Manual worker" & group2 == "Pensioner")$statistic,digits = 2)`, `r filter(oa.eco, group1 == "Manual worker" & group2 == "Pensioner")$p.adj %>% format_p`, $\hat{A}$ = `r VDA.oa.fs.pens[1]`) and students (t(`r round(filter(oa.eco, group1 == "Manual worker" & group2 == "Student")$df,digits = 2)`) = `r round(filter(oa.eco, group1 == "Manual worker" & group2 == "Student")$statistic,digits = 2)`, `r filter(oa.eco, group1 == "Manual worker" & group2 == "Student")$p.adj %>% format_p`, $\hat{A}$ = `r VDA.oa.fs.stud[1]`) as compared with manual workers. Similarly, pensioners had significantly higher score in OASIS as compared with mental workers (t(`r round(filter(oa.eco, group1 == "Mental worker (medical doctor..)" & group2 == "Pensioner")$df,digits = 2)`) = `r round(filter(oa.eco, group1 == "Mental worker (medical doctor..)" & group2 == "Pensioner")$statistic,digits = 2)`, `r filter(oa.eco, group1 == "Mental worker (medical doctor..)" & group2 == "Pensioner")$p.adj %>% format_p`, $\hat{A}$ = `r VDA.oa.ment.pens[1]`).              
+ 
+```{r, echo=FALSE}
+cs.tab.1=data %>%
+  dplyr::select(Gender, Family_status , Education, Economical_status, Religiosity, Income_of_family) %>%
+  tbl_summary( missing = "no",
+                  statistic = list(all_continuous() ~  "{mean} ({sd})",
+                                   all_categorical() ~ "{n} ({p}%)"),
+              digits = all_continuous() ~ 2,) 
+ 
+# cs.tab.2=data.ex %>%
+#   dplyr::select(Gender, family_status , education, economical_status, faith) %>%
+#   tbl_summary( missing = "no",
+#                   statistic = list(all_continuous() ~  "{mean} ({sd})",
+#                                    all_categorical() ~ "{n} ({p}%)"),
+#               digits = all_continuous() ~ 2,) 
+# 
+# cs.tab.3=sens.spec.data %>%
+#   dplyr::select(Gender, family_status , education, economical_status, faith) %>%
+#   tbl_summary( missing = "no",
+#                   statistic = list(all_continuous() ~  "{mean} ({sd})",
+#                                    all_categorical() ~ "{n} ({p}%)"),
+#               digits = all_continuous() ~ 2,) 
+  
+# tbl_merge(tbls = list(cs.tab.1, 
+#                       cs.tab.2,
+#                       cs.tab.3
+#                       ))  
+#   as_tibble()  %>% 
+#   rename("Variable"="**Characteristic**",
+#          "Survey 1"=  "**N = 1,769**",
+#          "Survey 2" = "**N = 1,393**",
+#          "Survey 3" = "**N = 518**"
+#          ) %>% 
+
+cs.tab.1 %>%  # this should be deleted when more samples are used
+  as_tibble() %>% # this should be deleted when more samples are used 
+  mutate_all(~(replace(., is.na(.), ""))) %>%
+  as_huxtable(add_colnames = F) %>% 
+  set_bold(c(2,5,8,17,25),1) %>% 
+  set_bottom_border(row = 1, value = 1) %>%  # the 1 here indicates the rownumber 
+  set_font("times") %>% 
+  set_font_size(10) %>% 
+  apa_table(caption = "Socio-demographic results of the three samples", span_text_columns = F)
+```
+
+```{r Bartlett test and KMO, include=FALSE}
+# POLYCHORIC CORELATION MATRIX
+# OASIS 
+OASIS.rep.poly = data %>% select(starts_with("OASIS_")) %>% lavCor(ordered = T)
+# BARTLETS TEST OF SPHERICITY:
+bartlett.oasis=cortest.bartlett(OASIS.rep.poly, diag = T, n=nrow(data)) #  Bartlett's test of sphericity 
+# KMO
+KMO(OASIS.rep.poly) # 0.87
+```
+
+```{r CFA OASIS, include=FALSE}
+# One factor model 
+one.fac.mod="Anxiety =~ OASIS_1 + OASIS_2 + OASIS_3 + OASIS_4 + OASIS_5"
+#when "ordered" is set to "TRUE", than DWLS estimator is automatically used as "standard" in results. "Robust" chisquare in results is referring to WLSMV estimator.
+OASIS.one.dim=sem(model = one.fac.mod, data = data, std.lv=T, ordered = T)
+one.fac.mod.sum=summary(OASIS.one.dim,rsquare=T, standardized=T, fit.measures=T)
+modificationindices(OASIS.one.dim, sort. = T) # how can we improve our model
+# inspection of correlation between residuals
+# Large positive values indicate the model underpredicts the correlation; large negative values suggest overprediction of the correlation. Usually values |r>.1| are worth closer consideration.
+resid(OASIS.one.dim, "cor")
+```
+
+## Confirmatory Factor Analysis Results
+
+Results of Bartlett test ($\chi^2$ (`r bartlett.oasis$df`) = `r round(bartlett.oasis$chisq,digits=2)`, `r format_p(bartlett.oasis$p.value)`) and KMO indicated that our data met the assumptions of factor analysis. The CFA (Sample 1) suggested that although relative fit indices indicated a good fit of the unidimensional solution, some absolute model fit indices i.e. RMSEA yielded inadequate values: $\chi^2$(`r round(one.fac.mod.sum$FIT[["df"]], digits = 2)`)=`r round(one.fac.mod.sum$FIT[["chisq"]], digits = 2)`, `r format_p(one.fac.mod.sum$FIT[["pvalue"]])`, CFI=`r round(one.fac.mod.sum$FIT[["cfi"]], digits = 3)`,TLI=`r round(one.fac.mod.sum$FIT[["tli"]], digits = 3)`,SRMR=`r round(one.fac.mod.sum$FIT[["srmr"]], digits = 3)`, RMSEA=`r round(one.fac.mod.sum$FIT[["rmsea"]], digits = 3)`, 90% CI[`r round(one.fac.mod.sum$FIT[["rmsea.ci.lower"]], digits = 3)`-`r round(one.fac.mod.sum$FIT[["rmsea.ci.upper"]], digits = 3)`]. Based on inspection of modification indices, constrains between item 1 and 2 were released. This in line with approach and theoretical reasons outlined in other psychometric studies of the OASIS [@campbell_sills_validation_2009; @ito_validity_2015; @osma_psychometric_2019]. Figure 1 depicts SEM diagram visualizing factor ladings and error terms correlation between item 1 and 2. 
+```{r CFA_OASIS_cor_er_it_1_2, include=FALSE}
+# One factor model 
+one.fac.mod.cor.er.oasis="Anxiety =~ OASIS_1 + OASIS_2 + OASIS_3 + OASIS_4 + OASIS_5 
+             OASIS_1 ~~ OASIS_2"
+
+#when "ordered" is set to "TRUE", than DWLS estimator is auto  matically used as "standard" in results. "Robust" chisquare in results is referring to WLSMV estimator.
+OASIS.one.dim.oasis.cor.eror=sem(model = one.fac.mod.cor.er.oasis, data = data, std.lv=T, ordered = T)
+one.fac.mod.sum.cor.errors=summary(OASIS.one.dim.oasis.cor.eror,rsquare=T, standardized=T, fit.measures=T)
+parameterestimates(OASIS.one.dim.oasis.cor.eror, standardized = T) # whill show standardized estimates and many other things
+modificationindices(OASIS.one.dim.oasis.cor.eror, sort. = T) # how can we improve our model
+fitmeasures(OASIS.one.dim.oasis.cor.eror) # chisq.scaled - robust one
+# exporting fit indexes
+mod.fit.indicies=as.table(fitMeasures(OASIS.one.dim.oasis.cor.eror)[c('chisq', 'df', 'pvalue',
+                                                              'cfi',"tli",'rmsea',"rmsea.ci.lower",
+                                                              "rmsea.ci.upper", 'srmr')]) %>% round(digits = 2) 
+
+one.fac.mod.cor.er.oasis.resid=resid(OASIS.one.dim.oasis.cor.eror, "cor")
+dif.test.cor.er.OASIS=lavaan::anova(OASIS.one.dim,OASIS.one.dim.oasis.cor.eror, method = "satorra.bentler.2010")
+```
+
+```{r Figure 1, echo=FALSE, message=FALSE, warning=FALSE}
+semPaths(OASIS.one.dim.oasis.cor.eror,layout = "tree2", whatLabels= "std",
+         residuals = T, thresholds = F,        
+         reorder = T, edge.label.cex= 1.1, fade=F, 
+         intercepts = F, rotation = 1,  
+         nCharNodes = 8,style = "OpenMx",
+         sizeLat = 20, sizeMan=7,edge.color="black")
+```
+
+\newpage
+After modification of the base model, fit indices yielded an excellent values: $\chi^2$(`r round(one.fac.mod.sum.cor.errors$FIT[["df"]], digits = 2)`) = `r round(one.fac.mod.sum.cor.errors$FIT[["chisq"]], digits = 2)`, `r format_p(one.fac.mod.sum.cor.errors$FIT[["pvalue"]])`, CFI=`r round(one.fac.mod.sum.cor.errors$FIT[["cfi"]], digits = 3)`,TLI=`r round(one.fac.mod.sum.cor.errors$FIT[["tli"]], digits = 3)`,SRMR=`r round(one.fac.mod.sum.cor.errors$FIT[["srmr"]], digits = 3)`, RMSEA=`r round(one.fac.mod.sum.cor.errors$FIT[["rmsea"]], digits = 3)`, 90% CI[`r round(one.fac.mod.sum.cor.errors$FIT[["rmsea.ci.lower"]], digits = 3)`-`r round(one.fac.mod.sum.cor.errors$FIT[["rmsea.ci.upper"]], digits = 3)`]. Chi-square difference test supported better fit of the model with correlated residuals: $\chi^2$(`r dif.test.cor.er.OASIS$"Df diff"[2]`) = `r dif.test.cor.er.OASIS$"Chisq diff"[2] %>% round(digits = 2)`; `r dif.test.cor.er.OASIS$"Pr(>Chisq)" [2] %>% format_p `. In modified model, the correlation between items residuals was low with maximum value of `r round(max(one.fac.mod.cor.er.oasis.resid$cov), digits = 2) `. Factor loadings of manifest variables were high (Figure 1). 
+```{r correlation table one, eval=FALSE, include=FALSE}
+variab.cor.data.pa=data.pa[, c("OASIS","ODSIS","Gender","BFI_N","RSES","Age","education")]
+# recode variables to numeric
+variab.cor.data.pa = variab.cor.data.pa %>% 
+  mutate_all(as.numeric)
+
+iter.cor.teq.fin.data.pa=corx(variab.cor.data.pa, method = "spearman", triangle = "lower", describe = c(M = mean, SD = sd), stars = c(0.05, 0.01, 0.001),note = "M = mean, SD = standard devation")
+iter.cor.teq.fin.data.pa
+```
+
+```{r print cor table pa data, eval=FALSE, include=FALSE}
+apa_table(iter.cor.teq.fin.data.pa$apa, caption = "Correaltion table with means and standard devations",
+          note = "* p < 0.05; ** p < 0.01; *** p < 0.001; SD = standard deviation, M = mean, OASIS = Overall Anxiety Severity and Impairment Scale, ODSIS = Overall Depression Severity and Impairment Scale, RSES = Rosenberg Self Esteem Scale, BFI_N = Big Five Inventory - Neuroticism subscale. Spearman rank correlations were used") 
+```
+
+## Invariance testing and factor loadings 
+
+```{r gender invariance OASIS, include=FALSE}
+meas.invar.oasis="Anxiety =~ OASIS_1 + OASIS_2 + OASIS_4 + OASIS_5 # there was a need to remove item 3 from the model as the some categories were empthy in one group  
+                             OASIS_1 ~~ OASIS_2"
+
+meas.invar.oasis.cfa=cfa(meas.invar.oasis, data = data,ordered = T,std.lv=T,
+                         meanstructure = T) # crucial in invariance testing
+# Tab x 
+tab.fit = matrix(nrow = 7, ncol = 10)
+# ODSIS Part
+
+colnames(tab.fit)=c("Model","x2","df","pvalue","CFI","TLI","rmsea","rmsea.ci.lower", "rmsea.ci.upper", "SRMR")
+tab.fit[1, ] = c("Overall model", round(fitMeasures(meas.invar.oasis.cfa,
+                                                    c('chisq', 'df', 'pvalue',
+                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
+                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
+
+mult.group.m = eqMI.main(model = meas.invar.oasis,
+                         data = data,
+                         group = "Gender", 
+                         meanstructure = T,
+                         output = "both",
+                         equivalence.test = T,
+                         adjRMSEA = T,
+                         projection = T,
+                         ordered = T)
+
+# male table
+tab.fit[2, ] = c("Male model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.configural.g1,
+                                                    c('chisq', 'df', 'pvalue',
+                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
+                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
+# female table
+tab.fit[3, ] = c("Female model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.configural.g2,
+                                                    c('chisq', 'df', 'pvalue',
+                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
+                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
+
+# Configure invariance 
+tab.fit[4, ] = c("Configural  model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.combine.groups,
+                                                    c('chisq', 'df', 'pvalue',
+                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
+                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
+# Metric invariance 
+tab.fit[5, ] = c("Metric  model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.metric,
+                                                    c('chisq', 'df', 'pvalue',
+                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
+                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
+# Scalar invariance 
+tab.fit[6, ] = c("Scalar  model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.scalar,
+                                                    c('chisq', 'df', 'pvalue',
+                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
+                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
+# Strict (error) invariance
+tab.fit[7, ] = c("Strict  model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.strict.residuals,
+                                                    c('chisq', 'df', 'pvalue',
+                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
+                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
+
+mult.group.m$eqMI.stat # checking chi-square 
+
+tab.fit = tab.fit %>% 
+  as_tibble() %>% 
+  mutate(rmsea = paste0(rmsea, " ","(",rmsea.ci.lower,"-",rmsea.ci.upper,")")) %>% 
+  rename(
+         "RMSEA (90% CI)" = "rmsea") %>% 
+  select(!starts_with(c("rmsea.ci.","rmsea.ci.lower","rmsea.ci.upper"))) %>% view()
+```
+ Change in the CFI < 0.01 across configure, metric, scalar and strict models suggests measurement invariance of the OASIS between the two genders (Table 3).
+```{r}
+# creating table 
+tab.fit %>% 
+  as_tibble() %>% 
+     mutate_all(~(replace(., is.na(.), ""))) %>% 
+  as_huxtable(add_colnames = F) %>% 
+  apa_table(col.names=c("Model","x2","df","p-value","CFI","TLI","RMSEA","SRMR"),
+          caption = "Measurement eqivalence of the OASIS between genders", 
+          note = "x2 = chi-square, df = degrees of freedom, CFI = Comparative Fit Index, TLI = Tucker-Lewis index, RMSEA = Root Mean Square Error of Approximation , CI = Confidence Interval, SRMR = Standardized Root Mean Square Residual")
+```
+
+## Internal consistency and item statistic
+```{r internal consistency examination, include=FALSE}
+# OASIS
+OASIS.rel=ufs::scaleStructure(select(starts_with("OASIS_"), .data = data), digits = 2, poly = TRUE, samples = 5000)
+```
+The OASIS yielded an excellent internal consistency: with Cronbach's $\alpha$ = `r round(OASIS.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(OASIS.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(OASIS.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(OASIS.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(OASIS.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(OASIS.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. Table 3 depicts statistic of the OASIS items. Overall, correlations between these items and item-total correlations were high. The item 5 had the lowest correlation with scale items as well as item-total correlation.
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# item statistic calculation
+ITC.OASIS=psych::alpha(x = select((starts_with("OASIS_")),.data = data))
+skew.kurt.OASIS=describe(x = select(data, starts_with("OASIS_")))
+
+# calculating polychoric correlations 
+OASIS.cz.polych = polychoric(select((starts_with("OASIS_")), .data = data), smooth = T) # polychoric correlation procedure
+OASIS.cz.polych$rho[upper.tri(OASIS.cz.polych$rho)] <- NA # replacing the same values in matrix with na
+
+# extract p values to poly correlations 
+library(correlation)
+library(gtools)
+p.val.polych=cor_to_p(cor(select((starts_with("OASIS_")),.data = data)), n = nrow(data),method = "polychoric")$p
+
+# p-values to stars
+stars.to.cor = p.val.polych %>% stars.pval()
+# two digits 
+OASIS.cz.polych$rho = OASIS.cz.polych$rho %>% round(digits = 2) 
+# paste p-values
+poly.mat.star <- matrix(paste(OASIS.cz.polych$rho, stars.to.cor, sep=""), ncol=ncol(p.val.polych)) 
+# adding colnames to poly cor table
+rownames(poly.mat.star) <- colnames(p.val.polych) 
+# pasting colnames and rownames to cor table
+colnames(poly.mat.star) <- paste(colnames(p.val.polych), "", sep="") 
+# remove upper triangular and 1 diagonal
+poly.mat.star[upper.tri(poly.mat.star, diag = FALSE)] <- "" 
+# adding 1 on the diagonal
+poly.mat.star[upper.tri(poly.mat.star, diag = FALSE)] <- "" 
+# removing stars from 1 at the diagonal
+diag(poly.mat.star)=str_replace_all(diag(poly.mat.star), "[:punct:]", replacement = "")
+
+# selecting mean,
+M=round(ITC.OASIS$item.stats$mean,digits = 2)
+# selecting SD
+SD=round(ITC.OASIS$item.stats$sd,digits = 2)
+# selecting ITC item-total correlation
+ITC=round(ITC.OASIS$item.stats$r.cor,digits = 2)
+# selecting skewness
+Skewness=round(skew.kurt.OASIS$skew,digits = 2)
+# selecting kurtosis
+kurtosis=round(skew.kurt.OASIS$kurtosis, digits = 2)
+
+# combine all
+OASIS.items.des=cbind(poly.mat.star,M,SD,ITC,Skewness,kurtosis) 
+
+##### This is for PDF output only
+# knitr::kable(longtable = T, digits = 2,OASIS.items.des, "latex", booktabs=T, linesep = "", caption = "Polychoric correlations of the OASIS items with SD and M, ITC") %>% 
+#   kableExtra::kable_styling(latex_options = c("scale_down", "hold_position"), font_size = 7) %>%  # full_width = T or longtable = T (to the Kable command)
+#   kableExtra::footnote(c( "* p < 0.05; ** p < 0.01; *** p < 0.001, M = Mean, SD = Standard Deviation, ITC = Item-total correlation corrected for scale reliability and item overlap, IIC = Inter-item correlation"),
+#            threeparttable=T, footnote_as_chunk = T)
+```
+
+```{r echo=FALSE}
+# creating table 
+OASIS.items.des %>% 
+  as_tibble(rownames = NA) %>% 
+     mutate_all(~(replace(., is.na(.), ""))) %>% 
+  as_huxtable(add_colnames = F) %>% 
+  apa_table(
+          caption = "Polychoric correlations of the OASIS items with SD and M, ITC and IIC", 
+          note = "* p < 0.05; ** p < 0.01; *** p < 0.001, M = Mean, SD = Standard Deviation, ITC = Item-total correlation corrected for scale reliability and item overlap")
+```
+
+## Convergent and divergent validity 
+
+```{r The ANCOVA Gender, eval=FALSE, include=FALSE}
+#OASIS______________________________
+# ANCOVA for further analysis
+ancov.1=aov(OASIS ~ Gender, data = data.ex) 
+# ANCOVA with type III summ of squares
+ancov.1.T.III.SS = ancov.1 %>% car::Anova(type="III") %>% print()
+# APA format 
+ancov.apa1=apa_print(ancov.1.T.III.SS)
+# Neuroticism
+#____________________________________________________________________________
+# ANCOVA for further analysis
+ancov.3=aov(OASIS ~ Gender + BFI_N, data = data.ex) 
+# ANCOVA with type III summ of squares
+ancov.3.T.III.SS = ancov.3 %>% car::Anova(type="III") %>% print()
+# APA format 
+ancov.apa3=apa_print(ancov.3.T.III.SS)
+#ODSIS______________________________
+
+# robust version to check the results of parametric test 
+WRS2::ancova(formula = OASIS ~ Gender + BFI_N , data = data.ex) 
+WRS2::ancova(formula = ODSIS ~ Gender + BFI_N , data = data.ex) 
+
+
+
+# The first ANCOVA indicated that females score significantly higher score on anxiety with medium effect size `r ancov.apa1$full_result$Gender` and also in depression with small effect size: `r ancov.apa2$full_result$Gender`. After adding neuroticism as a covariate, the difference between males and females in anxiety `r ancov.apa3$full_result$Gender` and depression `r ancov.apa4$full_result$Gender` remained significant.
+# 
+# The table 4 represents bivariate zero-order correlations between main study variables. OASIS positively correlated with depression, neuroticism, negative emotions experienced in past week and negatively correlated with self-esteem and age. Similarly, as the previous scale, ODSIS was positively correlated with neuroticism, negative emotions experienced in past week, anxiety and negatively correlated self-esteem and age. In the retest sample, positive association between OASIS and GAD-7: `r apa_print(cor.test(ret.data$OASIS_T2, ret.data$GAD_7, method = "spearman", exact = F))$full_result` and PHQ-9: `r apa_print(cor.test(ret.data$OASIS_T2, ret.data$PHQ, method = "spearman", exact = F))$full_result` was found. When estimating correlation of ODSIS with GAD-7 and PHQ-9, due to low power, parametric correlations were used: ODSIS score positively correlated with GAD-7: `r apa_print(cor.test(ret.data$ODSIS_T2, ret.data$GAD_7, method = "pearson", exact = F))$full_result` and PHQ-9: `r apa_print(cor.test(ret.data$ODSIS_T2, ret.data$PHQ, method = "pearson", exact = F))$full_result`. Results of this parametric correlations should be however interpreted with caution.
+```
+
+```{r correlation table between study variables in the data.ex, eval=FALSE, include=FALSE}
+variab.cor.data.ex=data.ex[, c("OASIS","ODSIS","Gender","BFI_N","RSES","PANAS_P","PANAS_N","Age","education","faith")]
+# recode variables to numeric
+variab.cor.data.ex = variab.cor.data.ex %>% 
+  mutate_all(as.numeric)
+
+variab.cor.data.ex.to.apa=corx(variab.cor.data.ex, method = "spearman", triangle = "lower", describe = c(M = mean, SD = sd), stars = c(0.05, 0.01, 0.001),note = "M = mean, SD = standard devation")
+variab.cor.data.ex.to.apa
+```
+
+```{r print cor table ex data, eval=FALSE, include=FALSE}
+apa_table(variab.cor.data.ex.to.apa$apa, caption = "Correaltion table with means and standard devations",
+          note = "* p < 0.05; ** p < 0.01; *** p < 0.001; SD = standard deviation; M = mean; OASIS = Overall Anxiety and Impairment Scale; ODSIS = Overall Depression and Impairment Scale; BFI_N = Big Five Inventory - Neuroticism subscale; RSES = Rosenberg Self-Esteem Scale; PANAS_P = The Positive and Negative Affect Schedule - Positive emotions subscale; PANAS_N = The Positive and Negative Affect Schedule - Negative emotions subscale; Correlations were calculated using Spearman rank correlation coeficient")
+```
+
+```{r test-retest reliability, eval=FALSE, include=FALSE}
+# OASIS
+icc.oasis = ret.data %>% 
+  select(OASIS_T1,OASIS_T2) %>% 
+    irr::icc(model = "twoway",type = "agreement", unit= "average")
+icc.oasis
+# ODSIS
+icc.odsis = ret.data %>% 
+  select(ODSIS_T1,ODSIS_T2) %>% 
+    irr::icc(model = "twoway",type = "agreement", unit= "average")
+icc.odsis
+
+
+# Intraclass correlations based on two-way random effects model revealed that OASIS *r* = `r icc.oasis$value %>% round(digits = 2)`, 95% CI [`r round(icc.oasis$lbound,digits=2)` - `r round(icc.oasis$ubound,digits=2)`], `r icc.oasis$p.value %>% format_p` and ODSIS *r* = `r icc.odsis$value %>% round(digits = 2)`, 95% CI [`r round(icc.odsis$lbound,digits=2)` - `r round(icc.odsis$ubound,digits=2)`], `r icc.odsis$p.value %>% format_p` scores were relatively stable after one week.
+```
+
+# Cut-off points identification 
+
+```{r cut-off, eval=FALSE, include=FALSE}
+sens.spec.data = drop_na(sens.spec.data) # there is need to delete incomplete obervations
+library(cutpointr)
+oa.roc <- cutpointr(x = "OASIS",class = "Anxiety", data = sens.spec.data, metric = youden, boot_runs = 1000, pos_class = "yes", neg_class = "No")
+summary(oa.roc)
+#_____________________________________________________________________________________
+od.roc <- cutpointr(x = "ODSIS",class = "Depression", data = sens.spec.data, metric = youden, boot_runs = 1000, pos_class = "yes", neg_class = "No")
+summary(od.roc)
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#True Positive Rate (TPR) indicates what proportion of people ‘anxiety’ were correctly classified.
+oasis.tpr=cutpointr::roc(data = sens.spec.data, x = OASIS, class = Anxiety,
+pos_class = "yes", neg_class = "No")
+round(boot_ci(oa.roc, variable = AUC, in_bag = TRUE, alpha = 0.05),digits = 2)[2] # CI for AUC
+# ODSIS________________________________________________________________________________
+odsis.tpr=cutpointr::roc(data = sens.spec.data, x = ODSIS, class = Anxiety,pos_class = "yes", neg_class = "No")
+round(boot_ci(oa.roc, variable = AUC, in_bag = TRUE, alpha = 0.05),digits = 2)[2] # CI for AUC
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+sens.spec.dataa = drop_na(sens.spec.data) # there is need to delete incomplete obervations
+library(pROC)
+# OASIS
+oasis.cut=glm(Anxiety ~ OASIS, data = sens.spec.dataa, family = "binomial")
+# pROC::roc(sens.spec.dataa$Anxiety, oasis.cut$fitted.values, plot = T)
+# par(pty = "s")
+# plot.roc(sens.spec.dataa$Anxiety, oasis.cut$fitted.values, percent = T, asp = NA, col="#1c61b6", main="ROC curve of OASIS")
+# ____________________________________________________________________________________
+```
+   
+
+# Discussion
+
+
+\newpage
+
+# References
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id="refs" custom-style="Bibliography"></div>
+\endgroup
