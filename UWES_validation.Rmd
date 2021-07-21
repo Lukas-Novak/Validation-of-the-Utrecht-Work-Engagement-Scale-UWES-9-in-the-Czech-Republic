@@ -131,7 +131,7 @@ data.raw=readRDS(paste0(path_to_dat,"/UWES_study.Rds"))
 #_______________________________________________________________________
 # variable recode
 data.rec = data.raw %>% 
-  rename("Faith" = "Religiosity") %>% 
+  rename("Religiosity" = "Religiosity") %>% 
   # mutate(across(starts_with(c("obtize_","hlth_","OASIS_","ODSIS_")), ~ as.numeric(.))) %>% # this can be deleted if not used    
   # mutate(OASIS = rowSums(across(starts_with("OASIS_")))) %>%  # this can be deleted if not used
   # mutate(ODSIS = rowSums(across(starts_with("ODSIS_")))) %>%  # this can be deleted if not used
@@ -158,7 +158,7 @@ data.rec = data.raw %>%
                                             "In household" = "Without work",
                                             "other: invalidní duchod" = "Pensioner",
                                              .default = NA_character_),
-         Faith = recode_factor(Faith,
+         Religiosity = recode_factor(Religiosity,
                                "Yes, I am a member or church/rel.society" = "Yes, I am a member of church",
                                "Yes, but I am not a member of church/rel.society" = "Yes, but I am not a member of a church"))
 
@@ -232,38 +232,27 @@ bp.t.1 = car::ncvTest(fake_regres) # homogeneity of variances can be rejected
   .................... 
 
 ## Data analysis
-
-Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, df = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`).
-
-
-
-
- Therefore, statistical test not assuming Gaussian distribution were used. Visual screening of residual plot suggested slight heteroscedasticity (Sample 1), which was not supported by Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, *df* = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`).  
-  
-  To explore the dimensionality of the OASIS, Confirmatory Factor Analysis (CFA) on the first sample (*n* = `r nrow(data)`) was performed. As the OASIS was developed as a unidimensional scale, only one factor model was evaluated. Power analysis suggested that for the purposes of the CFA, at least 1021 participants is needed. More details about power analysis procedure can be found in preregistration form (https://osf.io/yxm9g). Adequacy of correlation matrix was assessed by Bartlett test and also by Kaiser Meyer Olkin (KMO) measure. Absolute model fit was explored by the following indicators: Standardized Root Mean Square Residual (SRMR) and by Root Mean Square Error of Approximation (RMSEA). In these indicators, values < 0.08 suggest acceptable fit and < 0.05 a good fit [@civelek2018essentials; @hoe_issues_2008; @vandenberg_review_2000; @hooper_structural_2008]. The Comparative Fit index (CFI) and Tucker-Lewis index (TLI) were used to evaluate incremental fit of the model. Values of the TLI and CFI > 0.95 suggest an acceptable fit [@jackson_reporting_2009] and values > 0.97 a good fit [@schermelleh_engel_evaluating_2003]. Model implied and observed covariance was compared by the chi-square test. As manifest variables have five categories, based on recommendation of @distefano_comparison_2014, we used Diagonally Weighted Least Squares estimator (DWLS) to fit our model. Polychoric correlations were utilized during fitting procedure. 
-  
-  Measurement equivalence was tested via multigroup CFA. Invariance of the measurement was explored in gender (males,famales) and also in clinical and non - clinical population. The first equivalence analysis was conducted on the Sample 1, the second analysis on the Sample 2. If $\Delta$ CFA was > 0.01, than good fit of a nested model was rejected. Internal consistency of OASIS was assessed by Cronbach’s alpha and  McDonald’s omega. Convergent, divergent and concurent validity was inspected by zero - order Spearman correlation coefficient and by analysis of covariance (ANCOVA). In ANCOVA (Sample 2), outcome variable was gender, predictor the OASIS score and neuroticism as a covariate. Correlation analysis (Sample 2, 3), was conducted to verify H3 - H14. Temporal stability of the OASIS score will be examined by two-way random effects intracalss correlation coefficient. Time interval between the first and the second administration of the OASIS was one week (Sample 2). Evaluation of the cutt-of points was conducted using Receiver Operating Characteristics (ROC) analysis. Youden's index was calculated to find out optimal compromise between sensitivity and specificity. The ROC and the Youden's index calculation was done on the Sample 2.    
-  
-  Differences between socio-demographic groups in the OASIS (Sample 1) were examined via Wilcoxon signed rank test and by Kruskal–Wallis test (non-parametric ANOVA). Post-hoc analysis will consist of Dunn test and Games-Howell test. Degree of an effect for socio-demographic comparison was estimated by Vargha and Delaney $\hat{A}$ [@vargha_critique_2000], in which values of $\hat{A}$ between 0.56 - 0.64 indicates small effect; 0.64 - 0.71 medium effect and > 0.71 a large effect. Descriptive and inferential statistics procedures were done in the `r cite_r()` using the following libraries: *lavaan* [@R-lavaan], *papaja* [@R-papaja] *psych* [@R-psych], *usf* [@R-ufs].     
+  Inspection of histograms and results of Martia test of multivariate skewness and kurtouses indicated that normality assumption is violated in the UWES items. Moreover, examination of residual plots and results of Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, *df* = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`) suggested heteroscedasticity. Thus, methods not requering parametric assumptions were used. The Little MCAR test provided an evidence that missing values are mission on random. Thus, as there was not a large number of missing values (*n* = `r nrow(filter(data, is.na(UWES_9)))`), incomplete cases were deleted listwise.
+  Factor structure of the instrument was investigated via Confirmatory Factor Analysis (CFA). Original 3 dimensional factor structure was tested along with two and one factor solution reported across studies see @Kulikowski_2017. Kaiser Meyer Olkin (KMO) measure together with Bartlett test of sphericity were applied to assess factorability of the UWES data. Five indices were used to inspect model fit: 1) Mean Square Error of Approximation (RMSEA); 2) Standardized Root Mean Square Residual (SRMR); 3) chi-square test; 4) Comparative Fit index (CFI) and 5) Tucker-Lewis index (TLI). In the first two indices, values below reflects an acceptable fit and below 0.05 a good fit [@civelek2018essentials; @hoe_issues_2008; @vandenberg_review_2000; @hooper_structural_2008]. In the last two indices, values above 0.95 suggest an acceptable fit [@jackson_reporting_2009] and above 0.97 a good fit [@schermelleh_engel_evaluating_2003]. Diagonally Weighted Least Squares estimator (DWLS) on polychoric correlation matrix was used to fit CFA models.  
+  Invariance of a measurement was explored in males and females. Configural, metric, scalar and strict invariance was assessed by CFA: if $\Delta$ CFA was > 0.01, than difference exists between invariance models [@Putnick_Bornstein_2016]. The scale reliability was measured by the McDonald’s $\omega$ and also by the Cronbach’s $\alpha$. Divergent validity was measured by associaotion of the UWES with xxx and xxx. During divergent validity testing, UWES subscale score was regressed on xxxx and xxxx. Convergent validity was inspected by associations with xxx and xxx.
+  Comparison between socio-demographic groups in the UWES total and subscale score, was conducted by Mann-Withey U test and by Kruskal–Wallis test. For post-hoc testing, Games-Howell and Dunn test were utilized. Effect size was reported in Vargha and Delaney $\hat{A}$ [@vargha_critique_2000]. The interpretation of the $\hat{A}$ is as follows: small effect (0.56 - 0.64), medium effect (0.64 - 0.71), large effect (> 0.71). All statistical calculations were conducted in `r cite_r()`. Primary packages used for analysis included: *lavaan* [@R-lavaan], *papaja* [@R-papaja] *psych* [@R-psych], *usf* [@R-ufs].     
   
 # Results
 
 ## Socio-demographic results
 
 ```{r socio-demographic group comparison and descriptives, include=FALSE}
-# OASIS
+# UWES
 # Gender
-car::leveneTest(as.numeric(data$OASIS) ~ data$Gender, data = data, center = mean) # heteroscedasticity
+car::leveneTest(as.numeric(data$UWES) ~ data$Gender, data = data, center = mean) 
 # Education
-car::leveneTest(as.numeric(data$OASIS) ~ data$Education, data = data, center = mean) # heteroscedasticity
+car::leveneTest(as.numeric(data$UWES) ~ data$Education, data = data, center = mean) # heteroscedasticity
 # Religiosity
-car::leveneTest(as.numeric(data$OASIS) ~ data$Religiosity, data = data, center = mean) # heteroscedasticity
-# Socio-economic status
-car::leveneTest(as.numeric(data$OASIS) ~ data$Economical_status, data = data, center = mean) # heteroscedasticity
+car::leveneTest(as.numeric(data$UWES) ~ data$Religiosity, data = data, center = mean) 
 # Family status
-car::leveneTest(as.numeric(data$OASIS) ~ data$Family_status, data = data, center = mean) # heteroscedasticity
+car::leveneTest(as.numeric(data$UWES) ~ data$Family_status, data = data, center = mean) 
 # Gender
-car::leveneTest(as.numeric(data$OASIS) ~ data$Gender, data = data, center = mean) # heteroscedasticity
+car::leveneTest(as.numeric(data$UWES) ~ data$Gender, data = data, center = mean) 
 #....................................................................................................................
 # as normality and homoscedasticicy assumption is broken, Games-Howel as well as Dunn test will be used to snspect relationships between socio-demographic variables. We reported in the main text only those results, which were significant in both of these post-hoc tests.
 #............................................................
@@ -357,14 +346,14 @@ cs.tab.1=data %>%
               digits = all_continuous() ~ 2,) 
  
 # cs.tab.2=data.ex %>%
-#   dplyr::select(Gender, family_status , education, economical_status, faith) %>%
+#   dplyr::select(Gender, family_status , education, economical_status, Religiosity) %>%
 #   tbl_summary( missing = "no",
 #                   statistic = list(all_continuous() ~  "{mean} ({sd})",
 #                                    all_categorical() ~ "{n} ({p}%)"),
 #               digits = all_continuous() ~ 2,) 
 # 
 # cs.tab.3=sens.spec.data %>%
-#   dplyr::select(Gender, family_status , education, economical_status, faith) %>%
+#   dplyr::select(Gender, family_status , education, economical_status, Religiosity) %>%
 #   tbl_summary( missing = "no",
 #                   statistic = list(all_continuous() ~  "{mean} ({sd})",
 #                                    all_categorical() ~ "{n} ({p}%)"),
@@ -417,13 +406,12 @@ resid(OASIS.one.dim, "cor")
 ## Confirmatory Factor Analysis Results
 
 Results of Bartlett test ($\chi^2$ (`r bartlett.oasis$df`) = `r round(bartlett.oasis$chisq,digits=2)`, `r format_p(bartlett.oasis$p.value)`) and KMO indicated that our data met the assumptions of factor analysis. The CFA (Sample 1) suggested that although relative fit indices indicated a good fit of the unidimensional solution, some absolute model fit indices i.e. RMSEA yielded inadequate values: $\chi^2$(`r round(one.fac.mod.sum$FIT[["df"]], digits = 2)`)=`r round(one.fac.mod.sum$FIT[["chisq"]], digits = 2)`, `r format_p(one.fac.mod.sum$FIT[["pvalue"]])`, CFI=`r round(one.fac.mod.sum$FIT[["cfi"]], digits = 3)`,TLI=`r round(one.fac.mod.sum$FIT[["tli"]], digits = 3)`,SRMR=`r round(one.fac.mod.sum$FIT[["srmr"]], digits = 3)`, RMSEA=`r round(one.fac.mod.sum$FIT[["rmsea"]], digits = 3)`, 90% CI[`r round(one.fac.mod.sum$FIT[["rmsea.ci.lower"]], digits = 3)`-`r round(one.fac.mod.sum$FIT[["rmsea.ci.upper"]], digits = 3)`]. Based on inspection of modification indices, constrains between item 1 and 2 were released. This in line with approach and theoretical reasons outlined in other psychometric studies of the OASIS [@campbell_sills_validation_2009; @ito_validity_2015; @osma_psychometric_2019]. Figure 1 depicts SEM diagram visualizing factor ladings and error terms correlation between item 1 and 2. 
-```{r CFA_OASIS_cor_er_it_1_2, include=FALSE}
-# One factor model 
-one.fac.mod.cor.er.oasis="Anxiety =~ OASIS_1 + OASIS_2 + OASIS_3 + OASIS_4 + OASIS_5 
-             OASIS_1 ~~ OASIS_2"
+```{r CFA_three factor model, include=FALSE}
+# three factor model 
+three.fac.mod="WA =~ UWES_1 + UWES_2 + UWES_3 + UWES_4 + UWES_5 + UWES_6 + UWES_7 + UWES_8 + UWES_9"
 
 #when "ordered" is set to "TRUE", than DWLS estimator is auto  matically used as "standard" in results. "Robust" chisquare in results is referring to WLSMV estimator.
-OASIS.one.dim.oasis.cor.eror=sem(model = one.fac.mod.cor.er.oasis, data = data, std.lv=T, ordered = T)
+OASIS.one.dim.oasis.cor.eror=sem(model = three.fac.mod, data = data, std.lv=T, ordered = T)
 one.fac.mod.sum.cor.errors=summary(OASIS.one.dim.oasis.cor.eror,rsquare=T, standardized=T, fit.measures=T)
 parameterestimates(OASIS.one.dim.oasis.cor.eror, standardized = T) # whill show standardized estimates and many other things
 modificationindices(OASIS.one.dim.oasis.cor.eror, sort. = T) # how can we improve our model
@@ -466,8 +454,7 @@ apa_table(iter.cor.teq.fin.data.pa$apa, caption = "Correaltion table with means 
 ## Invariance testing and factor loadings 
 
 ```{r gender invariance OASIS, include=FALSE}
-meas.invar.oasis="Anxiety =~ OASIS_1 + OASIS_2 + OASIS_4 + OASIS_5 # there was a need to remove item 3 from the model as the some categories were empthy in one group  
-                             OASIS_1 ~~ OASIS_2"
+meas.invar.oasis = "WA =~ UWES_1 + UWES_2 + UWES_3 + UWES_4 + UWES_5 + UWES_6 + UWES_7 + UWES_8 + UWES_9"
 
 meas.invar.oasis.cfa=cfa(meas.invar.oasis, data = data,ordered = T,std.lv=T,
                          meanstructure = T) # crucial in invariance testing
@@ -481,8 +468,11 @@ tab.fit[1, ] = c("Overall model", round(fitMeasures(meas.invar.oasis.cfa,
                                                    'cfi',"tli",'rmsea',"rmsea.ci.lower",
                                                    "rmsea.ci.upper", 'srmr')), digits = 3))
 
+data.invar = data %>%
+  drop_na(UWES)
+
 mult.group.m = eqMI.main(model = meas.invar.oasis,
-                         data = data,
+                         data = data.invar,
                          group = "Gender", 
                          meanstructure = T,
                          output = "both",
@@ -645,7 +635,7 @@ WRS2::ancova(formula = ODSIS ~ Gender + BFI_N , data = data.ex)
 ```
 
 ```{r correlation table between study variables in the data.ex, eval=FALSE, include=FALSE}
-variab.cor.data.ex=data.ex[, c("OASIS","ODSIS","Gender","BFI_N","RSES","PANAS_P","PANAS_N","Age","education","faith")]
+variab.cor.data.ex=data.ex[, c("OASIS","ODSIS","Gender","BFI_N","RSES","PANAS_P","PANAS_N","Age","education","Religiosity")]
 # recode variables to numeric
 variab.cor.data.ex = variab.cor.data.ex %>% 
   mutate_all(as.numeric)
