@@ -1,0 +1,91 @@
+```{r}
+boring.study.categorical.melted <-
+  table1.categorical.Ns <- data %>%
+  select(Gender, Education, Faith) %>%
+  reshape2::melt(id.var="Gender")
+
+(table1.categorical.Ns <-
+  boring.study.categorical.melted %>%
+  group_by(Gender, variable, value) %>%
+  summarise(N=n()) %>%
+  maditr::dcast(variable+value~Gender, value.var="N"))
+
+(table1.categorical.tests <-
+  boring.study.categorical.melted %>%
+  group_by(variable) %>%
+  do(., chisq.test(.$value, .$Gender) %>% tidy) %>%
+  # this purely to facilitate matching rows up below
+  mutate(firstrowforvar=T))
+
+(table1.categorical.both <- table1.categorical.Ns %>%
+  group_by(variable) %>%
+  # we join on firstrowforvar to make sure we don't duplicate the tests
+  mutate(firstrowforvar=row_number()==1) %>%
+  left_join(., table1.categorical.tests, by=c("variable", "firstrowforvar")) %>%
+  # this is gross, but we don't want to repeat the variable names in our table
+  ungroup() %>%
+  mutate(variable = ifelse(firstrowforvar==T, as.character(variable), NA)) %>%
+  select(variable, value, statistic, parameter, p.value))
+
+
+continuous_variables <- c("UWES")
+boring.continuous.melted <-
+  data %>%
+  select(Gender, continuous_variables) %>%
+  reshape2::melt() %>%
+  group_by(variable)
+
+
+(table.continuous_variables.tests <-
+    boring.continuous.melted %>%
+    # note that we pass the result of t-test to tidy, which returns a dataframe
+    do(., t.test(.$value~.$Gender) %>% tidy) %>%
+    select(variable, statistic, parameter, p.value))
+
+
+(table.continuous_variables.descriptives <-
+    boring.continuous.melted %>%
+    group_by(variable, Gender) %>%
+    # this is not needed here because we have no missing values, but if there
+    # were missing value in this dataset then mean/sd functions would fail below,
+    #  so best to remove rows without a response:
+    filter(!is.na(value)) %>%
+    # note, we might also want the median/IQR
+    summarise(Mean=mean(value), SD=sd(value)) %>%
+    group_by(variable, Gender) %>%
+    # we format the mean and SD into a single column using sprintf.
+    # we don't have to do this, but it makes reshaping simpler and we probably want
+    # to round the numbers at some point, and so may as well do this now.
+    transmute(MSD = sprintf("%.2f (%.2f)", Mean, SD)) %>%
+    maditr::dcast(variable~Gender))
+
+(table.continuous_variables.both <-
+  left_join(table.continuous_variables.descriptives,
+            table.continuous_variables.tests))
+
+
+(table1 <- table1.categorical.both %>%
+  # make these variables into character format to be consistent with
+  # the Mean (SD) column for continuus variables
+  mutate_each(funs(format), value) %>%
+  # note the '.' as the first argument, which is the input from the pipe
+  bind_rows(.,
+          table.continuous_variables.both)) 
+    # prettify a few things
+  rename(df = parameter,
+         p=p.value,
+         `Control N/Mean (SD)`= Control,
+         Variable=variable,
+         Response=value,
+         `t/χ2` = statistic))
+
+# data = data %>%
+#   mutate(Number = seq(1:nrow(data))) 
+
+data %>%
+    pivot_longer(c("Education", "Gender", "Family_status"),
+                 names_to = "key", values_to = "value") %>%
+    group_by(key,value) %>%
+    summarise (mean = mean(Age),
+               sd = sd(Age)) 
+```
