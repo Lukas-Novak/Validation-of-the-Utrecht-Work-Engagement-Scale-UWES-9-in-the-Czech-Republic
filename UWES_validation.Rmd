@@ -133,8 +133,7 @@ data.raw=readRDS(paste0(path_to_dat,"/UWES_study.Rds"))
 data.rec = data.raw %>% 
   rename("Religiosity" = "Religiosity",
          "Work_position" = "work_position") %>% 
-    mutate(across(tidyr::starts_with(c("BFI_A_1","BFI_A_3",
-                                     "BFI_A_6","BFI_A_8")), ~dplyr::recode(., 
+  mutate(across(tidyr::starts_with(c("BFI_E_2","BFI_E_5","BFI_E_7")), ~dplyr::recode(., 
                                                                        "1"= 5,
                                                                        "2"= 4,
                                                                        "3"= 3,
@@ -148,7 +147,7 @@ data.rec = data.raw %>%
                                                                        "5"= 1)),
   # mutate(across(starts_with(c("obtize_","hlth_","UWES_","ODSIS_","BFI_","Age")), ~ as.numeric(.))) %>% # this can be deleted if not used    
          BFI_N = rowSums(across(starts_with("BFI_N_"))),
-         BFI_A = rowSums(across(starts_with("BFI_A_"))),
+         BFI_E = rowSums(across(starts_with("BFI_E_"))),
   # rename(hlth_for_wom_pain_in_the_small_ = hlth_women_pain_in_small_etc) %>%  # this can be deleted if not used
   UWES = rowSums(across(starts_with("UWES_")))) %>%  # this can be deleted if not used
   mutate(Education = recode_factor(Education, 
@@ -536,15 +535,16 @@ dif.test.one.three.fac=lavaan::anova(UWES.three.fac,UWES.one.fac, method = "sato
 
 
 \newpage
-After modification of the base model, fit indices yielded an excellent values: $\chi^2$(`r round(two.fac.mod.sum$FIT[["df"]], digits = 2)`) = `r round(two.fac.mod.sum$FIT[["chisq"]], digits = 2)`, `r format_p(two.fac.mod.sum$FIT[["pvalue"]])`, CFI=`r round(two.fac.mod.sum$FIT[["cfi"]], digits = 3)`,TLI=`r round(two.fac.mod.sum$FIT[["tli"]], digits = 3)`,SRMR=`r round(two.fac.mod.sum$FIT[["srmr"]], digits = 3)`, RMSEA=`r round(two.fac.mod.sum$FIT[["rmsea"]], digits = 3)`, 90% CI[`r round(two.fac.mod.sum$FIT[["rmsea.ci.lower"]], digits = 3)`-`r round(two.fac.mod.sum$FIT[["rmsea.ci.upper"]], digits = 3)`]. Chi-square difference test supported better fit of the model with correlated residuals: $\chi^2$(`r dif.test.two.three.fac$"Df diff"[2]`) = `r dif.test.two.three.fac$"Chisq diff"[2] %>% round(digits = 2)`; `r dif.test.two.three.fac$"Pr(>Chisq)" [2] %>% format_p `. In modified model, the correlation between items residuals was low with maximum value of `r round(max(one.fac.mod.cor.er.UWES.resid$cov), digits = 2) `. Factor loadings of manifest variables were high (Figure 1). 
-```{r correlation table one, eval=FALSE, include=FALSE}
-variab.cor.data.pa=data.pa[, c("UWES","ODSIS","Gender","BFI_N","RSES","Age","education")]
+
+
+```{r correlation table, eval=FALSE, include=FALSE}
+variab.cor.data=data[, c("UWES","BFI_E","BFI_N","Age","Gender")]
 # recode variables to numeric
-variab.cor.data.pa = variab.cor.data.pa %>% 
+variab.cor.data = variab.cor.data %>% 
   mutate_all(as.numeric)
 
-iter.cor.teq.fin.data.pa=corx(variab.cor.data.pa, method = "spearman", triangle = "lower", describe = c(M = mean, SD = sd), stars = c(0.05, 0.01, 0.001),note = "M = mean, SD = standard devation")
-iter.cor.teq.fin.data.pa
+iter.cor.teq.fin.data=corx(variab.cor.data, method = "spearman", triangle = "lower", describe = c(M = mean, SD = sd), stars = c(0.05, 0.01, 0.001),note = "M = mean, SD = standard devation")
+iter.cor.teq.fin.data
 ```
 
 ```{r print cor table pa data, eval=FALSE, include=FALSE}
