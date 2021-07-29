@@ -257,19 +257,54 @@ bp.t.1 = car::ncvTest(fake_regres) # homogeneity of variances can be rejected
 ## Measures
 
 ### Utrecht Work Engagement Scale (UWES)
-  .................... 
+  
+### Daily Spiritual Experience Scale (DSES)
+
+```{r DSES rel, include=FALSE}
+# DSES  
+DSES.rel=ufs::scaleStructure(select(starts_with(c("DSES_")), .data = data), digits = 2, poly = TRUE, samples = 5000)
+```
+Internal consistency of the DSES was excellent: Cronbach's $\alpha$ = `r round(DSES.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(DSES.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(DSES.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(DSES.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(DSES.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(DSES.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`].
+
+### General Self Efficacy Scale (GSES)
+
+```{r GSES rel, include=FALSE}
+# GSES  
+GSES.rel=ufs::scaleStructure(select(starts_with(c("GSES_")), .data = data), digits = 2, poly = TRUE, samples = 5000)
+```
+Internal consistency of the GSES was excellent: Cronbach's $\alpha$ = `r round(GSES.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(GSES.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(GSES.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(GSES.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(GSES.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(GSES.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
+
+### Big Five Inventory - Neuroticism subscale (BFI_N)
+
+```{r BFI_N rel, include=FALSE}
+# BFI_N  
+BFI_N.rel=ufs::scaleStructure(select(starts_with(c("BFI_N_")), .data = data), digits = 2, poly = TRUE, samples = 5000)
+```
+Internal consistency of the BFI_N was good: Cronbach's $\alpha$ = `r round(BFI_N.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(BFI_N.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(BFI_N.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(BFI_N.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(BFI_N.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(BFI_N.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
+
+### Big Five Inventory - Extraversion subscale (BFI_E)
+
+```{r BFI_E rel, include=FALSE}
+# BFI_E  
+BFI_E.rel=ufs::scaleStructure(select(starts_with(c("BFI_E_")), .data = data), digits = 2, poly = TRUE, samples = 5000)
+```
+Internal consistency of the BFI_E was good: Cronbach's $\alpha$ = `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(BFI_E.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
 
 ## Data analysis
   Inspection of histograms and results of the Martia test of multivariate skewness and kurtouses indicated that normality assumption is violated in the UWES items. Moreover, examination of residual plots and result of the Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, *df* = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`) suggested heteroscedasticity. Thus, methods not requiring parametric assumptions were used. The Little MCAR test provided an evidence that missing values are missing on random. Thus, as there was not a large number of missing values (*n* = `r nrow(filter(data, is.na(UWES_9)))`), incomplete cases were deleted listwise.
   Factor structure of the instrument was investigated via Confirmatory Factor Analysis (CFA). Original 3 dimensional factor structure was tested along with two and one factor solution, frequently reported across studies - see review of @Kulikowski_2017. Item composition of tested factor solutions can be found in the study of @Willmer_2019. Kaiser Meyer Olkin (KMO) measure together with Bartlett test of sphericity were applied to assess factorability of the UWES data. Five indices were used to inspect model fit: 1) Mean Square Error of Approximation (RMSEA); 2) Standardized Root Mean Square Residual (SRMR); 3) chi-square test; 4) Comparative Fit index (CFI) and 5) Tucker-Lewis index (TLI). In the first two indices, values below 0.08 reflects an acceptable fit and below 0.05 a good fit [@civelek2018essentials; @hoe_issues_2008; @vandenberg_review_2000; @hooper_structural_2008]. In the last two indices, values above 0.95 suggest an acceptable fit [@jackson_reporting_2009] and above 0.97 a good fit [@schermelleh_engel_evaluating_2003]. Diagonally Weighted Least Squares estimator (DWLS) on polychoric correlation matrix was used to fit CFA models.  
-  Invariance of a measurement was explored between males and females. Configural, metric, scalar and strict invariance was supported, in the mutigoup CFA if $\Delta$ CFA was < 0.01 between invariance models [@Putnick_Bornstein_2016]. The scale reliability was measured by the McDonald’s $\omega$ and also by the Cronbach’s $\alpha$. Divergent validity was measured by association of the UWES with xxx and xxx. During divergent validity testing, UWES subscale score was regressed on xxxx and xxxx. Convergent validity was inspected by correlations with Neuroticism and with Extroversion. Zero order, Spearman rank correlation coeficient was used. 
-  Comparison between socio-demographic groups in the UWES total and subscale score, was conducted by Mann–Whitney U test and by Kruskal–Wallis test. For post-hoc testing, Games-Howell and Dunn test were utilized. Effect size was reported in Vargha and Delaney $\hat{A}$ [@vargha_critique_2000]. The interpretation of the $\hat{A}$ is as follows: small effect (0.56 - 0.64), medium effect (0.64 - 0.71), large effect (> 0.71). All statistical calculations were conducted in `r cite_r()`. Primary packages used for analysis included: *lavaan* [@R-lavaan], *papaja* [@R-papaja] *psych* [@R-psych], *usf* [@R-ufs].     
+  
+  Invariance of a measurement was explored between males and females. Configural, metric, scalar and strict invariance was supported, in the mutigoup CFA if $\Delta$ CFA was < 0.01 between invariance models [@Putnick_Bornstein_2016]. The scale reliability was measured by the McDonald’s $\omega$ and also by the Cronbach’s $\alpha$. Convergent validity was inspected by zero order Spearman rank correlations with self-efficacy, neuroticism and with extroversion. Divergent validity was measured by correlation of the UWES with spirituality.
+  
+  Due to the non-normal distribution of the data, an association between the chronic health illnesses, health risk behaviour and UWES was calculated using logistic regression. In the logistic models, outcome variable was presence of an individual chronic illness or practise of health risk behaviour. The UWES score was set as a predictor. Education and work position were covariates. Both crude and adjusted effect were estimated. The p-values were corrected by Bonferroni correction.         
+  
+  Comparison between socio-demographic groups in the UWES total and subscale score, was performed by Mann–Whitney U test and by Kruskal–Wallis test. For post-hoc testing, Games-Howell and Dunn test were utilized. In these two tests, effect size was reported in Vargha and Delaney $\hat{A}$ [@vargha_critique_2000]. The interpretation of the $\hat{A}$ is as follows: small effect (0.56 - 0.64), medium effect (0.64 - 0.71), large effect (> 0.71). All statistical calculations were conducted in `r cite_r()`. Primary packages used for analysis included: *lavaan* [@R-lavaan], *papaja* [@R-papaja] *psych* [@R-psych], *usf* [@R-ufs].     
   
 # Results
 
 ## Socio-demographic results
 
-Results of the Kruskal-Wallis test followed by the Games-Howell and the Dunn test revealed that there are significant differences in socio-demographic groups in the UWES total and subscale scores: professional workers had significantly higher score in the UWES total and Vigor, Absorption and Dedication subscales as compared with workers. Similarly, chief workers reported higher UWES total score and also Dedication and Vigor subscale scores compared with workers (see Table 1). In terms of education, people with higher vocational school or university had significantly higher total and Absorption subscale score as compared with people with non graduation high school or lower education (Table 1). There were not other significant differences between socio-demographic groups and the UWES total and subscale scores.
+Results of the Kruskal-Wallis test followed by the Games-Howell and the Dunn test revealed that there are significant differences in socio-demographic groups in the UWES total and subscale scores: professional workers had significantly higher score in the UWES total and Vigor, Absorption and Dedication subscales scores as compared with workers. Similarly, chief workers reported higher UWES total score and also Dedication and Vigor subscale scores compared with workers (see Table 1). In terms of education, people with higher vocational school or university had significantly higher total and Absorption subscale score as compared with people with non graduation high school or lower education (Table 1). There were not other significant differences between socio-demographic groups.
 
 ```{r socio-demographic group comparison and descriptives, include=FALSE}
 # UWES
@@ -325,10 +360,10 @@ car::leveneTest(as.numeric(data$UWES_V) ~ data$Work_position, data = data, cente
 # total score
 wilcox.test(UWES ~ Gender, data = data)
 
-# vigor subscale
+# Vigor subscale
 wilcox.test(UWES_V ~ Gender, data = data)
 
-# dedication subscale
+# Dedication subscale
 wilcox.test(UWES_D ~ Gender, data = data)
 t.test(UWES_D ~ Gender, data = data) # Welsh t-test
 
@@ -495,7 +530,7 @@ two.var.tab = two.var.tab %>%
   select(Variables,value,"n(%)","UWES_T: M(SD)",Gr.dif.UWES.total) 
 ```
 
-```{r table one - second part from UWES DEDICATION subscale score, include=FALSE}
+```{r table one - second part from UWES Dedication subscale score, include=FALSE}
 desc.table.ded = data %>%
     pivot_longer(c("Gender","Education", "Family_status", "Religiosity","Work_position"),
                  names_to = "key", values_to = "value") %>%
@@ -647,7 +682,7 @@ two.var.tab.ded = two.var.tab.ded %>%
   select(Variables,value,"n(%)","UWES_D: M(SD)",Gr.dif.UWES_D.total) 
 ```
 
-```{r table one - third part from UWES VIGOR subscale score, include=FALSE}
+```{r table one - third part from UWES Vigor subscale score, include=FALSE}
 desc.table.vig = data %>%
     pivot_longer(c("Gender","Education", "Family_status", "Religiosity","Work_position"),
                  names_to = "key", values_to = "value") %>%
@@ -1130,7 +1165,7 @@ mod.fit.indicies =
 
 ## Confirmatory Factor Analysis 
 
-  Bartlett test ($\chi^2$ (`r bartlett.UWES$df`) = `r round(bartlett.UWES$chisq,digits=2)`, `r format_p(bartlett.UWES$p.value)`) as well as KMO (`r round(KMO(UWES.rep.poly)$MSA,digits = 2)`) revealed that UWES data are sufficiently correlated for confirmatory factor analysis. In the first step, original-three factor model was fitted. Results indicated a good fit of three dimensional solution (see Figure 1, Table 2). Modification indices did not suggested high change in $\chi^2$ in case of releasing constrains between UWES items. Factor loadings ($\lambda$) in the three factor solution were high as were correlations between the three factros (see Figure 1). Correlation between residuals in manifest variables was low: *r* = `r round(max(resid(UWES.three.fac, "cor")$cov), digits = 2)`. In the second step, two factor model was tested: results suggested that two-dimensional model yields lower model fit as compared to the original-three factor model (see Table 2). This was supported by the significant chi square difference test with Satorra Bentler correction: $\chi^2$(`r dif.test.two.three.fac$"Df diff"[2]`) = `r dif.test.two.three.fac$"Chisq diff"[2] %>% round(digits = 2)`; `r dif.test.two.three.fac$"Pr(>Chisq)" [2] %>% format_p`. Factor loadings of the two factor solution were high ranging from: `r round(min(select((filter(parameterestimates(UWES.two.fac,standardized = T), op %in% "=~")), std.all)), digits = 2)` to `r round(max(select((filter(parameterestimates(UWES.two.fac, standardized = T), op %in% "=~")), std.all)), digits = 2)`. Finally, fit of unidimensional solution was assessed: overall, this model had worst goodness of fit indices values and factor loadings ($\lambda$ = `r round(min(select((filter(parameterestimates(UWES.one.fac,standardized = T), op %in% "=~")), std.all)), digits = 2)` - `r round(max(select((filter(parameterestimates(UWES.one.fac, standardized = T), op %in% "=~")), std.all)), digits = 2)`) as compared with two and three factor model (see Table 2). The Chi square difference test suggested lower fit of unidimensional solution as compared with the three factor solution: $\chi^2$(`r dif.test.one.three.fac$"Df diff"[2]`) = `r dif.test.one.three.fac$"Chisq diff"[2] %>% round(digits = 2)`; `r dif.test.one.three.fac$"Pr(>Chisq)" [2] %>% format_p`. In the last step, hierarchical model of the UWES was assessed: after model was fitted, CFA parameters yielded no change compared with the original-three factor model suggesting that original factor model would be more parsimonious solution. Taken together, this results supports superiority the original-three factor model over two and one factor solution in terms of fit with the data.
+  Bartlett test ($\chi^2$ (`r bartlett.UWES$df`) = `r round(bartlett.UWES$chisq,digits=2)`, `r format_p(bartlett.UWES$p.value)`) as well as KMO (`r round(KMO(UWES.rep.poly)$MSA,digits = 2)`) revealed that UWES data are sufficiently correlated to perform CFA. In the first step, original-three factor model was fitted. Results indicated a good fit of this three dimensional solution (see Figure 1, Table 2). Modification indices did not suggested high change in $\chi^2$ in case of releasing constrains between UWES items. Factor loadings ($\lambda$) in the three factor solution were high as were correlations between the three factors (see Figure 1). Correlation between residuals in manifest variables was low: *r* = `r round(max(resid(UWES.three.fac, "cor")$cov), digits = 2)`. In the second step, two factor model was tested: results suggested that two-dimensional model yields lower model fit as compared to the original-three factor model (see Table 2). This was supported by the significant $\chi^2$ difference test with Satorra Bentler correction: $\chi^2$(`r dif.test.two.three.fac$"Df diff"[2]`) = `r dif.test.two.three.fac$"Chisq diff"[2] %>% round(digits = 2)`; `r dif.test.two.three.fac$"Pr(>Chisq)" [2] %>% format_p`. Factor loadings of the two factor model were high ranging from: `r round(min(select((filter(parameterestimates(UWES.two.fac,standardized = T), op %in% "=~")), std.all)), digits = 2)` to `r round(max(select((filter(parameterestimates(UWES.two.fac, standardized = T), op %in% "=~")), std.all)), digits = 2)`. Finally, fit of unidimensional solution was assessed: overall, this model had the worst goodness of fit indices values and factor loadings ($\lambda$ = `r round(min(select((filter(parameterestimates(UWES.one.fac,standardized = T), op %in% "=~")), std.all)), digits = 2)` - `r round(max(select((filter(parameterestimates(UWES.one.fac, standardized = T), op %in% "=~")), std.all)), digits = 2)`) as compared with the two and the three factor model (see Table 2). The $\chi^2$ difference test suggested lower fit of unidimensional solution as compared with the three factor solution: $\chi^2$(`r dif.test.one.three.fac$"Df diff"[2]`) = `r dif.test.one.three.fac$"Chisq diff"[2] %>% round(digits = 2)`; `r dif.test.one.three.fac$"Pr(>Chisq)" [2] %>% format_p`. In the last step, hierarchical model of the UWES was assessed: after model was fitted, CFA parameters yielded no change as compared with the original-three factor model suggesting that the original factor model would be more parsimonious solution. Taken together, this results supports superiority the original-three factor model over two and one factor solution in terms of fit with the data.
   
 (ref:my-figure-caption) SEM plot of the UWES three factor solution with factor loadings and item residuals.
 
@@ -1142,8 +1177,6 @@ semPaths(UWES.three.fac,layout = "tree2", whatLabels= "std",
          nCharNodes = 20,style = "OpenMx", edge.label.position = 0.56,
          sizeLat = 9, sizeMan=8,edge.color="black")
 ```
-  
-\newpage  
   
 ```{r echo=FALSE, message=FALSE, warning=TRUE}
 #....................................................
@@ -1244,7 +1277,7 @@ UWES.items.des = UWES.items.des %>%
   select(!c("M","SD"))
 ```
 
-  Internal consistency of the UWES total score was excellent: Cronbach's $\alpha$ = `r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.tot$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.tot$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.tot$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. When assessing the internal consistency of the UWES subcales, the highest values yielded dedication subscale: Cronbach's $\alpha$ = `r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.ded$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.ded$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.ded$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`] followed by the vigor subscale: Cronbach's $\alpha$ = `r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.vig$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.vig$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.vig$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. The lowest internal consistency was observed in the absorption factor: Cronbach's $\alpha$ = `r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.abs$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.abs$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.abs$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. The table 3 illustrates statistic of UWES items. In general, correlations between UWES items  and item-total correlations were high. The lowest item-total correlation had item 9.    
+  Internal consistency of the UWES total score was excellent: Cronbach's $\alpha$ = `r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.tot$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.tot$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.tot$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. When assessing the internal consistency of the UWES subcales, the highest values yielded Dedication subscale: Cronbach's $\alpha$ = `r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.ded$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.ded$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.ded$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`] followed by the Vigor subscale: Cronbach's $\alpha$ = `r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.vig$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.vig$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.vig$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. The lowest internal consistency was observed in the Absorption factor: Cronbach's $\alpha$ = `r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.abs$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.abs$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.abs$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. The Table 3 illustrates statistics of UWES items. In general, correlations between these items and item-total correlations were high. The lowest item-total correlation had item 9.    
 
 ```{r echo=FALSE}
 # creating table 
@@ -1257,7 +1290,7 @@ UWES.items.des %>%
           note = "* p < 0.05; ** p < 0.01; *** p < 0.001, M = Mean, SD = Standard Deviation, ITC = Item-total correlation corrected for scale reliability and item overlap")
 ```
 
-  Correlation analysis indicated that there is significant positive association between all UWES subscale and total score and extroversion. The highest correlation was found in the Vigor subscale. In addition, there was significant negative correlation between all UWES subscales and total score with neuroticism. The highest association was also found in the Vigor subscale (see Table 5).   
+  Correlation analysis indicated that there is significant positive association between all UWES subscale and total score and extroversion. The highest correlation was found in the Vigor subscale. In addition, there was significant negative correlation between all UWES subscales and total score with neuroticism. The highest association was also found in the Vigor subscale. Moreover, the UWES total and its all subscales were associated with self-efficacy. The strongest association was observed in the Vigor subscale. Finally, there was no correlation between the UWES composite and subcale score with spirituality with exception of Dedication subscale (see Table 5).   
 
 ```{r correlation table, include=FALSE}
 variab.cor.data=data[, c("UWES","UWES_V","UWES_D","UWES_A",
@@ -1267,22 +1300,27 @@ variab.cor.data = variab.cor.data %>%
   mutate_all(as.numeric)
 
 iter.cor.teq.fin.data=corx(variab.cor.data, method = "spearman", triangle = "lower", describe = c(M = mean, SD = sd), stars = c(0.05, 0.01, 0.001),note = "M = mean, SD = standard devation")
+
+# create vector of rownames
+row.nam.cor.tab=rownames(iter.cor.teq.fin.data$apa)
+
 iter.cor.teq.fin.data$apa = iter.cor.teq.fin.data$apa %>% 
   as.data.frame() %>%   
   mutate("M(SD)" = paste0(M," (",SD,")")) %>% 
-  select(!c("M","SD"))
+  select(!c("M","SD")) %>% 
+  as.data.frame(row.names = row.nam.cor.tab)
   # rownames_to_column() %>% 
   # rename("-" = "rowname")
 ```
 
 ```{r echo=FALSE}
 apa_table(iter.cor.teq.fin.data$apa, caption = "Correaltion matrix of the UWES, personality characteristics and socio-demographic indicators",
-          note = "* p < 0.05; ** p < 0.01; *** p < 0.001; SD = standard deviation, M = mean, UWES = Utrecht Work Engagement Scale, BFI_N = Big Five Inventory - Neuroticism subscale, BFI_E = Big Five Inventory - Extraversion subscale, UWES_A = Utrecht Work Engagement Scale - Absorption subscale, UWES_D = Utrecht Work Engagement Scale - Dedication subscale, UWES_V = Utrecht Work Engagement Scale - Vigor subscale. Spearman rank correlations were used") 
+          note = "* p < 0.05; ** p < 0.01; *** p < 0.001; SD = standard deviation, M = mean, UWES = Utrecht Work Engagement Scale, BFI_N = Big Five Inventory - Neuroticism subscale, BFI_E = Big Five Inventory - Extraversion subscale, UWES_A = Utrecht Work Engagement Scale - Absorption subscale, UWES_D = Utrecht Work Engagement Scale - Dedication subscale, UWES_V = Utrecht Work Engagement Scale - Vigor subscale. DSES = Daily Spiritual Experience Scale, GSES = General Self Efficacy Scale") 
 ```
 
 ## Invariance testing and factor loadings 
 
-  Results of the measurement equivalence indicated that across tested invariance models (configure, metric, scalar and strict) $\Delta$ of the CFI was < 0.01. This finding strongly suggest that UWES assess working engagement equivalently in males and females (See Table 6).    
+  Results of the measurement equivalence indicated that across tested invariance models (configure, metric, scalar and strict) $\Delta$ of the CFI was < 0.01. This findings strongly suggest that the UWES assess working engagement equivalently in males and females (See Table 6).    
 
 \newpage
 
@@ -1352,11 +1390,9 @@ mult.group.m$eqMI.stat # checking chi-square
 
 tab.fit = tab.fit %>% 
   as_tibble() %>% 
-  mutate(rmsea = paste0(rmsea, " ","(",rmsea.ci.lower,"-",rmsea.ci.upper,")")) %>% 
   mutate(pvalue = as.numeric(pvalue)) %>% 
   mutate(pvalue = format_p(pvalue)) %>% 
-  rename(
-         "RMSEA (90% CI)" = "rmsea") %>% 
+  mutate(rmsea = paste0(rmsea," 90% CI (",rmsea.ci.lower,"-",rmsea.ci.upper,")")) %>% 
   select(!starts_with(c("rmsea.ci.","rmsea.ci.lower","rmsea.ci.upper"))) %>% view()
 ```
 
@@ -1368,7 +1404,7 @@ tab.fit %>%
   as_huxtable(add_colnames = F) %>% 
   apa_table(col.names=c("Model","x2","df","p-value","CFI","TLI","RMSEA","SRMR"),
           caption = "Measurement eqivalence of the UWES between genders", 
-          note = "x2 = chi-square, df = degrees of freedom, CFI = Comparative Fit Index, TLI = Tucker-Lewis index, RMSEA = Root Mean Square Error of Approximation , CI = Confidence Interval, SRMR = Standardized Root Mean Square Residual")
+          note = "x2 = chi-square, df = degrees of freedom, CFI = Comparative Fit Index, TLI = Tucker-Lewis index, RMSEA = Root Mean Square Error of Approximation, SRMR = Standardized Root Mean Square Residual, CI = confidence interval")
 
 # rmarkdown::pandoc_convert("pokus.docx", output = "pokus.html")
 # {r child = "pokus.html"}
@@ -1377,9 +1413,7 @@ tab.fit %>%
 ```{r eval=FALSE, child= "pokus.md", include=FALSE}
 ```
 
-## Convergent and divergent validity 
-
-# First regression analysis
+## Association of the UWES with chronic health ilnesses 
 
 ```{r frist regression, include=FALSE}
 # Side-by-side Regression Models
@@ -1750,11 +1784,11 @@ Results of the regression analysis revealed that work engagement is significantl
 # creating table 
 tab %>% 
   apa_table(
-          caption = "Logistic regression table depicting associations between the UWES and chronic diseases", 
-          note = "* p < 0.05; ** p < 0.01; *** p < 0.001, results are reported in odds ratios")
+          caption = "Logistic regression table depicting associations (in odds ratios) between the UWES and chronic diseases", 
+          note = "* p < 0.05; ** p < 0.01; *** p < 0.001, results are reported in odds ratios; Education and Work position were covariates in adjusted effect; values in brackets refers to 95% confidence interval for odds ratios")
 ```
 
-# Second regression analysis
+# Association of the UWES with health risk behaviour 
 
 ```{r second regression, include=FALSE}
 # Side-by-side Regression Models
@@ -1940,14 +1974,14 @@ table.3 = expss::setnames(x = table.3.tib, new = names.tab2)
            janitor::row_to_names(row_number = 1) 
 ```
 
-Results of logistic regression suggested that there is no relationship between work engagement and the smoking, alcohol drinking, drug abuse, coffee drinking or using computer or television for recreation. The most closer to significance threshold was smoking. 
+Results of logistic regression suggested that there is no relationship between work engagement and the smoking, alcohol drinking, drug abuse, coffee drinking or using computer or television for recreation in both crude and adjusted effect. Variable smoking was the most closer to the significance treshold. 
 
 ```{r echo=FALSE}
 # creating table 
 tab.wide.2 %>% 
   apa_table(
-          caption = "Logistic regression table depicting associations between the UWES and health related behaviours", 
-          note = "* p < 0.05; ** p < 0.01; *** p < 0.001, results are reported in odds ratios")
+          caption = "Logistic regression table depicting associations (in odds ratios) between the UWES and health risk behaviours", 
+          note = "* p < 0.05; ** p < 0.01; *** p < 0.001, results are reported in odds ratios; Education and Work position were covariates in adjusted effect; values in brackets refers to 95% confidence interval for odds ratios")
 ```
 
 # Discussion
