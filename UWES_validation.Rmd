@@ -39,21 +39,32 @@ authornote: |
 
 
 abstract: |
-  One or two sentences providing a **basic introduction** to the field,  comprehensible to a scientist in any discipline.
+
+  Introduction
+  
+    One or two sentences providing a **basic introduction** to the field,  comprehensible to a scientist in any discipline.
   
   Two to three sentences of **more detailed background**, comprehensible  to scientists in related disciplines.
   
   One sentence clearly stating the **general problem** being addressed by  this particular study.
   
-  One sentence summarizing the main result (with the words "**here we show**" or their equivalent).
+
+  Methods 
   
-  Two or three sentences explaining what the **main result** reveals in direct comparison to what was thought to be the case previously, or how the  main result adds to previous knowledge.
+  Sample of 707 employees (Age: M = 43.65, SD = 10.08, Females: 38.47%) recruited from different companies in the Czech Republic was used for purpouses of this study. Neuroticism, extraversion, self-efficacy, spirituality, chronic health diseases and frequency of health risk behavior were measured.
+  
+  Results 
+  
+  Higher UWES total score was reported in professional workers, chief workers and in people with higher vocational school or university. The confirmatory factor analysis (CFA) supported the original three-factor solution: χ2 (24) = 75.373; p < 0.001; CFI = 0.999; TLI = 0.999; RMSEA = 0.058; SRMR = 0.021. Measrement equivalence suggested that on configural, metric, scalar and strict level, the UWES assess work engagement invariantly between males and females. The UWES had an excelent internal consistency (α = 0.96, McDonald’s ω = 0.96) and its convergent validity was supported by positive association with extraversion, self-efficacy and by negative association with neuroticism. Logistic regression revealed that higher score in the UWES was associated with lower chance of developing skin diseases and pain of unclear origin. There was no association of the UWES and health risk behaviours such as smoking, alcohol drinking or illegal drug use.
+  
+  Conclusion
+  
+   Two or three sentences explaining what the **main result** reveals in direct comparison to what was thought to be the case previously, or how the  main result adds to previous knowledge.
   
   One or two sentences to put the results into a more **general context**.
   
   Two or three sentences to provide a **broader perspective**, readily comprehensible to a scientist in any discipline.
   
-  <!-- https://tinyurl.com/ybremelq -->
   
 keywords          : "keywords"
 wordcount         : "X"
@@ -123,7 +134,7 @@ library("papaja")
 
 # Introduction
 
-Based on theoretical reasons and previous empirical evidence [@Chan_Ho_Ip_Wong_2020] we expected significnat positive association between self-efficacy and UWES total score (Hypotheses x). 
+Based on theoretical assumptions and previous empirical evidence [@Chan_Ho_Ip_Wong_2020] we expected significant positive association between self-efficacy and UWES total score (Hypotheses x). 
 
 \newpage
 
@@ -257,38 +268,43 @@ bp.t.1 = car::ncvTest(fake_regres) # homogeneity of variances can be rejected
 ## Measures
 
 ### Utrecht Work Engagement Scale (UWES)
-  
-### Daily Spiritual Experience Scale (DSES)
+
+
 
 ```{r DSES rel, include=FALSE}
 # DSES  
 DSES.rel=ufs::scaleStructure(select(starts_with(c("DSES_")), .data = data), digits = 2, poly = TRUE, samples = 5000)
 ```
-Internal consistency of the DSES was excellent: Cronbach's $\alpha$ = `r round(DSES.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(DSES.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(DSES.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(DSES.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(DSES.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(DSES.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`].
 
-### General Self Efficacy Scale (GSES)
+### Daily Spiritual Experience Scale (DSES)
+
+  Internal consistency of the DSES was excellent: Cronbach's $\alpha$ = `r round(DSES.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(DSES.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(DSES.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(DSES.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(DSES.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(DSES.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`].
 
 ```{r GSES rel, include=FALSE}
 # GSES  
 GSES.rel=ufs::scaleStructure(select(starts_with(c("GSES_")), .data = data), digits = 2, poly = TRUE, samples = 5000)
 ```
-Internal consistency of the GSES was excellent: Cronbach's $\alpha$ = `r round(GSES.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(GSES.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(GSES.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(GSES.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(GSES.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(GSES.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
 
-### Big Five Inventory - Neuroticism subscale (BFI_N)
+### General Self Efficacy Scale (GSES)
+
+  Internal consistency of the GSES was excellent: Cronbach's $\alpha$ = `r round(GSES.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(GSES.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(GSES.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(GSES.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(GSES.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(GSES.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
 
 ```{r BFI_N rel, include=FALSE}
 # BFI_N  
 BFI_N.rel=ufs::scaleStructure(select(starts_with(c("BFI_N_")), .data = data), digits = 2, poly = TRUE, samples = 5000)
 ```
-Internal consistency of the BFI_N was good: Cronbach's $\alpha$ = `r round(BFI_N.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(BFI_N.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(BFI_N.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(BFI_N.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(BFI_N.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(BFI_N.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
 
-### Big Five Inventory - Extraversion subscale (BFI_E)
+### Big Five Inventory - Neuroticism subscale (BFI_N)
+
+  Internal consistency of the BFI_N was good: Cronbach's $\alpha$ = `r round(BFI_N.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(BFI_N.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(BFI_N.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(BFI_N.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(BFI_N.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(BFI_N.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
 
 ```{r BFI_E rel, include=FALSE}
 # BFI_E  
 BFI_E.rel=ufs::scaleStructure(select(starts_with(c("BFI_E_")), .data = data), digits = 2, poly = TRUE, samples = 5000)
 ```
-Internal consistency of the BFI_E was good: Cronbach's $\alpha$ = `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(BFI_E.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
+### Big Five Inventory - Extraversion subscale (BFI_E)
+
+  Internal consistency of the BFI_E was good: Cronbach's $\alpha$ = `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(BFI_E.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
 
 ## Data analysis
   Inspection of histograms and results of the Martia test of multivariate skewness and kurtouses indicated that normality assumption is violated in the UWES items. Moreover, examination of residual plots and result of the Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, *df* = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`) suggested heteroscedasticity. Thus, methods not requiring parametric assumptions were used. The Little MCAR test provided an evidence that missing values are missing on random. Thus, as there was not a large number of missing values (*n* = `r nrow(filter(data, is.na(UWES_9)))`), incomplete cases were deleted listwise.
@@ -1169,7 +1185,7 @@ mod.fit.indicies =
   
 (ref:my-figure-caption) SEM plot of the UWES three factor solution with factor loadings and item residuals.
 
-```{r my-figure, fig.cap = "(ref:my-figure-caption)", echo=FALSE, message=FALSE, warning=FALSE}
+```{r my-figure, echo=FALSE, fig.cap="(ref:my-figure-caption)", message=FALSE, warning=FALSE}
 semPaths(UWES.three.fac,layout = "tree2", whatLabels= "std",
          residuals = T, thresholds = F,        
          reorder = T, edge.label.cex= 1, fade=F, 
@@ -1178,7 +1194,7 @@ semPaths(UWES.three.fac,layout = "tree2", whatLabels= "std",
          sizeLat = 9, sizeMan=8,edge.color="black")
 ```
   
-```{r echo=FALSE, message=FALSE, warning=TRUE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 #....................................................
 # Table 2 preparation
 #....................................................
@@ -1202,7 +1218,7 @@ mod.fit.indicies %>%
 ```
 
 ## Item statistic and reliability
-```{r internal consistency examination, include=FALSE}
+```{r internal consistency examination, message=FALSE, warning=FALSE, include=FALSE}
 # UWES total
 UWES.rel.tot=ufs::scaleStructure(select(ends_with(c("UWES_1", "UWES_2","UWES_3","UWES_4",
                                               "UWES_5", "UWES_6", "UWES_7", "UWES_8",
@@ -1321,8 +1337,6 @@ apa_table(iter.cor.teq.fin.data$apa, caption = "Correaltion matrix of the UWES, 
 ## Invariance testing and factor loadings 
 
   Results of the measurement equivalence indicated that across tested invariance models (configure, metric, scalar and strict) $\Delta$ of the CFI was < 0.01. This findings strongly suggest that the UWES assess working engagement equivalently in males and females (See Table 6).    
-
-\newpage
 
 ```{r gender invariance UWES, include=FALSE}
 meas.invar.UWES= "Dedication =~ UWES_3 + UWES_4 + UWES_7
