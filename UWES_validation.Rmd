@@ -1189,9 +1189,11 @@ mod.fit.indicies =
 semPaths(UWES.three.fac,layout = "tree2", whatLabels= "std",
          residuals = T, thresholds = F,        
          reorder = T, edge.label.cex= 1, fade=F, 
-         intercepts = F, rotation = 1,  
-         nCharNodes = 20,style = "OpenMx", edge.label.position = 0.56,
+         intercepts = F, rotation = 1, filetype = c("eps"), filename = "Figure.1",  
+         nCharNodes = 20,style = "OpenMx", edge.label.position = 0.62,
          sizeLat = 9, sizeMan=8,edge.color="black")
+
+knitr::include_graphics("Figure.1.eps") # this does not show image into word document however 
 ```
   
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
