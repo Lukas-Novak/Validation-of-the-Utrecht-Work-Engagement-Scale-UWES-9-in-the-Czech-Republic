@@ -1125,7 +1125,7 @@ mod.fit.indicies =
 
 
 one.fac.mod.cor.er.UWES.resid=resid(UWES.two.fac, "cor")
-dif.test.two.three.fac=lavaan::anova(UWES.three.fac,UWES.two.fac, method = "satorra.bentler.2010")
+dif.test.two.three.fac=lavaan::anova(UWES.three.fac,UWES.two.fac)
 ```
 
 ```{r CFA one factor model, include=FALSE}
@@ -1149,7 +1149,7 @@ mod.fit.indicies =
 
 
 one.fac.mod.cor.er.UWES.resid=resid(UWES.one.fac, "cor")
-dif.test.one.three.fac=lavaan::anova(UWES.three.fac,UWES.one.fac, method = "satorra.bentler.2010")
+dif.test.one.three.fac=lavaan::anova(UWES.three.fac,UWES.one.fac)
 ```
 
 ```{r CFA hierarchical factor model, include=FALSE}
@@ -1176,7 +1176,7 @@ mod.fit.indicies =
 
 
 # one.fac.mod.cor.er.UWES.resid=resid(UWES.hier.fac.hier, "cor")
-# dif.test.one.three.fac=lavaan::anova(UWES.three.fac,UWES.hier.fac.hier, method = "satorra.bentler.2010")
+# dif.test.one.three.fac=lavaan::anova(UWES.three.fac,UWES.hier.fac.hier)
 ```
 
 ## Confirmatory Factor Analysis 
@@ -1315,7 +1315,8 @@ variab.cor.data=data[, c("UWES","UWES_V","UWES_D","UWES_A",
                          "BFI_E","BFI_N","Age","Gender","DSES","GSES")]
 # recode variables to numeric
 variab.cor.data = variab.cor.data %>% 
-  mutate_all(as.numeric)
+  mutate_all(as.numeric) %>% 
+  as.matrix()
 
 iter.cor.teq.fin.data=corx(variab.cor.data, method = "spearman", triangle = "lower", describe = c(M = mean, SD = sd), stars = c(0.05, 0.01, 0.001),note = "M = mean, SD = standard devation")
 
@@ -1368,7 +1369,9 @@ mult.group.m = eqMI.main(model = meas.invar.UWES,
                          equivalence.test = T,
                          adjRMSEA = T,
                          projection = T,
-                         ordered = T)
+                         ordered = FALSE) # in previous version of the script this was set as TRUE but due to the following error: "Error: lavaan->lavTestLRT():  
+   #method = “satorra.bentler.2001” only available when models are fitted with test = "satorra.bentler", "yuan.bentler", or "yuan.bentler.mplus""; this needed to
+#be modified
 
 # male table
 tab.fit[2, ] = c("Male model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.configural.g1,
@@ -1706,7 +1709,7 @@ names.tab2=c("Table 2",
              "OR_(R)","95% CI_(R)","p-value_(R)", # the first names are crude and second for adjusted effect
              "OR_(Rna)","95% CI_(Rna)","p-value_(Rna)")
 
-table.2 = expss::setnames(x = table.2.tib, new = names.tab2)
+names(table.2.tib) <- names.tab2
 
   
    #ds=gtsummary::as_tibble(re.tab.1)
@@ -1913,7 +1916,8 @@ names.tab2=c("Table 2",
              "OR_(R)","95% CI_(R)","p-value_(R)", # the first names are crude and second for adjusted effect
              "OR_(Rna)","95% CI_(Rna)","p-value_(Rna)")
 
-table.3 = expss::setnames(x = table.3.tib, new = names.tab2)
+names(table.3.tib) <- names.tab2 
+# table.3 = expss::setnames(x = table.3.tib, new = names.tab2) # worked before but not now
 
   
    #ds=gtsummary::as_tibble(re.tab.1)
