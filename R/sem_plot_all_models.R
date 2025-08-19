@@ -1,11 +1,14 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FINAL SCRIPT TO GENERATE SEMPLOTS FOR ALL 13 TESTED UWES-9 CFA MODELS
+# Final version with corrected layouts, gray edges, plotted residuals, clean boxes, and no self-loops.
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 # 1. PREAMBLE: LOAD LIBRARIES
 # -----------------------------------------------------------------------------
 # Ensure these packages are installed: install.packages(c("lavaan", "semPlot"))
 library(lavaan)
 library(semPlot)
+
 # 2. DATA
 # -----------------------------------------------------------------------------
 # This script assumes your data frame is already loaded and named 'dat'.
@@ -25,6 +28,8 @@ model_10_three_factor_corr_seppala <- "Vigor =~ UWES_1 + UWES_2 + UWES_5\n Dedic
 model_11_three_factor_corr_zecca <- "Vigor =~ UWES_1 + UWES_2 + UWES_5\n Dedication =~ UWES_3 + UWES_4 + UWES_7\n Absorption =~ UWES_6 + UWES_8 + UWES_9\n UWES_1 ~~ UWES_2\n UWES_3 ~~ UWES_4\n UWES_8 ~~ UWES_9"
 model_12_hierarchical_dominguez <- "Vigor =~ UWES_1 + UWES_2 + UWES_5\n Dedication =~ UWES_3 + UWES_4 + UWES_7\n Absorption =~ UWES_6 + UWES_8 + UWES_9\n WE =~ Vigor + Dedication + Absorption"
 model_13_partial_bifactor_debruin <- "WE =~ UWES_1 + UWES_2 + UWES_3 + UWES_4 + UWES_5 + UWES_6 + UWES_7 + UWES_8 + UWES_9\n Vigor =~ UWES_1 + UWES_2 + UWES_5\n Absorption =~ UWES_6 + UWES_8 + UWES_9\n WE ~~ 0*Vigor\n WE ~~ 0*Absorption\n Vigor ~~ 0*Absorption"
+model_14_combined_modified <- "Vigor =~ UWES_1 + UWES_2 + UWES_5\n Dedication =~ UWES_3 + UWES_4 + UWES_7\n Absorption =~ UWES_6 + UWES_8 + UWES_9\n UWES_1 ~~ UWES_2\n UWES_3 ~~ UWES_4\n UWES_8 ~~ UWES_9"
+model_15_replicated_errors <- "Vigor =~ UWES_1 + UWES_2 + UWES_5\n Dedication =~ UWES_3 + UWES_4 + UWES_7\n Absorption =~ UWES_6 + UWES_8 + UWES_9\n UWES_1 ~~ UWES_2\n UWES_8 ~~ UWES_9"
 
 # 4. FIT ALL MODELS USING CFA (using 'dat' and ML estimator as per user's log)
 # -----------------------------------------------------------------------------
@@ -41,25 +46,30 @@ fit_10 <- cfa(model_10_three_factor_corr_seppala, data = dat, std.lv = TRUE)
 fit_11 <- cfa(model_11_three_factor_corr_zecca, data = dat, std.lv = TRUE)
 fit_12 <- cfa(model_12_hierarchical_dominguez, data = dat, std.lv = TRUE)
 fit_13 <- cfa(model_13_partial_bifactor_debruin, data = dat, std.lv = TRUE, orthogonal=TRUE)
+fit_14 <- cfa(model_14_combined_modified, data = dat, std.lv = TRUE)
+fit_15 <- cfa(model_15_replicated_errors, data = dat, std.lv = TRUE)
 
 # 5. GENERATE AND ARRANGE PLOTS
 # -----------------------------------------------------------------------------
 # Define common plot settings for consistency
-plot_settings <- list(what = "std", style = "ram", # Use "ram" style for clean boxes
+plot_settings <- list(what = "paths", style = "ram", # Use "paths" instead of "std" to hide numbers
                       edge.color = "gray40", 
                       intercepts = FALSE, # Hide intercepts
                       selfLoops = FALSE,  # Hide latent variances
-                      edge.width = 1.2,   # FIX: Set a uniform, consistent edge width for all paths
+                      edge.width = 1.2,   # Set a uniform, consistent edge width for all paths
                       nCharNodes = 0,     
-                      sizeMan = 7, sizeLat = 10, edge.label.cex = 0.75,
-                      bifactor = "g"
+                      sizeMan = 8,
+                      sizeLat = 10, 
+                      edge.label.cex = 0, # Set edge label size to 0 to hide all numbers
+                      bifactor = "g",
+                      label.cex = 1.2       # Hide all labels including factor loadings
 )
 
 # Create plots with explicit spacing using layout function
 # Save the final figure to a high-resolution PNG file
-svg("Figure_1_All_CFA_Models_Final.svg", width = 12, height = 30)
+svg("Figure_1_All_CFA_Models_Final.svg", width = 15, height = 35)
 
-# Set layout matrix with explicit spacing
+# Set layout matrix with explicit spacing for 5 rows, 3 columns (15 models total)
 layout_matrix <- matrix(1:15, nrow = 5, ncol = 3, byrow = TRUE)
 layout(layout_matrix, heights = c(1, 1, 1, 1, 1))
 
@@ -89,9 +99,9 @@ create_plot_with_title(fit_10, "J) Modified 3-Factor (8~~9)\n(Seppälä et al., 
 create_plot_with_title(fit_11, "K) Modified 3-Factor (Zecca)\n(Zecca et al., 2015)", layout = "tree2", residuals = TRUE)
 create_plot_with_title(fit_12, "L) Hierarchical Model\n(Domínguez-Salas et al., 2022)", layout = "tree2")
 create_plot_with_title(fit_13, "M) Partial Bi-Factor Model\n(de Bruin & Henn, 2013)", layout = "tree2")
+create_plot_with_title(fit_14, "N) Combined Modified 3-Factor\n(1~~2, 3~~4, 8~~9)", layout = "tree2", residuals = TRUE)
+create_plot_with_title(fit_15, "O) Replicated Errors Model\n(1~~2, 8~~9)", layout = "tree2", residuals = TRUE)
 
-# Add two empty plots to fill the 5x3 grid neatly
-plot.new()
-plot.new()
+# No empty plots needed - all 15 positions are filled
 
 dev.off() # Close the PNG device and save the file

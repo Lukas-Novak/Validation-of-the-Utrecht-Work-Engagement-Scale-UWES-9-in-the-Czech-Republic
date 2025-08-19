@@ -26,53 +26,24 @@ author:
     affiliation   : "1"
     role:
       - Writing - Review & Editing
-
 affiliation:
   - id            : "1"
     institution   : "Palacky University Olomouc - Social Health Institute"
   - id            : "2"
     institution   : "The Czech Academy of Sciences, Institute of Psychology, Prague, Czech Republic"
-
-
 authornote: |
-
-
-
 abstract: |
-
   Introduction
   
     One or two sentences providing a **basic introduction** to the field,  comprehensible to a scientist in any discipline.
-  
-  Two to three sentences of **more detailed background**, comprehensible  to scientists in related disciplines.
-  
-  One sentence clearly stating the **general problem** being addressed by  this particular study.
-  
-
-  Methods 
-  
   Sample of 707 employees (Age: M = 43.65, SD = 10.08, Females: 38.47%) recruited from different companies in the Czech Republic was used for purpouses of this study. Neuroticism, extraversion, self-efficacy, spirituality, chronic health diseases and frequency of health risk behavior were measured.
-  
-  Results 
-  
   Higher UWES total score was reported in professional workers, chief workers and in people with higher vocational school or university. The confirmatory factor analysis (CFA) supported the original three-factor solution: χ2 (24) = 75.373; p < 0.001; CFI = 0.999; TLI = 0.999; RMSEA = 0.058; SRMR = 0.021. Measrement equivalence suggested that on configural, metric, scalar and strict level, the UWES assess work engagement invariantly between males and females. The UWES had an excelent internal consistency (α = 0.96, McDonald’s ω = 0.96) and its convergent validity was supported by positive association with extraversion, self-efficacy and by negative association with neuroticism. Logistic regression revealed that higher score in the UWES was associated with lower chance of developing skin diseases and pain of unclear origin. There was no association of the UWES and health risk behaviours such as smoking, alcohol drinking or illegal drug use.
-  
-  Conclusion
-  
    Two or three sentences explaining what the **main result** reveals in direct comparison to what was thought to be the case previously, or how the  main result adds to previous knowledge.
-  
-  One or two sentences to put the results into a more **general context**.
-  
-  Two or three sentences to provide a **broader perspective**, readily comprehensible to a scientist in any discipline.
-  
-  
 keywords          : "keywords"
 wordcount         : "X"
-
 bibliography      : ["r-references.bib"]
 link-citations    : yes
 linkcolor         : blue
-
 floatsintext      : no
 figurelist        : no
 tablelist         : no
@@ -80,10 +51,11 @@ footnotelist      : no
 linenumbers       : yes
 mask              : no
 draft             : no
-
 documentclass     : "apa6"
 classoption       : "man"
 output            : papaja::apa6_word
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include = FALSE}
@@ -98,7 +70,7 @@ knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
 ```
 
 ```{r loading libraries, include=FALSE}
-packages=c("psych","dplyr","lavaan","base","foreign","Routliers","MVN","parameters", "EFA.MRFA","RGenData","semPlot","psycho","apa","corx","effectsize","qwraps2","finalfit","ggstatsplot","dunn.test","devtools","rticles","ICC.Sample.Size","tidyverse","magrittr","osfr","expss","gtsummary","huxtable","equaltestMI","haven","rcompanion","ufs","semTools","semPlot","insight","flextable") 
+packages=c("psych","dplyr","lavaan","base","foreign","Routliers","MVN","parameters", "EFA.MRFA","RGenData","semPlot","psycho","apa","corx","effectsize","qwraps2","finalfit","ggstatsplot","dunn.test","devtools","rticles","ICC.Sample.Size","tidyverse","magrittr","osfr","expss","gtsummary","huxtable","equaltestMI","haven","rcompanion","ufs","semTools","semPlot","insight","flextable","dynamic","officer","officedown") 
 
 # Install packages not yet installed
 installed_packages <- packages %in% rownames(installed.packages())
@@ -130,6 +102,11 @@ if (any(Miss.Pack == FALSE)) {
 }
 library("papaja")
 #________________________________________________________________________-
+
+# Helper functions:
+# Cache Dynamic Fit Index (DFI) Cutoffs for Categorical Multi-Factor CFA Models
+source("/home/rstudio/uwes-validation//R/cache_dynamic.R")
+source("/home/rstudio/uwes-validation//R/create_dynamic_table.R")
 ```
 
 # Introduction
@@ -269,8 +246,6 @@ bp.t.1 = car::ncvTest(fake_regres) # homogeneity of variances can be rejected
 
 ### Utrecht Work Engagement Scale (UWES)
 
-
-
 ```{r DSES rel, include=FALSE}
 # DSES  
 DSES.rel=ufs::scaleStructure(select(starts_with(c("DSES_")), .data = data), digits = 2, poly = TRUE, samples = 5000)
@@ -308,7 +283,8 @@ BFI_E.rel=ufs::scaleStructure(select(starts_with(c("BFI_E_")), .data = data), di
 
 ## Data analysis
   Inspection of histograms and results of the Martia test of multivariate skewness and kurtouses indicated that normality assumption is violated in the UWES items. Moreover, examination of residual plots and result of the Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, *df* = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`) suggested heteroscedasticity. Thus, methods not requiring parametric assumptions were used. The Little MCAR test provided an evidence that missing values are missing on random. Thus, as there was not a large number of missing values (*n* = `r nrow(filter(data, is.na(UWES_9)))`), incomplete cases were deleted listwise.
-  Factor structure of the instrument was investigated via Confirmatory Factor Analysis (CFA). Original 3 dimensional factor structure was tested along with two and one factor solution, frequently reported across studies - see review of @Kulikowski_2017. Item composition of tested factor solutions can be found in the study of @Willmer_2019. Kaiser Meyer Olkin (KMO) measure together with Bartlett test of sphericity were applied to assess factorability of the UWES data. Five indices were used to inspect model fit: 1) Mean Square Error of Approximation (RMSEA); 2) Standardized Root Mean Square Residual (SRMR); 3) chi-square test; 4) Comparative Fit index (CFI) and 5) Tucker-Lewis index (TLI). In the first two indices, values below 0.08 reflects an acceptable fit and below 0.05 a good fit [@civelek2018essentials; @hoe_issues_2008; @vandenberg_review_2000; @hooper_structural_2008]. In the last two indices, values above 0.95 suggest an acceptable fit [@jackson_reporting_2009] and above 0.97 a good fit [@schermelleh_engel_evaluating_2003]. Diagonally Weighted Least Squares estimator (DWLS) on polychoric correlation matrix was used to fit CFA models.  
+  The instrument's factor structure was investigated via Confirmatory Factor Analysis (CFA) to test a comprehensive range of models from the literature. We first tested the original correlated three-factor model (Vigor, Dedication, Absorption) and a competing one-factor model (Schaufeli, Bakker, & Salanova, 2006). However, as many studies report strong intercorrelations among the three dimensions, suggesting they may represent a single higher-order construct (Fong & Ng, 2012), we also specified and tested a hierarchical (second-order) model (Domínguez-Salas et al., 2022). Further analyses included tests of alternative two-factor solutions (e.g., Chaudhary, Rangnekar, & Barua, 2012), a partial bi-factor model (de Bruin & Henn, 2013), and several modified three-factor models incorporating correlated error terms (e.g., Simbula et al., 2013). The Kaiser-Meyer-Olkin (KMO) measure and Bartlett’s test of sphericity were first applied to confirm the data’s suitability for factor analysis.
+  Kaiser Meyer Olkin (KMO) measure together with Bartlett test of sphericity were applied to assess factorability of the UWES data. Five indices were used to inspect model fit: 1) Mean Square Error of Approximation (RMSEA); 2) Standardized Root Mean Square Residual (SRMR); 3) chi-square test; 4) Comparative Fit index (CFI) and 5) Tucker-Lewis index (TLI). In the first two indices, values below 0.08 reflects an acceptable fit and below 0.05 a good fit [@civelek2018essentials; @hoe_issues_2008; @vandenberg_review_2000; @hooper_structural_2008]. In the last two indices, values above 0.95 suggest an acceptable fit [@jackson_reporting_2009] and above 0.97 a good fit [@schermelleh_engel_evaluating_2003]. Diagonally Weighted Least Squares estimator (DWLS) on polychoric correlation matrix was used to fit CFA models.  
   
   Invariance of a measurement was explored between males and females. Configural, metric, scalar and strict invariance was supported, in the mutigoup CFA if $\Delta$ CFA was < 0.01 between invariance models [@Putnick_Bornstein_2016]. The scale reliability was measured by the McDonald’s $\omega$ and also by the Cronbach’s $\alpha$. Convergent validity was inspected by zero order Spearman rank correlations with self-efficacy, neuroticism and with extroversion. Divergent validity was measured by correlation of the UWES with spirituality.
   
@@ -688,7 +664,6 @@ two.var.tab.ded = two.var.tab.ded %>%
 #................................
 # formatting table
 #...............................
-two.var.tab.ded = two.var.tab.ded %>% 
   mutate("UWES_D: M(SD)" = paste0("",mean," (",sd,")"),
          "n(%)" = paste0("",n," ","(",round(percent,digits = 0),"%)"),
          Gr.dif.UWES_D.total = paste0("",group2,": ","x2(",round(df,digits = 0),")","=",round(statistic,digits = 2),
@@ -1061,8 +1036,8 @@ m.sd.tab = m.sd.tab %>%
 ```
 
 ```{r echo=FALSE}
- # print table
- m.sd.tab %>%  
+# Table 
+ m.sd.tab %>%   
   as_tibble() %>% 
   mutate_all(~(replace(., is.na(.), ""))) %>%
   as_huxtable(add_colnames = F) %>% 
@@ -1098,9 +1073,11 @@ modificationindices(UWES.three.fac, sort. = T) # how can we improve our model
 # Large positive values indicate the model underpredicts the correlation; large negative values suggest overprediction of the correlation. Usually values |r>.1| are worth closer consideration.
 resid(UWES.three.fac, "cor")
 
-mod.fit.indicies=c("Three factor model", as.table(fitMeasures(UWES.three.fac)[c('chisq', 'df', 'pvalue',
-                                                              'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                              "rmsea.ci.upper", 'srmr')]) %>% round(digits = 3)) %>% t() 
+DFI_three_factor <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = UWES.three.fac,
+  data = data
+  )
 ```
 
 ```{r CFA two factor model, include=FALSE}
@@ -1109,23 +1086,22 @@ two.fac.mod="VigDeg =~ UWES_1 + UWES_2 + UWES_3 + UWES_4 + UWES_5 + UWES_7
              Abs =~  UWES_6 + UWES_8 + UWES_9"
 
 #when "ordered" is set to "TRUE", than DWLS estimator is auto  matically used as "standard" in results. "Robust" chisquare in results is referring to WLSMV estimator.
-UWES.two.fac=sem(model = two.fac.mod, data = data, std.lv=T, ordered = T)
+UWES.two.fac=cfa(model = two.fac.mod, data = data, std.lv=T, ordered = T)
 two.fac.mod.sum=summary(UWES.two.fac,rsquare=T, standardized=T, fit.measures=T)
 parameterestimates(UWES.two.fac, standardized = T) # whill show standardized estimates and many other things
 modificationindices(UWES.two.fac, sort. = T) # how can we improve our model
 fitmeasures(UWES.two.fac) # chisq.scaled - robust one
-# exporting fit indexes
-mod.fit.indicies =
-  c("Two factor model", as.table(fitMeasures(UWES.two.fac)[c("chisq", "df", 'pvalue',
-                                                                           'cfi',"tli",'rmsea',"rmsea.ci.lower", 
-                                                                           "rmsea.ci.upper", 'srmr')]) %>% 
-      round(digits = 3)) %>%
-  t() %>%
-  rbind(mod.fit.indicies)
 
+# DFI
+DFI_two_factor <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = UWES.two.fac,
+  data = data
+  )
 
 one.fac.mod.cor.er.UWES.resid=resid(UWES.two.fac, "cor")
 dif.test.two.three.fac=lavaan::anova(UWES.three.fac,UWES.two.fac)
+
 ```
 
 ```{r CFA one factor model, include=FALSE}
@@ -1138,21 +1114,24 @@ one.fac.mod.sum=summary(UWES.one.fac,rsquare=T, standardized=T, fit.measures=T)
 parameterestimates(UWES.one.fac, standardized = T) # whill show standardized estimates and many other things
 modificationindices(UWES.one.fac, sort. = T) # how can we improve our model
 fitmeasures(UWES.one.fac) # chisq.scaled - robust one
-# exporting fit indexes
-mod.fit.indicies =
-  c("One factor model", as.table(fitMeasures(UWES.one.fac)[c("chisq", "df", 'pvalue',
-                                                                           'cfi',"tli",'rmsea',"rmsea.ci.lower", 
-                                                                           "rmsea.ci.upper", 'srmr')]) %>% 
-      round(digits = 3)) %>%
-  t() %>%
-  rbind(mod.fit.indicies)
 
+# DFI
+DFI_one_factor <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = UWES.one.fac,
+  data = data
+  )
 
 one.fac.mod.cor.er.UWES.resid=resid(UWES.one.fac, "cor")
 dif.test.one.three.fac=lavaan::anova(UWES.three.fac,UWES.one.fac)
 ```
 
 ```{r CFA hierarchical factor model, include=FALSE}
+
+# # Define the names of the ordered categorical variables
+# ordered_vars <- c("UWES_1", "UWES_2", "UWES_3", "UWES_4", "UWES_5", 
+#                   "UWES_6", "UWES_7", "UWES_8", "UWES_9")
+
 # one factor model 
 hier.fac.mod=" Dedication =~ UWES_3 + UWES_4 + UWES_7
                Absorption =~ UWES_6 + UWES_8 + UWES_9
@@ -1165,21 +1144,399 @@ hier.fac.mod.sum=summary(UWES.hier.fac.hier,rsquare=T, standardized=T, fit.measu
 parameterestimates(UWES.hier.fac.hier, standardized = T) # whill show standardized estimates and many other things
 modificationindices(UWES.hier.fac.hier, sort. = T) # how can we improve our model
 fitmeasures(UWES.hier.fac.hier) # chisq.scaled - robust one
-# exporting fit indexes
-mod.fit.indicies =
-  c("Hierarchical factor model", as.table(fitMeasures(UWES.hier.fac.hier)[c("chisq", "df", 'pvalue',
-                                                                           'cfi',"tli",'rmsea',"rmsea.ci.lower", 
-                                                                           "rmsea.ci.upper", 'srmr')]) %>% 
-      round(digits = 3)) %>%
-  t() %>%
-  rbind(mod.fit.indicies)
 
+# DFI
+DFI_hierarch_factor <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = UWES.hier.fac.hier,
+  data = data
+  )
 
 # one.fac.mod.cor.er.UWES.resid=resid(UWES.hier.fac.hier, "cor")
 # dif.test.one.three.fac=lavaan::anova(UWES.three.fac,UWES.hier.fac.hier)
 ```
 
+```{r CFA partial bi-factor model de Bruin, eval=FALSE, include=FALSE}
+# de Bruin, G. P., & Henn, C. M. (2013). Dimensionality of the 9-item Utrecht Work Engagement Scale (UWES–9). Psychological Reports, 112(3), 788–799. https://doi.org/10.2466/01.03.PR0.112.3.788-799
+
+# Partial bi-factor model from de Bruin & Henn (2013). 
+# A general factor (WE) influences all items. 
+# Two specific group factors (Vigor and Absorption) influence their respective items.
+# The Dedication items' variance is fully explained by the general factor.
+# The general factor is specified to be uncorrelated with the group factors.
+
+partial.bifac.mod.deBruin <- "
+    WE =~ UWES_1 + UWES_2 + UWES_3 + UWES_4 + UWES_5 + UWES_6 + UWES_7 + UWES_8 + UWES_9
+    Vigor =~ UWES_1 + UWES_2 + UWES_5
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Specify factors are orthogonal (uncorrelated)
+    WE ~~ 0*Vigor
+    WE ~~ 0*Absorption
+    Vigor ~~ 0*Absorption
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+UWES.partial.bifac.deBruin <- sem(model = partial.bifac.mod.deBruin, data = data, std.lv = TRUE, ordered = TRUE)
+partial.bifac.deBruin.sum <- summary(UWES.partial.bifac.deBruin, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterestimates(UWES.partial.bifac.deBruin, standardized = TRUE) # Will show standardized estimates and many other things
+modificationindices(UWES.partial.bifac.deBruin, sort. = TRUE) # How can we improve our model
+fitmeasures(UWES.partial.bifac.deBruin) # chisq.scaled - robust one
+
+# DFI
+DFI_partial_bifactor_deBruin <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = UWES.partial.bifac.deBruin,
+  data = data
+)
+
+partial.bifac.deBruin.resid <- resid(UWES.partial.bifac.deBruin, "cor")
+# Example of model comparison if needed, e.g., comparing to the three-factor model
+# dif.test.partial.bifac.three.fac <- lavaan::anova(UWES.three.fac, UWES.partial.bifac.deBruin)
+```
+
+```{r CFA three factor model with correlated errors Dominguez, include=FALSE}
+# Domínguez-Salas, S., Rodríguez-Domínguez, C., Arcos-Romero, A. I., Allande-Cussó, R., García-Iglesias, J. J., & Gómez-Salgado, J. (2022). Psychometric Properties of the Utrecht Work Engagement Scale (UWES-9) in a Sample of Active Health Care Professionals in Spain. Psychology research and behavior management, 15, 3461–3472. https://doi.org/10.2147/PRBM.S387242
+
+# Modified three-factor model with correlated errors from Domínguez-Salas et al. (2022).
+# This is based on the standard three-factor model but adds correlations between the error terms of items 1 and 2, and items 8 and 9.
+three.fac.mod.corr.errors.Dominguez <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated errors
+    UWES_1 ~~ UWES_2
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+UWES.three.fac.corr.errors.Dominguez <- sem(model = three.fac.mod.corr.errors.Dominguez, data = data, std.lv = TRUE, ordered = TRUE)
+three.fac.mod.corr.errors.Dominguez.sum <- summary(UWES.three.fac.corr.errors.Dominguez, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterestimates(UWES.three.fac.corr.errors.Dominguez, standardized = TRUE) # Will show standardized estimates and many other things
+modificationindices(UWES.three.fac.corr.errors.Dominguez, sort. = TRUE) # How can we improve our model
+fitmeasures(UWES.three.fac.corr.errors.Dominguez) # chisq.scaled - robust one
+
+# DFI
+DFI_three_factor_corr_errors_Dominguez <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = UWES.three.fac.corr.errors.Dominguez,
+  data = data
+)
+
+three.fac.mod.corr.errors.Dominguez.resid <- resid(UWES.three.fac.corr.errors.Dominguez, "cor")
+# Example of model comparison if needed, e.g., comparing to the standard three-factor model
+# dif.test.corr.errors.vs.standard.three.fac <- lavaan::anova(UWES.three.fac, UWES.three.fac.corr.errors.Dominguez)
+```
+
+```{r cfa_three_factor_corr_errors_balducci, include=FALSE}
+# Balducci, C., Fraccaroli, F., & Schaufeli, W. B. (2010). Psychometric properties of the Italian version of the Utrecht Work Engagement Scale (UWES-9): A cross-cultural analysis. European Journal of Psychological Assessment, 26(2), 143–149. https://doi.org/10.1027/1015-5759/a000020
+
+# Modified three-factor model from Balducci et al. (2010) with four correlated error terms.
+three_fac_mod_corr_errors_balducci <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated errors specific to the Italian sample in the study
+    UWES_1 ~~ UWES_2
+    UWES_2 ~~ UWES_5
+    UWES_6 ~~ UWES_8
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_three_fac_corr_errors_balducci <- sem(model = three_fac_mod_corr_errors_balducci, data = data, std.lv = TRUE, ordered = TRUE)
+three_fac_mod_corr_errors_balducci_sum <- summary(uwes_three_fac_corr_errors_balducci, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_three_fac_corr_errors_balducci, standardized = TRUE) 
+modificationIndices(uwes_three_fac_corr_errors_balducci, sort. = TRUE)
+fitMeasures(uwes_three_fac_corr_errors_balducci)
+
+# DFI
+dfi_three_factor_corr_errors_balducci <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = uwes_three_fac_corr_errors_balducci,
+  data = data
+)
+```
+
+```{r cfa_three_factor_corr_error_chaudhary, include=FALSE}
+# Chaudhary, R., Rangnekar, S., & Barua, M. K. (2012). Psychometric evaluation of utrecht work engagement scale in an indian sample. Asia-Pacific Journal of Management Research and Innovation, 8(3), 343–350. https://doi.org/10.1177/2319510X1200800314
+
+# Modified three-factor model with a correlated error term between the third Vigor item and the first Absorption item.
+three_fac_mod_corr_error_chaudhary <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated error based on modification indices in the study
+    UWES_5 ~~ UWES_6
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_three_fac_corr_error_chaudhary <- sem(model = three_fac_mod_corr_error_chaudhary, data = data, std.lv = TRUE, ordered = TRUE)
+three_fac_mod_corr_error_chaudhary_sum <- summary(uwes_three_fac_corr_error_chaudhary, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_three_fac_corr_error_chaudhary, standardized = TRUE)
+modificationIndices(uwes_three_fac_corr_error_chaudhary, sort. = TRUE)
+fitMeasures(uwes_three_fac_corr_error_chaudhary)
+
+# DFI
+dfi_three_factor_corr_error_chaudhary <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = uwes_three_fac_corr_error_chaudhary,
+  data = data
+)
+```
+
+```{r cfa_two_factor_model_chaudhary, include=FALSE}
+# Chaudhary, R., Rangnekar, S., & Barua, M. K. (2012). Psychometric evaluation of utrecht work engagement scale in an indian sample. Asia-Pacific Journal of Management Research and Innovation, 8(3), 343–350. https://doi.org/10.1177/2319510X1200800314
+
+# Alternative two-factor model where Vigor and Absorption items load onto one factor.
+two_fac_mod_chaudhary <- "
+    VigAbs =~ UWES_1 + UWES_2 + UWES_5 + UWES_6 + UWES_8 + UWES_9
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_two_fac_chaudhary <- cfa(model = two_fac_mod_chaudhary, data = data, std.lv = TRUE, ordered = TRUE)
+two_fac_mod_chaudhary_sum <- summary(uwes_two_fac_chaudhary, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_two_fac_chaudhary, standardized = TRUE)
+modificationIndices(uwes_two_fac_chaudhary, sort. = TRUE)
+fitMeasures(uwes_two_fac_chaudhary)
+
+# DFI
+dfi_two_factor_chaudhary <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = uwes_two_fac_chaudhary,
+  data = data
+)
+```
+
+```{r cfa_three_factor_corr_error_littman_ovadia, include=FALSE}
+# Littman-Ovadia, H., & Balducci, C. (2013). Psychometric properties of the Hebrew version of the utrecht work engagement scale (UWES-9). European Journal of Psychological Assessment, 29(1), 58–63. https://doi.org/10.1027/1015-5759/a000121
+
+# Modified three-factor model with a correlated error between the first two Vigor items.
+three_fac_mod_corr_error_littman_ovadia <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated error
+    UWES_1 ~~ UWES_2
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_three_fac_corr_error_littman_ovadia <- sem(model = three_fac_mod_corr_error_littman_ovadia, data = data, std.lv = TRUE, ordered = TRUE)
+three_fac_mod_corr_error_littman_ovadia_sum <- summary(uwes_three_fac_corr_error_littman_ovadia, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_three_fac_corr_error_littman_ovadia, standardized = TRUE) 
+modificationIndices(uwes_three_fac_corr_error_littman_ovadia, sort. = TRUE)
+fitMeasures(uwes_three_fac_corr_error_littman_ovadia)
+
+# DFI
+dfi_three_factor_corr_error_littman_ovadia <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = uwes_three_fac_corr_error_littman_ovadia,
+  data = data
+)
+```
+
+```{r cfa_three_factor_mod_simbula_tran, include=FALSE}
+# Simbula, S., Guglielmi, D., Schaufeli, W. B., & Depolo, M. (2013). An Italian validation of the Utrecht Work Engagement Scale: Characterization of engaged groups in a sample of schoolteachers. Bollettino di Psicologia Applicata, 268, 43-54.
+# Tran, T. T. T., Watanabe, K., Imamura, K., et al. (2020). Reliability and validity of the Vietnamese version of the 9-item Utrecht Work Engagement Scale. Journal of Occupational Health, 62(1), e12157. https://doi.org/10.1002/1348-9585.12157
+
+# Modified three-factor model with correlated errors.
+three_fac_mod_simbula_tran <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated errors
+    UWES_1 ~~ UWES_2
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_three_fac_simbula_tran <- sem(model = three_fac_mod_simbula_tran, data = data, std.lv = TRUE, ordered = TRUE)
+three_fac_simbula_tran_sum <- summary(uwes_three_fac_simbula_tran, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_three_fac_simbula_tran, standardized = TRUE) 
+modificationIndices(uwes_three_fac_simbula_tran, sort. = TRUE)
+fitMeasures(uwes_three_fac_simbula_tran)
+
+# DFI
+dfi_three_factor_simbula_tran <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = uwes_three_fac_simbula_tran,
+  data = data
+)
+```
+
+```{r cfa_three_factor_mod_seppala, include=FALSE}
+# Seppälä, P., Mauno, S., Feldt, T., Hakanen, J., Kinnunen, U., Tolvanen, A., & Schaufeli, W. (2009). The construct validity of the Utrecht Work Engagement Scale: Multisample and longitudinal evidence. Journal of Happiness Studies, 10(4), 459–481. https://doi.org/10.1007/s10902-008-9100-y
+
+# Modified three-factor model with a single correlated error.
+three_fac_mod_seppala <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated error
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_three_fac_seppala <- sem(model = three_fac_mod_seppala, data = data, std.lv = TRUE, ordered = TRUE)
+three_fac_seppala_sum <- summary(uwes_three_fac_seppala, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_three_fac_seppala, standardized = TRUE) 
+modificationIndices(uwes_three_fac_seppala, sort. = TRUE)
+fitMeasures(uwes_three_fac_seppala)
+
+# DFI
+dfi_three_factor_seppala <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = uwes_three_fac_seppala,
+  data = data
+)
+```
+
+```{r cfa_three_factor_mod_zecca, include=FALSE}
+# Zecca, G., Györkös, C., Becker, J., Massoudi, K., de Bruin, G. P., & Rossier, J. (2015). Validation of the French Utrecht Work Engagement Scale and its relationship with personality traits and impulsivity. Revue Européenne de Psychologie Appliquée/European Review of Applied Psychology, 65(1), 19-28. https://doi.org/10.1016/j.erap.2014.10.003
+
+# Modified three-factor model with within-factor correlated errors.
+three_fac_mod_zecca <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated errors
+    UWES_1 ~~ UWES_2
+    UWES_3 ~~ UWES_4
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used. 
+uwes_three_fac_zecca <- sem(model = three_fac_mod_zecca, data = data, std.lv = TRUE, ordered = TRUE)
+three_fac_zecca_sum <- summary(uwes_three_fac_zecca, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_three_fac_zecca, standardized = TRUE)
+modificationIndices(uwes_three_fac_zecca, sort. = TRUE)
+fitMeasures(uwes_three_fac_zecca)
+
+dfi_three_factor_zecca <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = uwes_three_fac_zecca,
+  data = data
+)
+```
+
+```{r cfa_two_factor_mod_panthee, include=FALSE}
+# Panthee, B., Shimazu, A., & Kawakami, N. (2014). Validation of Nepalese version of Utrecht Work Engagement Scale. Journal of Occupational Health, 56(6), 421–429. https://doi.org/10.1539/joh.14-0041-OA
+
+# Two-factor model (Dedication/Absorption and Vigor)
+two_fac_mod_panthee <- "
+    DedAbs =~ UWES_3 + UWES_4 + UWES_7 + UWES_6 + UWES_8 + UWES_9
+    Vigor =~ UWES_1 + UWES_2 + UWES_5
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_two_fac_panthee <- cfa(model = two_fac_mod_panthee, data = data, std.lv = TRUE, ordered = TRUE)
+two_fac_mod_panthee_sum <- summary(uwes_two_fac_panthee, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_two_fac_panthee, standardized = TRUE)
+modificationIndices(uwes_two_fac_panthee, sort. = TRUE)
+fitMeasures(uwes_two_fac_panthee)
+
+# DFI
+DFI_two_factor_panthee <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = uwes_two_fac_panthee,
+  data = data
+)
+
+op_section <- prop_section(type = "continuous")
+close_section <- prop_section(
+    page_size = page_size(orient = "landscape", width = 17, height = 17), 
+    type = "continuous")
+
+```
+
+```{r CFA_within_factor_corr_model, include=FALSE}
+# This model synthesizes the modifications that demonstrated the best (though still imperfect) 
+# performance in the DFI analyses. The goal is to address the multiple sources of local 
+# misfit simultaneously to create a model that aligns with the DFI's "Level-0" (correctly specified) benchmarks.
+# Theoretical justifications for correlated errors:
+# - UWES_1 ~~ UWES_2: Both items refer to high energy levels ("bursting with energy," "strong and vigorous"). Their similar, active wording suggests shared variance beyond the general Vigor factor.
+# - UWES_3 ~~ UWES_4: Both items refer to the inspirational aspect of the job ("enthusiastic about my job," "my job inspires me"). This shared focus on inspiration can create a correlation not captured by the broader Dedication factor.
+# - UWES_8 ~~ UWES_9: Both items refer to the immersive experience of work ("immersed in my work," "get carried away when I'm working"). This captures a cognitive state of flow that might have shared variance beyond the general Absorption factor.
+
+within_factor_corr_model <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # All plausible within-factor correlated errors
+    UWES_1 ~~ UWES_2
+    UWES_3 ~~ UWES_4
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+UWES_within_factor_corr <- sem(model = within_factor_corr_model, data = data, std.lv = TRUE, ordered = TRUE)
+within_factor_corr_sum <- summary(UWES_within_factor_corr, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(UWES_within_factor_corr, standardized = TRUE)
+modificationIndices(UWES_within_factor_corr, sort. = TRUE)
+fitMeasures(UWES_within_factor_corr)
+
+# DFI for the within-factor correlated errors model
+DFI_within_factor_corr <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = UWES_within_factor_corr,
+  data = data
+)
+```
+
+```{r CFA replicated_errors_model, include=FALSE}
+# This model tests the three-factor structure while accounting for the two most
+# consistently replicated correlated errors in the international literature.
+# This provides a strong test of a more parsimonious modified model.
+
+replicated_errors_model <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated errors replicated across multiple studies
+    UWES_1 ~~ UWES_2
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+UWES_replicated_errors <- sem(model = replicated_errors_model, data = data, std.lv = TRUE, ordered = TRUE)
+replicated_errors_sum <- summary(UWES_replicated_errors, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(UWES_replicated_errors, standardized = TRUE)
+modificationIndices(UWES_replicated_errors, sort. = TRUE)¨
+fitMeasures(UWES_replicated_errors)
+
+
+# DFI for the replicated errors model
+DFI_replicated_errors <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
+  model = UWES_replicated_errors,
+  data = data
+)
+
+lavaan::anova(UWES_replicated_errors,UWES_combined_modified)
+```
+
 ## Confirmatory Factor Analysis 
+
+
+### **Confirmatory Factor Analysis**
+
+A series of Confirmatory Factor Analyses (CFA) were conducted to determine the optimal factorial structure of the UWES-9 for the Czech sample. As noted in the methods, initial models based on standard one-factor, two-factor, hierarchical, and correlated three-factor structures demonstrated poor fit to the data. For instance, the standard three-factor model yielded an RMSEA of `r round(fitMeasures(UWES.three.fac)['rmsea'], 3)`, which was substantially higher than its dynamically-generated Level-0 cutoff of `r round(DFI_three_factor$cutoffs['RMSEA', 'Level-0'], 3)`, indicating a significant degree of misfit and the need for a more nuanced model.
+
+This led to the testing of modified three-factor models that account for local misfit. Two primary models were retained for a final comparison. The first, a **"Replicated Errors" model**, was specified based on the most consistent findings in the international literature. This model included correlated errors between items 1 and 2 (Vigor) and items 8 and 9 (Absorption), a modification independently identified across several validation studies (e.g., Domínguez-Salas et al., 2022; Simbula et al., 2013). The second, a **"Three-Factor Model with Within-Factor Correlated Errors"**, included the same two correlations plus an additional error covariance between items 3 and 4 (Dedication). This more complex model was tested to confirm whether any remaining misfit in the "Replicated Errors" model could be systematically explained by this additional theoretically-grounded correlation (Zecca et al., 2015).
+
+To adjudicate between these nested models, a scaled chi-square difference test was performed. The test revealed no significant improvement in fit for the more complex model with three correlated errors (*χ²*diff(`r lavaan::anova(UWES_replicated_errors, UWES_within_factor_corr, robust = TRUE)$'Df diff'[2]`) = `r format(round(lavaan::anova(UWES_replicated_errors, UWES_within_factor_corr, robust = TRUE)$'Chisq diff'[2], 2), nsmall = 2)`, *p* = `r format(round(lavaan::anova(UWES_replicated_errors, UWES_within_factor_corr, robust = TRUE)$'Pr(>Chisq)'[2], 2), nsmall = 2)`). Based on the principle of parsimony, the simpler "Replicated Errors" model was retained as the final and most appropriate model.
+
+The fit of this final model was evaluated against dynamically generated fit index cutoffs. The model produced an excellent CFI (`r format(round(fitMeasures(UWES_replicated_errors)['cfi'], 3), nsmall = 3)`) and a low SRMR (`r format(round(fitMeasures(UWES_replicated_errors)['srmr'], 3), nsmall = 3)`). However, the RMSEA (`r format(round(fitMeasures(UWES_replicated_errors)['rmsea'], 3), nsmall = 3)`) was considerably higher than its dynamically generated Level-0 cutoff of `r format(round(DFI_replicated_errors$cutoffs['RMSEA', 'Level-0'], 3), nsmall = 3)`, indicating that while the model is superior to all tested alternatives, it still contains a non-trivial degree of misfit. This suggests that while this three-factor structure with modifications for item wording overlap is the best representation of the data, the UWES-9 scale may not perfectly capture the construct of work engagement within this sample. A summary of the fit indices for all tested models is provided in Table [Insert Table Number Here].
 
   Bartlett test ($\chi^2$ (`r bartlett.UWES$df`) = `r round(bartlett.UWES$chisq,digits=2)`, `r format_p(bartlett.UWES$p.value)`) as well as KMO (`r round(KMO(UWES.rep.poly)$MSA,digits = 2)`) revealed that UWES data are sufficiently correlated to perform CFA. In the first step, original-three factor model was fitted. Results indicated a good fit of this three dimensional solution (see Figure 1, Table 2). Modification indices did not suggested high change in $\chi^2$ in case of releasing constrains between UWES items. Factor loadings ($\lambda$) in the three factor solution were high as were correlations between the three factors (see Figure 1). Correlation between residuals in manifest variables was low: *r* = `r round(max(resid(UWES.three.fac, "cor")$cov), digits = 2)`. In the second step, two factor model was tested: results suggested that two-dimensional model yields lower model fit as compared to the original-three factor model (see Table 2). This was supported by the significant $\chi^2$ difference test with Satorra Bentler correction: $\chi^2$(`r dif.test.two.three.fac$"Df diff"[2]`) = `r dif.test.two.three.fac$"Chisq diff"[2] %>% round(digits = 2)`; `r dif.test.two.three.fac$"Pr(>Chisq)" [2] %>% format_p`. Factor loadings of the two factor model were high ranging from: `r round(min(select((filter(parameterestimates(UWES.two.fac,standardized = T), op %in% "=~")), std.all)), digits = 2)` to `r round(max(select((filter(parameterestimates(UWES.two.fac, standardized = T), op %in% "=~")), std.all)), digits = 2)`. Finally, fit of unidimensional solution was assessed: overall, this model had the worst goodness of fit indices values and factor loadings ($\lambda$ = `r round(min(select((filter(parameterestimates(UWES.one.fac,standardized = T), op %in% "=~")), std.all)), digits = 2)` - `r round(max(select((filter(parameterestimates(UWES.one.fac, standardized = T), op %in% "=~")), std.all)), digits = 2)`) as compared with the two and the three factor model (see Table 2). The $\chi^2$ difference test suggested lower fit of unidimensional solution as compared with the three factor solution: $\chi^2$(`r dif.test.one.three.fac$"Df diff"[2]`) = `r dif.test.one.three.fac$"Chisq diff"[2] %>% round(digits = 2)`; `r dif.test.one.three.fac$"Pr(>Chisq)" [2] %>% format_p`. In the last step, hierarchical model of the UWES was assessed: after model was fitted, CFA parameters yielded no change as compared with the original-three factor model suggesting that the original factor model would be more parsimonious solution. Taken together, this results supports superiority the original-three factor model over two and one factor solution in terms of fit with the data.
   
@@ -1194,29 +1551,64 @@ semPaths(UWES.three.fac,layout = "tree2", whatLabels= "std",
          sizeLat = 9, sizeMan=8,edge.color="black")
 
 knitr::include_graphics("Figure.1.eps") # this does not show image into word document however 
+
+source("./R/sem_plot_all_models.R")
 ```
   
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-#....................................................
-# Table 2 preparation
-#....................................................
-mod.fit.indicies = mod.fit.indicies %>% 
-  as_tibble(.name_repair = "unique") %>% 
-  mutate(rmsea = paste0(rmsea," 90% CI (",rmsea.ci.lower,"-",rmsea.ci.upper,")")) %>% 
-  mutate(pvalue = format_p(pvalue)) %>% 
-    rename(
-         "RMSEA" = "rmsea",
-         "Tested model" = "...1",
-         "CFI" = "cfi",
-         "TLI" = "tli",
-         "SRMR" = "srmr",
-         "p-value" = "pvalue",
-         "x2" = "chisq") %>% 
-  select(!starts_with(c("rmsea.ci.","rmsea.ci.lower","rmsea.ci.upper")))
-# PRINT TABLE
-mod.fit.indicies %>% 
- apa_table(caption = "Fit statistic of the models tested in CFA", span_text_columns = F,escape = TRUE,
-           note = "x2 = chi-square, df = degrees of freedom, CFI = Comparative Fit Index, TLI = Tucker-Lewis index, RMSEA = Root Mean Square Error of Approximation , CI = Confidence Interval, SRMR = Standardized Root Mean Square Residual")
+```{r}
+block_section(op_section)
+```
+
+```{r FactorLoadings, echo=FALSE}
+# 1. Grab the object names as characters
+names_dfi <- ls(pattern = "^DFI_|^dfi_")
+names_dfi
+
+# 2. Build the argument list
+call_args <- list(
+  models           = names_dfi,
+  add_interpretation = FALSE,
+  show_fitted_model = TRUE,
+  add_separator_rows = FALSE,
+  remove_duplicated_model_names = FALSE,
+  bold_fitted_model = TRUE
+)
+
+# 3. Call the function
+table_DFI <- do.call(create_dynamic_table, call_args)
+view(table_DFI)
+
+DFI_table = create_dynamic_table(
+  # c(
+  #   "DFI_one_factor",
+  #   "DFI_two_factor",
+  #   "DFI_three_factor",
+  #   "DFI_three_factor_valenced",
+  #   "DFI_five_factor",
+  #   "DFI_modified_five_factor"
+  # ),
+  add_interpretation = FALSE,
+  show_fitted_model = TRUE,
+  add_separator_rows = FALSE,
+  remove_duplicated_model_names = FALSE,
+  bold_fitted_model = TRUE
+) 
+  # mutate(
+  #   Model = case_when(
+  #     Model == "five_factor" ~ "Five factor",
+  #     Model == "modified_five_factor" ~ "Modified five factor",
+  #     Model == "one_factor" ~ "One factor",
+  #     Model == "three_factor" ~ "Three factor",
+  #     Model == "three_factor_valenced" ~ "Three factor valenced",
+  #     Model == "two_factor" ~ "Two factor",
+  #     TRUE ~ Model  # Keep other values unchanged (like NA)
+  #   )
+  # )
+
+```
+
+```{r}
+block_section(close_section)
 ```
 
 ## Item statistic and reliability
@@ -1315,10 +1707,9 @@ variab.cor.data=data[, c("UWES","UWES_V","UWES_D","UWES_A",
                          "BFI_E","BFI_N","Age","Gender","DSES","GSES")]
 # recode variables to numeric
 variab.cor.data = variab.cor.data %>% 
-  mutate_all(as.numeric) %>% 
-  as.matrix()
+  mutate_all(as.numeric) 
 
-iter.cor.teq.fin.data=corx(variab.cor.data, method = "spearman", triangle = "lower", describe = c(M = mean, SD = sd), stars = c(0.05, 0.01, 0.001),note = "M = mean, SD = standard devation")
+iter.cor.teq.fin.data=corx::corx(variab.cor.data, method = "spearman", triangle = "lower", describe = c(M = mean, SD = sd), stars = c(0.05, 0.01, 0.001),note = "M = mean, SD = standard devation")
 
 # create vector of rownames
 row.nam.cor.tab=rownames(iter.cor.teq.fin.data$apa)
@@ -1994,7 +2385,7 @@ names(table.3.tib) <- names.tab2
            janitor::row_to_names(row_number = 1) 
 ```
 
-Results of logistic regression suggested that there is no relationship between work engagement and the smoking, alcohol drinking, drug abuse, coffee drinking or using computer or television for recreation in both crude and adjusted effect. Variable smoking was the most closer to the significance treshold. 
+Results of logistic regression suggested that there is no relationship between work engagement and the smoking, alcohol drinking, drug abuse, coffee drinking or using computer or television for recreation in both crude and adjusted effect. Variable smoking was the most closer to the significance threshold. 
 
 ```{r echo=FALSE}
 # creating table 
@@ -2005,7 +2396,6 @@ tab.wide.2 %>%
 ```
 
 # Discussion
-
 
 \newpage
 
