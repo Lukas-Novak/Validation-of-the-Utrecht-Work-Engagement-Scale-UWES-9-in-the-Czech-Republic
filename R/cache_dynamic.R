@@ -25,7 +25,7 @@
 #'
 #' @author Lukas Novak
 #' @maintainer Lukas Novak <lukasjirinovak@gmail.com>
-cache_dynamic <- function(model, cache_dir, data = NULL, reps = 500, estimator = NULL, ...) {
+cache_dynamic <- function(model, cache_dir, data = NULL, reps = 500, robust = TRUE, estimator = NULL, ...) {
   
   # 1. Automatic file path generation
   model_name <- deparse(substitute(model))
@@ -84,8 +84,9 @@ cache_dynamic <- function(model, cache_dir, data = NULL, reps = 500, estimator =
   }
   
   # 6. Argument Handling and Execution
-  args_list <- list(model = model, reps = reps, estimator = final_estimator, ...)
+  args_list <- list(model = model, reps = reps, robust = robust, estimator = final_estimator, ...)
   
+  # The 'data' argument is ONLY for non-categorical (continuous) models.
   if (!is_categorical) {
     if (is.null(data)) {
       stop("`", dynamic_function_name, "` requires a dataset. Please provide it via the `data` argument.", call. = FALSE)

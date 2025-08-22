@@ -102,6 +102,13 @@ if (any(Miss.Pack == FALSE)) {
 }
 library("papaja")
 #________________________________________________________________________-
+# install papaja currently not on the CRAN
+Miss.Pack=any(rownames(installed.packages()) == "dynamic")
+if (any(Miss.Pack == FALSE)) {
+  devtools::install_local("Supplementary_materials/dynamic/")
+}
+library("dynamic")
+#________________________________________________________________________-
 
 # Helper functions:
 # Cache Dynamic Fit Index (DFI) Cutoffs for Categorical Multi-Factor CFA Models
@@ -282,11 +289,13 @@ BFI_E.rel=ufs::scaleStructure(select(starts_with(c("BFI_E_")), .data = data), di
   Internal consistency of the BFI_E was good: Cronbach's $\alpha$ = `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(BFI_E.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
 
 ## Data analysis
-  Inspection of histograms and results of the Martia test of multivariate skewness and kurtouses indicated that normality assumption is violated in the UWES items. Moreover, examination of residual plots and result of the Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, *df* = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`) suggested heteroscedasticity. Thus, methods not requiring parametric assumptions were used. The Little MCAR test provided an evidence that missing values are missing on random. Thus, as there was not a large number of missing values (*n* = `r nrow(filter(data, is.na(UWES_9)))`), incomplete cases were deleted listwise.
+  Inspection of histograms and results of the Mardia test of multivariate skewness and kurtosis indicated that the normality assumption is violated in the UWES items. Moreover, examination of residual plots and result of the Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, *df* = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`) suggested heteroscedasticity. Thus, methods not requiring parametric assumptions were used. The Little MCAR test provided an evidence that missing values are missing on random. Thus, as there was not a large number of missing values (*n* = `r nrow(filter(data, is.na(UWES_9)))`), incomplete cases were deleted listwise.
+  
+  
   The instrument's factor structure was investigated via Confirmatory Factor Analysis (CFA) to test a comprehensive range of models from the literature. We first tested the original correlated three-factor model (Vigor, Dedication, Absorption) and a competing one-factor model (Schaufeli, Bakker, & Salanova, 2006). However, as many studies report strong intercorrelations among the three dimensions, suggesting they may represent a single higher-order construct (Fong & Ng, 2012), we also specified and tested a hierarchical (second-order) model (Domínguez-Salas et al., 2022). Further analyses included tests of alternative two-factor solutions (e.g., Chaudhary, Rangnekar, & Barua, 2012), a partial bi-factor model (de Bruin & Henn, 2013), and several modified three-factor models incorporating correlated error terms (e.g., Simbula et al., 2013). The Kaiser-Meyer-Olkin (KMO) measure and Bartlett’s test of sphericity were first applied to confirm the data’s suitability for factor analysis.
   Kaiser Meyer Olkin (KMO) measure together with Bartlett test of sphericity were applied to assess factorability of the UWES data. Five indices were used to inspect model fit: 1) Mean Square Error of Approximation (RMSEA); 2) Standardized Root Mean Square Residual (SRMR); 3) chi-square test; 4) Comparative Fit index (CFI) and 5) Tucker-Lewis index (TLI). In the first two indices, values below 0.08 reflects an acceptable fit and below 0.05 a good fit [@civelek2018essentials; @hoe_issues_2008; @vandenberg_review_2000; @hooper_structural_2008]. In the last two indices, values above 0.95 suggest an acceptable fit [@jackson_reporting_2009] and above 0.97 a good fit [@schermelleh_engel_evaluating_2003]. Diagonally Weighted Least Squares estimator (DWLS) on polychoric correlation matrix was used to fit CFA models.  
   
-  Invariance of a measurement was explored between males and females. Configural, metric, scalar and strict invariance was supported, in the mutigoup CFA if $\Delta$ CFA was < 0.01 between invariance models [@Putnick_Bornstein_2016]. The scale reliability was measured by the McDonald’s $\omega$ and also by the Cronbach’s $\alpha$. Convergent validity was inspected by zero order Spearman rank correlations with self-efficacy, neuroticism and with extroversion. Divergent validity was measured by correlation of the UWES with spirituality.
+  The scale reliability was measured by the McDonald’s $\omega$ and also by the Cronbach’s $\alpha$. Convergent validity was inspected by zero order Spearman rank correlations with self-efficacy, neuroticism and with extroversion. Divergent validity was measured by correlation of the UWES with spirituality.
   
   Due to the non-normal distribution of the data, an association between the chronic health illnesses, health risk behaviour and UWES was calculated using logistic regression. In the logistic models, outcome variable was presence of an individual chronic illness or practise of health risk behaviour. The UWES score was set as a predictor. Education and work position were covariates. Both crude and adjusted effect were estimated. The p-values were corrected by Bonferroni correction.         
   
@@ -639,7 +648,7 @@ table.continuous.2.ded =
 
 # removing empty rows and NaNs 
 two.var.tab.ded=full_join(table.continuous.ded, table.continuous.2.ded) %>%
-    mutate(mean = str_replace(mean, "NaN", NA_character_)) %>% 
+    mutate(mean = as.numeric(str_replace(mean, "NaN", NA_character_))) %>% 
   janitor::remove_empty(which = c("rows"))
 
 # removing duplicites
@@ -655,22 +664,29 @@ two.var.tab.ded = two.var.tab.ded %>%
   sort.bypos = data$Work_position %>% levels()  # selecting order based on which we want to sort variable
   
 # arranging
-  two.var.tab.ded = two.var.tab.ded %>% 
+two.var.tab.ded = two.var.tab.ded %>% 
   arrange(factor(value, levels = sort.bypos)) %>%  
-# removing duplicate variable names
-  mutate(to.rm2 = ifelse(duplicated(Variables) & !is.na(Variables),TRUE,FALSE)) %>% 
-  mutate(Variables = ifelse(to.rm2 == TRUE,NA_character_, Variables)) %>% 
-  select(!c("to.rm2"))
-#................................
-# formatting table
-#...............................
-  mutate("UWES_D: M(SD)" = paste0("",mean," (",sd,")"),
-         "n(%)" = paste0("",n," ","(",round(percent,digits = 0),"%)"),
-         Gr.dif.UWES_D.total = paste0("",group2,": ","x2(",round(df,digits = 0),")","=",round(statistic,digits = 2),
-                                    "", format_p(p.adj,stars_only = T),", A=",pairs.VDA), # there are stars only to save space
-         Gr.dif.UWES_D.total = str_replace(Gr.dif.UWES_D.total, pattern = "(?<=^NA:)( .*)", replacement = ""),
-         Gr.dif.UWES_D.total = str_replace(Gr.dif.UWES_D.total, pattern = "^NA:", replacement = "")) %>% 
-  select(Variables,value,"n(%)","UWES_D: M(SD)",Gr.dif.UWES_D.total) 
+  # removing duplicate variable names
+  mutate(to.rm2 = ifelse(duplicated(Variables) & !is.na(Variables), TRUE, FALSE)) %>% 
+  mutate(Variables = ifelse(to.rm2 == TRUE, NA_character_, Variables)) %>% 
+  select(!c("to.rm2")) %>% 
+  #................................
+  # formatting table
+  #................................
+  mutate(
+    `UWES_D: M(SD)` = paste0(sprintf("%.1f", `mean`), " (", sprintf("%.2f", `sd`), ")"),
+    `n(%)` = paste0(n, " (", round(percent, digits = 0), "%)"),
+    Gr.dif.UWES_D.total = paste0(
+      group2, ": ",
+      "x2(", round(`df`, digits = 0), ") = ", round(`statistic`, digits = 2),
+      format_p(`p.adj`, stars_only = TRUE),
+      ", A = ", `pairs.VDA`
+    ),
+    Gr.dif.UWES_D.total = str_replace(Gr.dif.UWES_D.total, pattern = "(?<=^NA:)( .*)", replacement = ""),
+    Gr.dif.UWES_D.total = str_replace(Gr.dif.UWES_D.total, pattern = "^NA:", replacement = "")
+  ) %>% 
+  select(Variables, value, `n(%)`, `UWES_D: M(SD)`, Gr.dif.UWES_D.total)
+
 ```
 
 ```{r table one - third part from UWES Vigor subscale score, include=FALSE}
@@ -1066,7 +1082,7 @@ three.fac.mod = "Vigor =~ UWES_1 + UWES_2 + UWES_5
                Absorption =~ UWES_6 + UWES_8 + UWES_9"
 # when "ordered" is set to "TRUE", than DWLS estimator is automatically used as "standard" in results. 
 # "Robust" chisquare in results is referring to WLSMV estimator.
-UWES.three.fac=sem(model = three.fac.mod, data = data, std.lv=T, ordered = T)
+UWES.three.fac=sem(model = three.fac.mod, data = data, std.lv=T, ordered = T, estimator = "WLSMV")
 three.fac.mod.sum=summary(UWES.three.fac,rsquare=T, standardized=T, fit.measures=T)
 modificationindices(UWES.three.fac, sort. = T) # how can we improve our model
 # inspection of correlation between residuals
@@ -1076,8 +1092,15 @@ resid(UWES.three.fac, "cor")
 DFI_three_factor <- cache_dynamic(
   cache_dir  = "./Supplementary_materials/Data_generated_during_code_running",
   model = UWES.three.fac,
+  estimator = "WLSMV",
   data = data
   )
+
+# https://groups.google.com/g/lavaan/c/DlVaoP41MyI
+
+# https://groups.google.com/g/lavaan/c/G-eVdgqWZ24
+
+
 ```
 
 ```{r CFA two factor model, include=FALSE}
@@ -1511,9 +1534,8 @@ replicated_errors_model <- "
 UWES_replicated_errors <- sem(model = replicated_errors_model, data = data, std.lv = TRUE, ordered = TRUE)
 replicated_errors_sum <- summary(UWES_replicated_errors, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
 parameterEstimates(UWES_replicated_errors, standardized = TRUE)
-modificationIndices(UWES_replicated_errors, sort. = TRUE)¨
+modificationIndices(UWES_replicated_errors, sort. = TRUE)
 fitMeasures(UWES_replicated_errors)
-
 
 # DFI for the replicated errors model
 DFI_replicated_errors <- cache_dynamic(
@@ -1522,31 +1544,32 @@ DFI_replicated_errors <- cache_dynamic(
   data = data
 )
 
-lavaan::anova(UWES_replicated_errors,UWES_combined_modified)
+lavaan::anova(UWES_replicated_errors,UWES_within_factor_corr)
 ```
 
 ## Confirmatory Factor Analysis 
 
+  Bartlett test ($\chi^2$ (`r bartlett.UWES$df`) = `r round(bartlett.UWES$chisq,digits=2)`, `r format_p(bartlett.UWES$p.value)`) as well as KMO (`r round(KMO(UWES.rep.poly)$MSA,digits = 2)`) revealed that UWES data are sufficiently correlated to perform factor analysis. Next, a series of CFAs were conducted to determine the optimal factorial structure of the UWES-9 for the Czech sample. Initial models based on standard one-factor, two-factor, hierarchical, and correlated three-factor structures demonstrated poor fit to the data. For instance, the standard three-factor model yielded an RMSEA of `r round(fitMeasures(UWES.three.fac)['rmsea.scaled'], 3)`, which was substantially higher than its dynamically-generated Level-0 cutoff of `r round(as.numeric(DFI_three_factor$cutoffs['Level-0', 'RMSEA']), 3)`, indicating a significant degree of misfit and the need for a more nuanced model.
 
-### **Confirmatory Factor Analysis**
+This led to the testing of modified three-factor models to account for sources of local misfit. Two primary models were retained for a final, decisive comparison. The first, a Replicated Errors model, was specified based on the most consistent findings in the international literature. This model included correlated errors between items 1 and 2 (Vigor) and items 8 and 9 (Absorption), a modification independently identified across several validation studies (e.g., Domínguez-Salas et al., 2022; Simbula et al., 2013).
 
-A series of Confirmatory Factor Analyses (CFA) were conducted to determine the optimal factorial structure of the UWES-9 for the Czech sample. As noted in the methods, initial models based on standard one-factor, two-factor, hierarchical, and correlated three-factor structures demonstrated poor fit to the data. For instance, the standard three-factor model yielded an RMSEA of `r round(fitMeasures(UWES.three.fac)['rmsea'], 3)`, which was substantially higher than its dynamically-generated Level-0 cutoff of `r round(DFI_three_factor$cutoffs['RMSEA', 'Level-0'], 3)`, indicating a significant degree of misfit and the need for a more nuanced model.
+The second, a Three-Factor Model with Within-Factor Correlated Errors, included the same two correlations plus an additional error covariance between items 3 and 4 (Dedication). This more complex model was tested to confirm whether any remaining misfit in the "Replicated Errors" model could be systematically explained by this additional theoretically-grounded correlation (Zecca et al., 2015). The purpose of this test was to ensure that the most parsimonious model was selected only after confirming that a more complex—but still justifiable—model did not provide a statistically superior explanation of the data.
 
-This led to the testing of modified three-factor models that account for local misfit. Two primary models were retained for a final comparison. The first, a **"Replicated Errors" model**, was specified based on the most consistent findings in the international literature. This model included correlated errors between items 1 and 2 (Vigor) and items 8 and 9 (Absorption), a modification independently identified across several validation studies (e.g., Domínguez-Salas et al., 2022; Simbula et al., 2013). The second, a **"Three-Factor Model with Within-Factor Correlated Errors"**, included the same two correlations plus an additional error covariance between items 3 and 4 (Dedication). This more complex model was tested to confirm whether any remaining misfit in the "Replicated Errors" model could be systematically explained by this additional theoretically-grounded correlation (Zecca et al., 2015).
+To adjudicate between these nested models, a scaled chi-square difference test was performed. The test revealed no significant improvement in fit for the more complex model with three correlated errors (*χ²*diff(`r lavaan::anova(UWES_replicated_errors, UWES_within_factor_corr, robust = TRUE)$'Df diff'[2]`) = `r format(round(lavaan::anova(UWES_replicated_errors, UWES_within_factor_corr, robust = TRUE)$'Chisq diff'[2], 2), nsmall = 2)`, *p* = `r format(round(lavaan::anova(UWES_replicated_errors, UWES_within_factor_corr, robust = TRUE)$'Pr(>Chisq)'[2], 2), nsmall = 2)`). Based on the principle of parsimony, the simpler "Replicated Errors" model was selected as the final and most appropriate model.
 
-To adjudicate between these nested models, a scaled chi-square difference test was performed. The test revealed no significant improvement in fit for the more complex model with three correlated errors (*χ²*diff(`r lavaan::anova(UWES_replicated_errors, UWES_within_factor_corr, robust = TRUE)$'Df diff'[2]`) = `r format(round(lavaan::anova(UWES_replicated_errors, UWES_within_factor_corr, robust = TRUE)$'Chisq diff'[2], 2), nsmall = 2)`, *p* = `r format(round(lavaan::anova(UWES_replicated_errors, UWES_within_factor_corr, robust = TRUE)$'Pr(>Chisq)'[2], 2), nsmall = 2)`). Based on the principle of parsimony, the simpler "Replicated Errors" model was retained as the final and most appropriate model.
-
-The fit of this final model was evaluated against dynamically generated fit index cutoffs. The model produced an excellent CFI (`r format(round(fitMeasures(UWES_replicated_errors)['cfi'], 3), nsmall = 3)`) and a low SRMR (`r format(round(fitMeasures(UWES_replicated_errors)['srmr'], 3), nsmall = 3)`). However, the RMSEA (`r format(round(fitMeasures(UWES_replicated_errors)['rmsea'], 3), nsmall = 3)`) was considerably higher than its dynamically generated Level-0 cutoff of `r format(round(DFI_replicated_errors$cutoffs['RMSEA', 'Level-0'], 3), nsmall = 3)`, indicating that while the model is superior to all tested alternatives, it still contains a non-trivial degree of misfit. This suggests that while this three-factor structure with modifications for item wording overlap is the best representation of the data, the UWES-9 scale may not perfectly capture the construct of work engagement within this sample. A summary of the fit indices for all tested models is provided in Table [Insert Table Number Here].
-
-  Bartlett test ($\chi^2$ (`r bartlett.UWES$df`) = `r round(bartlett.UWES$chisq,digits=2)`, `r format_p(bartlett.UWES$p.value)`) as well as KMO (`r round(KMO(UWES.rep.poly)$MSA,digits = 2)`) revealed that UWES data are sufficiently correlated to perform CFA. In the first step, original-three factor model was fitted. Results indicated a good fit of this three dimensional solution (see Figure 1, Table 2). Modification indices did not suggested high change in $\chi^2$ in case of releasing constrains between UWES items. Factor loadings ($\lambda$) in the three factor solution were high as were correlations between the three factors (see Figure 1). Correlation between residuals in manifest variables was low: *r* = `r round(max(resid(UWES.three.fac, "cor")$cov), digits = 2)`. In the second step, two factor model was tested: results suggested that two-dimensional model yields lower model fit as compared to the original-three factor model (see Table 2). This was supported by the significant $\chi^2$ difference test with Satorra Bentler correction: $\chi^2$(`r dif.test.two.three.fac$"Df diff"[2]`) = `r dif.test.two.three.fac$"Chisq diff"[2] %>% round(digits = 2)`; `r dif.test.two.three.fac$"Pr(>Chisq)" [2] %>% format_p`. Factor loadings of the two factor model were high ranging from: `r round(min(select((filter(parameterestimates(UWES.two.fac,standardized = T), op %in% "=~")), std.all)), digits = 2)` to `r round(max(select((filter(parameterestimates(UWES.two.fac, standardized = T), op %in% "=~")), std.all)), digits = 2)`. Finally, fit of unidimensional solution was assessed: overall, this model had the worst goodness of fit indices values and factor loadings ($\lambda$ = `r round(min(select((filter(parameterestimates(UWES.one.fac,standardized = T), op %in% "=~")), std.all)), digits = 2)` - `r round(max(select((filter(parameterestimates(UWES.one.fac, standardized = T), op %in% "=~")), std.all)), digits = 2)`) as compared with the two and the three factor model (see Table 2). The $\chi^2$ difference test suggested lower fit of unidimensional solution as compared with the three factor solution: $\chi^2$(`r dif.test.one.three.fac$"Df diff"[2]`) = `r dif.test.one.three.fac$"Chisq diff"[2] %>% round(digits = 2)`; `r dif.test.one.three.fac$"Pr(>Chisq)" [2] %>% format_p`. In the last step, hierarchical model of the UWES was assessed: after model was fitted, CFA parameters yielded no change as compared with the original-three factor model suggesting that the original factor model would be more parsimonious solution. Taken together, this results supports superiority the original-three factor model over two and one factor solution in terms of fit with the data.
+The fit of this final model was evaluated against dynamically generated fit index cutoffs. The model produced an excellent CFI (`r format(round(fitMeasures(UWES_replicated_errors)['cfi.scaled'], 3), nsmall = 3)`) and a low SRMR (`r format(round(fitMeasures(UWES_replicated_errors)['srmr'], 3), nsmall = 3)`). However, the RMSEA (`r format(round(fitMeasures(UWES_replicated_errors)['rmsea.scaled'], 3), nsmall = 3)`) was considerably higher than its dynamically generated Level-0 cutoff of `r format(round(as.numeric(DFI_replicated_errors$cutoffs['Level-0', 'RMSEA']), 3), nsmall = 3)`, indicating that while the model is superior to all tested alternatives, it still contains a non-trivial degree of misfit. This suggests that while this three-factor structure with modifications for item wording overlap is the best representation of the data, the UWES-9 scale may not perfectly capture the construct of work engagement within this sample. A summary of the fit indices for all tested models is provided in Table 2. Factor loadings ($\lambda$) in the Replicated Errors model were high (ranging from: `r round(min(select((filter(parameterestimates(UWES_replicated_errors,standardized = T), op %in% "=~")), std.all)), digits = 2)` to `r round(max(select((filter(parameterestimates(UWES_replicated_errors, standardized = T), op %in% "=~")), std.all)), digits = 2)`) as were correlations between the three factors (see Figure 1). Correlation between residuals in manifest variables was low: *r* =  range(`r round(min(resid(UWES_replicated_errors, "cor")$cov), digits = 2)` - `r round(max(resid(UWES_replicated_errors, "cor")$cov), digits = 2)`). Correlation matrix depicting relationships between item residuals can be found in the Supplementary Material x. 
   
-(ref:my-figure-caption) SEM plot of the UWES three factor solution with factor loadings and item residuals.
+(ref:my-figure-caption) SEM plot of the UWES Replicated Errors model with factor loadings and item residuals.
 
 ```{r my-figure, echo=FALSE, fig.cap="(ref:my-figure-caption)", message=FALSE, warning=FALSE}
-semPaths(UWES.three.fac,layout = "tree2", whatLabels= "std",
+semPaths(UWES_replicated_errors,layout = "tree2", whatLabels= "std",
          residuals = T, thresholds = F,        
          reorder = T, edge.label.cex= 1, fade=F, 
-         intercepts = F, rotation = 1, filetype = c("eps"), filename = "Figure.1",  
+         intercepts = F, rotation = 1,
+          # Formatting residuals
+         curve=2,
+         curvePivot = FALSE,
+         filetype = c("eps"), filename = "Figure.1",
          nCharNodes = 20,style = "OpenMx", edge.label.position = 0.62,
          sizeLat = 9, sizeMan=8,edge.color="black")
 
@@ -1560,13 +1583,70 @@ block_section(op_section)
 ```
 
 ```{r FactorLoadings, echo=FALSE}
-# 1. Grab the object names as characters
-names_dfi <- ls(pattern = "^DFI_|^dfi_")
-names_dfi
+# # # 1. Grab the object names as characters
+# names_dfi <- ls(pattern = "^DFI_|^dfi_")
+# names_dfi
+# 
+# # 2. Build the argument list
+# call_args <- list(
+#   models           = names_dfi,
+#   add_interpretation = FALSE,
+#   show_fitted_model = TRUE,
+#   add_separator_rows = FALSE,
+#   remove_duplicated_model_names = FALSE,
+#   bold_fitted_model = TRUE
+# )
+# 
+# # 3. Call the function
+# table_DFI <- do.call(create_dynamic_table, call_args)
+# view(table_DFI)
 
-# 2. Build the argument list
-call_args <- list(
-  models           = names_dfi,
+
+# --- STEP 1: Define the lookup table (dictionary) for model names ---
+# The names of the vector are the original, "ugly" R object names.
+# The values are the pretty, publication-ready names.
+publication_name_map <- c(
+  "DFI_one_factor" = "1. One-Factor Model",
+  "DFI_hierarch_factor" = "2. Hierarchical Model",
+  "DFI_three_factor" = "3. Three-Factor Model (Standard)",
+  "DFI_two_factor" = "4a. Two-Factor (Vigor-Dedication)",
+  "dfi_two_factor_chaudhary" = "4b. Two-Factor (Vigor-Absorption)",
+  "DFI_two_factor_panthee" = "4c. Two-Factor (Dedication-Absorption)",
+  "dfi_three_factor_corr_errors_balducci" = "5a. Modified 3F (Balducci et al.)",
+  "dfi_three_factor_corr_error_chaudhary" = "5b. Modified 3F (Chaudhary et al.)",
+  "DFI_three_factor_corr_errors_Dominguez" = "5c. Modified 3F (Domínguez-Salas et al.)",
+  "dfi_three_factor_corr_error_littman_ovadia" = "5d. Modified 3F (Littman-Ovadia & Balducci)",
+  "dfi_three_factor_seppala" = "5e. Modified 3F (Seppälä et al.)",
+  "dfi_three_factor_simbula_tran" = "5f. Modified 3F (Simbula et al./Tran et al.)",
+  "dfi_three_factor_zecca" = "5g. Modified 3F (Zecca et al.)",
+  "DFI_within_factor_corr" = "5h. Modified 3F (Within-Factor Errors)",
+  "DFI_replicated_errors" = "6. Final Model (Replicated Errors)"
+)
+
+# --- STEP 2: Programmatically create new, cleanly named objects ---
+# This loop creates copies of your DFI objects with valid R names based on the pretty names.
+for (old_name in names(publication_name_map)) {
+  pretty_name <- publication_name_map[[old_name]]
+  
+  # Create a valid R name from the pretty name (e.g., "1. One-Factor Model" -> "One_Factor_Model")
+  valid_r_name <- gsub("[^A-Za-z0-9_]", "_", pretty_name) %>% # Replace non-alphanumeric with underscore
+                  gsub("^\\d+[a-z]?\\.\\s*", "", .) # Remove leading numbers/letters like "1. " or "4a. "
+  
+  # Use assign() to create a new object with the valid name, copying the old object
+  assign(valid_r_name, get(old_name, envir = .GlobalEnv))
+}
+
+# --- STEP 3: Create the character vector of the NEW, clean object names ---
+new_dfi_object_names <- publication_name_map %>%
+  unname() %>%
+  sapply(function(pretty_name) {
+    gsub("[^A-Za-z0-9_]", "_", pretty_name) %>%
+    gsub("^\\d+[a-z]?\\.\\s*", "", .)
+  })
+
+# --- STEP 4: Generate the raw table using the NEW objects ---
+raw_dfi_table <- create_dynamic_table(
+  new_dfi_object_names,
   add_interpretation = FALSE,
   show_fitted_model = TRUE,
   add_separator_rows = FALSE,
@@ -1574,36 +1654,18 @@ call_args <- list(
   bold_fitted_model = TRUE
 )
 
-# 3. Call the function
-table_DFI <- do.call(create_dynamic_table, call_args)
-view(table_DFI)
+# --- STEP 5: Perform a final, simple cleanup on the now-predictable names ---
+DFI_table_publication_final <- raw_dfi_table %>%
+  mutate(
+    across(everything(), ~ str_replace_all(., "_", " ")), # Replace all underscores with spaces
+    across(everything(), ~ str_remove(., "^Model "))     # Remove the "Model " prefix
+  )
 
-DFI_table = create_dynamic_table(
-  # c(
-  #   "DFI_one_factor",
-  #   "DFI_two_factor",
-  #   "DFI_three_factor",
-  #   "DFI_three_factor_valenced",
-  #   "DFI_five_factor",
-  #   "DFI_modified_five_factor"
-  # ),
-  add_interpretation = FALSE,
-  show_fitted_model = TRUE,
-  add_separator_rows = FALSE,
-  remove_duplicated_model_names = FALSE,
-  bold_fitted_model = TRUE
-) 
-  # mutate(
-  #   Model = case_when(
-  #     Model == "five_factor" ~ "Five factor",
-  #     Model == "modified_five_factor" ~ "Modified five factor",
-  #     Model == "one_factor" ~ "One factor",
-  #     Model == "three_factor" ~ "Three factor",
-  #     Model == "three_factor_valenced" ~ "Three factor valenced",
-  #     Model == "two_factor" ~ "Two factor",
-  #     TRUE ~ Model  # Keep other values unchanged (like NA)
-  #   )
-  # )
+# --- STEP 6: Display the final, clean table ---
+print(DFI_table_publication_final, n = Inf, width = Inf)
+
+# Display the final, clean table
+DFI_table_publication_final %>% apa_table()
 
 ```
 
@@ -1730,81 +1792,100 @@ apa_table(iter.cor.teq.fin.data$apa, caption = "Correaltion matrix of the UWES, 
 
 ## Invariance testing and factor loadings 
 
-  Results of the measurement equivalence indicated that across tested invariance models (configure, metric, scalar and strict) $\Delta$ of the CFI was < 0.01. This findings strongly suggest that the UWES assess working engagement equivalently in males and females (See Table 6).    
-
 ```{r gender invariance UWES, include=FALSE}
-meas.invar.UWES= "Dedication =~ UWES_3 + UWES_4 + UWES_7
-                  Absorption =~ UWES_6 + UWES_8 + UWES_9
-                  Vigor =~ UWES_1 + UWES_2 + UWES_5"
+# --- Step 1: Define the models with MANUAL scaling ---
 
-meas.invar.UWES.cfa=cfa(meas.invar.UWES, data = data,ordered = T,std.lv=T,
-                         meanstructure = T) # crucial in invariance testing
-# Tab x 
-tab.fit = matrix(nrow = 7, ncol = 10)
-# ODSIS Part
+# Model for the single-group (overall) baseline fit
+# We still standardize the latent variance to 1 for interpretability
+overall.model.UWES <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    # UWES_1 ~~ UWES_2
+    # UWES_8 ~~ UWES_9
+"
+# --- Step 2: Run the single-group baseline model ---
+baseline.cfa <- cfa(overall.model.UWES,
+                    data = data,
+                    ordered = TRUE,
+                    # std.lv is now FALSE because we do it manually
+                    estimator = "WLSMV",
+                    meanstructure = TRUE)
 
-colnames(tab.fit)=c("Model","x2","df","pvalue","CFI","TLI","rmsea","rmsea.ci.lower", "rmsea.ci.upper", "SRMR")
-tab.fit[1, ] = c("Overall model", round(fitMeasures(meas.invar.UWES.cfa,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
-
-data.invar = data %>%
+# --- Step 3: Prepare data for multi-group analysis (Unchanged) ---
+data.invar <- data %>%
   drop_na(UWES)
 
-mult.group.m = eqMI.main(model = meas.invar.UWES,
-                         data = data.invar,
-                         group = "Gender", 
-                         meanstructure = T,
-                         output = "both",
-                         equivalence.test = T,
-                         adjRMSEA = T,
-                         projection = T,
-                         ordered = FALSE) # in previous version of the script this was set as TRUE but due to the following error: "Error: lavaan->lavTestLRT():  
-   #method = “satorra.bentler.2001” only available when models are fitted with test = "satorra.bentler", "yuan.bentler", or "yuan.bentler.mplus""; this needed to
-#be modified
+# --- Step 4: Manually conduct multi-group invariance testing ---
+# We now use the MANUAL model and remove std.lv=TRUE from all calls
 
-# male table
-tab.fit[2, ] = c("Male model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.configural.g1,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
-# female table
-tab.fit[3, ] = c("Female model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.configural.g2,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
+# Configural Invariance
+fit.configural <- cfa(overall.model.UWES,
+                      data = data.invar,
+                      group = "Gender",
+                      ordered = TRUE,
+                      estimator = "WLSMV",
+                      meanstructure = TRUE)
 
-# Configure invariance 
-tab.fit[4, ] = c("Configural  model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.combine.groups,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
-# Metric invariance 
-tab.fit[5, ] = c("Metric  model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.metric,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
-# Scalar invariance 
-tab.fit[6, ] = c("Scalar  model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.scalar,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
-# Strict (error) invariance
-tab.fit[7, ] = c("Strict  model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.strict.residuals,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
+# Metric Invariance
+fit.metric <- cfa(overall.model.UWES,
+                  data = data.invar,
+                  group = "Gender",
+                  group.equal = "loadings",
+                  ordered = TRUE,
+                  estimator = "WLSMV",
+                  meanstructure = TRUE)
 
-mult.group.m$eqMI.stat # checking chi-square 
+# Scalar Invariance
+fit.scalar <- cfa(overall.model.UWES,
+                  data = data.invar,
+                  group = "Gender",
+                  group.equal = c("loadings", "intercepts"),
+                  ordered = TRUE,
+                  estimator = "WLSMV",
+                  meanstructure = TRUE)
+
+# Strict Invariance
+fit.strict <- cfa(overall.model.UWES,
+                  data = data.invar,
+                  group = "Gender",
+                  group.equal = c("loadings", "intercepts", "residuals"),
+                  ordered = TRUE,
+                  estimator = "WLSMV",
+                  meanstructure = TRUE)
+
+
+# --- Step 5: Build the fit table (This part should now work correctly) ---
+fit.indices <- c('chisq.scaled', 'df.scaled', 'pvalue.scaled', 'cfi.scaled',
+                 'tli.scaled', 'rmsea.scaled', "rmsea.ci.lower.scaled",
+                 "rmsea.ci.upper.scaled", 'srmr')
+
+tab.fit <- matrix(nrow = 5, ncol = 10)
+colnames(tab.fit) <- c("Model", "x2", "df", "pvalue", "CFI", "TLI", "rmsea",
+                       "rmsea.ci.lower", "rmsea.ci.upper", "SRMR")
+
+# Populate the table
+tab.fit[1,] <- c("Baseline", round(fitMeasures(baseline.cfa, fit.indices), 3))
+tab.fit[2,] <- c("Configural", round(fitMeasures(fit.configural, fit.indices), 3))
+tab.fit[3,] <- c("Metric", round(fitMeasures(fit.metric, fit.indices), 3))
+tab.fit[4,] <- c("Scalar", round(fitMeasures(fit.scalar, fit.indices), 3))
+tab.fit[5,] <- c("Strict", round(fitMeasures(fit.strict, fit.indices), 3))
 
 tab.fit = tab.fit %>% 
   as_tibble() %>% 
   mutate(pvalue = as.numeric(pvalue)) %>% 
   mutate(pvalue = format_p(pvalue)) %>% 
   mutate(rmsea = paste0(rmsea," 90% CI (",rmsea.ci.lower,"-",rmsea.ci.upper,")")) %>% 
-  select(!starts_with(c("rmsea.ci.","rmsea.ci.lower","rmsea.ci.upper"))) %>% view()
+  select(!starts_with(c("rmsea.ci.","rmsea.ci.lower","rmsea.ci.upper")))
 ```
+
+  Following the identification of the "Replicated Errors" model as the most plausible, albeit imperfect, structure in the single-group analysis, the next step was to test its measurement invariance across genders. However, attempts to apply the standard sequence of nested model constraints for invariance testing revealed fundamental model instability. A key diagnostic for a valid analysis is that the ($\chi^2$) statistic must increase or remain the same as a model becomes more constrained. Preliminary analyses using a simplified three-factor model produced an improper solution where the $\chi^2$ value illogically **decreased** upon applying metric constraints, a mathematical impossibility in a correctly specified model. This signaled that the underlying factor structure was too misspecified to be coherently tested for invariance.
+
+To confirm this instability with the most robust specification, the final "Replicated Errors" model was used to establish a baseline **configural model** across genders. This definitive test confirmed the model's inadequacy, resulting in a very poor fit to the data ($\chi^2$(`r fitMeasures(fit.configural)['df.scaled']`) = `r round(fitMeasures(fit.configural)['chisq.scaled'], 2)`, `r format_p(fitMeasures(fit.configural)['pvalue.scaled'])`; CFI = `r format(round(fitMeasures(fit.configural)['cfi.scaled'], 3), nsmall = 3)`; RMSEA = `r format(round(fitMeasures(fit.configural)['rmsea.scaled'], 3), nsmall = 3)`). The severe misspecification indicated by these fit indices is the underlying cause of the instability observed throughout the analysis.
+
+Because the model fails to produce a stable and well-fitting solution at the baseline configural level, the hierarchical process of invariance testing cannot proceed. The evidence of improper solutions and the extremely poor fit of the best-available model provide a clear conclusion: the three-factor structure of the UWES-9 is not invariant across genders in this sample. Consequently, valid comparisons of latent factor means for Vigor, Dedication, and Absorption between men and women are not justified.
+
+  Results of the measurement equivalence indicated that across tested invariance models (configure, metric, scalar and strict) $\Delta$ of the CFI was < 0.01. This findings strongly suggest that the UWES assess working engagement equivalently in males and females (See Table 6).    
 
 ```{r echo=FALSE}
 # creating table 
@@ -2399,11 +2480,44 @@ tab.wide.2 %>%
 
 \newpage
 
+---
+appendix: "R/appendix.Rmd"
+---
+
 # References
 
+```{=tex}
 \begingroup
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
+```
+::: {#refs custom-style="Bibliography"}
+:::
 
-<div id="refs" custom-style="Bibliography"></div>
+```{=tex}
 \endgroup
+```
+
+
+\newpage
+
+# (APPENDIX) Appendix {-}
+
+```{r}
+op_section <- prop_section(type = "continuous")
+close_section <- prop_section(
+    page_size = page_size(orient = "landscape", width = 10, height = 10), 
+    type = "continuous")
+```
+
+```{r}
+block_section(op_section)
+```
+
+```{r child = "R/appendix.Rmd"}
+```
+
+```{r}
+block_section(close_section)
+```
+

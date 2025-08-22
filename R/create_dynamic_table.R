@@ -92,7 +92,8 @@ create_dynamic_table <- function(models,
                                  add_separator_rows = FALSE,
                                  remove_duplicated_model_names = TRUE,
                                  add_interpretation = FALSE,
-                                 models_per_row = 3) {
+                                 models_per_row = 3,
+                                 bold_fitted_model = FALSE) {
   
   # --- Input Validation ---
   if (!is.character(models)) {
@@ -113,7 +114,6 @@ create_dynamic_table <- function(models,
     cutoffs_rownames <- rownames(cutoffs_matrix)
     level_rows <- which(stringr::str_detect(cutoffs_rownames, "^Level-"))
     
-    # Gracefully handle missing Magnitude column
     magnitude_col <- if ("Magnitude" %in% colnames(cutoffs_matrix)) {
       as.character(cutoffs_matrix[level_rows, "Magnitude"])
     } else {
@@ -122,9 +122,9 @@ create_dynamic_table <- function(models,
     
     cutoffs_clean <- tibble::tibble(
       Misspecification = cutoffs_rownames[level_rows],
-      SRMR = as.numeric(cutoffs_matrix[level_rows, "SRMR"]),
-      RMSEA = as.numeric(cutoffs_matrix[level_rows, "RMSEA"]),
-      CFI = as.numeric(cutoffs_matrix[level_rows, "CFI"]),
+      SRMR = as.character(cutoffs_matrix[level_rows, "SRMR"]),
+      RMSEA = as.character(cutoffs_matrix[level_rows, "RMSEA"]),
+      CFI = as.character(cutoffs_matrix[level_rows, "CFI"]),
       Magnitude = magnitude_col
     )
     
@@ -132,6 +132,7 @@ create_dynamic_table <- function(models,
       dplyr::rename_with(stringr::str_trim) %>%
       dplyr::select(dplyr::any_of(c("SRMR", "RMSEA", "CFI"))) %>%
       dplyr::mutate(
+        across(c("SRMR", "RMSEA", "CFI"), as.character),
         Misspecification = "Fitted Model",
         Magnitude = NA_character_,
         .before = 1
@@ -145,16 +146,12 @@ create_dynamic_table <- function(models,
   raw_table <- purrr::map_df(seq_along(dfi_objects), ~ process_dfi_object(dfi_objects[[.x]], model_names[.x]))
   
   # --- APPLY FORMATTING AND OPTIONS ---
-  
-  # 1. Conditionally filter out the 'Fitted Model' row
   if (!show_fitted_model) {
     raw_table <- dplyr::filter(raw_table, Misspecification != "Fitted Model")
   }
-  
-  # 2. Conditionally add the Interpretation column
   if (add_interpretation) {
     if (!show_fitted_model) {
-      warning("`add_interpretation` is TRUE, but `show_fitted_model` is FALSE. Cannot add interpretation without the fitted model row. Ignoring.")
+      warning("`add_interpretation` is TRUE, but `show_fitted_model` is FALSE. Ignoring.")
       raw_table$Interpretation <- NA_character_
     } else {
       raw_table <- raw_table %>%
@@ -171,116 +168,99 @@ create_dynamic_table <- function(models,
         )
     }
   }
-  
-  # 3. Conditionally remove the Magnitude column
+  if (bold_fitted_model && show_fitted_model) {
+    raw_table <- raw_table %>%
+      dplyr::mutate(
+        across(-c(Model, Misspecification), ~ dplyr::case_when(
+          Misspecification == "Fitted Model" & !is.na(.x) & .x != "" ~ paste0("**", .x, "**"),
+          TRUE ~ as.character(.)
+        ))
+      )
+  }
   if (!show_magnitude) {
     raw_table <- dplyr::select(raw_table, -Magnitude)
   }
   
   # --- DECIDE TABLE FORMAT (LONG vs. WIDE) ---
-  
-  # Use long format for 3 or fewer models
   if (num_models <= 3) {
-    final_table <- raw_table %>%
-      dplyr::group_by(Model) %>%
-      dplyr::group_modify(~ {
-        if (add_separator_rows && dplyr::cur_group_id() < num_models) {
-          dplyr::bind_rows(.x, .x[NA, ][1, ])
-        } else {
-          .x
-        }
-      }) %>%
-      dplyr::ungroup()
-    
-    if (remove_duplicated_model_names) {
-      final_table <- final_table %>%
-        dplyr::mutate(
-          Model = dplyr::if_else(is.na(dplyr::lag(Model)) | dplyr::lag(Model) != Model, Model, "")
-        )
-    }
-    return(final_table)
+    return(raw_table)
   }
   
-  # Use wide format for more than 3 models
+  # --- START: ROBUST WIDE FORMAT LOGIC ---
   if (num_models > 3) {
-    
-    # Split models into chunks for wrapping
     model_chunks <- split(unique(raw_table$Model), ceiling(seq_along(unique(raw_table$Model)) / models_per_row))
-    
-    all_blocks <- list() # To store each formatted tibble block
+    all_blocks <- list()
+    metrics <- setdiff(names(raw_table), c("Model", "Misspecification"))
     
     for (i in seq_along(model_chunks)) {
-      
       chunk_models <- model_chunks[[i]]
       
-      # Prepare the data for the current chunk
-      chunk_data <- raw_table %>%
-        dplyr::filter(Model %in% chunk_models) %>%
-        # Ensure consistent factor levels for ordering
-        dplyr::mutate(Model = factor(Model, levels = chunk_models)) %>%
-        tidyr::pivot_wider(
-          names_from = Model,
-          values_from = -c(Model, Misspecification)
-        )
+      list_of_model_tibbles <- purrr::map(seq_along(chunk_models), function(j) {
+        model_name <- chunk_models[j]
+        raw_table %>%
+          dplyr::filter(Model == model_name) %>%
+          dplyr::select(Misspecification, all_of(metrics)) %>%
+          dplyr::rename_with(~ paste0(., "_pos_", j), .cols = all_of(metrics))
+      })
       
-      # --- Build Header Rows ---
-      metrics <- setdiff(names(raw_table), c("Model", "Misspecification"))
+      unsorted_chunk_data <- purrr::reduce(
+        list_of_model_tibbles,
+        dplyr::full_join,
+        by = "Misspecification"
+      )
       
-      # Add empty separator columns between models
-      final_chunk_data <- chunk_data %>%
-        # Add a blank column before each model's data (except the first)
-        purrr::reduce(rev(chunk_models)[-length(chunk_models)], function(data, model_name) {
-          first_col_name <- paste0(metrics[1], "_", model_name)
-          data %>% tibble::add_column(!!paste0("sep_", model_name) := "", .before = first_col_name)
-        }, .init = .)
+      # --- FIX: Add explicit sorting for rows ---
+      chunk_data <- unsorted_chunk_data %>%
+        dplyr::mutate(
+          sort_key = dplyr::case_when(
+            stringr::str_detect(Misspecification, "^Level-") ~ as.integer(stringr::str_extract(Misspecification, "\\d+")),
+            Misspecification == "Fitted Model" ~ 999L,
+            TRUE ~ 1000L
+          )
+        ) %>%
+        dplyr::arrange(sort_key) %>%
+        dplyr::select(-sort_key)
+      # --- END FIX ---
       
-      # Rebuild headers to match new structure with separators
-      model_header_vec_sep <- purrr::map(chunk_models, ~ c(paste("Model", .x), rep("", length(metrics))))
-      metric_header_vec_sep <- purrr::map(chunk_models, ~ c("", metrics))
+      col_names <- "Misspecification"
+      header1_labels <- "Misspecification"
+      header2_labels <- ""
       
-      # Interleave with empty strings for the separator columns
-      interleaved_model_header <- unlist(purrr::reduce(
-        model_header_vec_sep[-1], ~ c(.x, "", .y), .init = model_header_vec_sep[[1]]
-      ))
+      for (j in 1:models_per_row) {
+        if (j > 1) {
+          col_names <- c(col_names, paste0("sep_col_", j))
+          header1_labels <- c(header1_labels, "")
+          header2_labels <- c(header2_labels, "")
+        }
+        col_names <- c(col_names, paste0(metrics, "_pos_", j))
+        model_name_label <- if (j <= length(chunk_models)) paste("Model", chunk_models[j]) else ""
+        metric_labels <- if (j <= length(chunk_models)) metrics else rep("", length(metrics))
+        header1_labels <- c(header1_labels, model_name_label, rep("", length(metrics) - 1))
+        header2_labels <- c(header2_labels, metric_labels)
+      }
       
-      interleaved_metric_header <- unlist(purrr::reduce(
-        metric_header_vec_sep[-1], ~ c(.x, "", .y), .init = metric_header_vec_sep[[1]]
-      ))
+      block_data <- tibble::tibble(Misspecification = chunk_data$Misspecification)
+      for (j in 1:models_per_row) {
+        if (j > 1) {
+          block_data[[paste0("sep_col_", j)]] <- ""
+        }
+        for (metric in metrics) {
+          col_name <- paste0(metric, "_pos_", j)
+          block_data[[col_name]] <- if (col_name %in% names(chunk_data)) chunk_data[[col_name]] else NA_character_
+        }
+      }
       
-      # Create final header tibbles
-      model_header_final <- rlang::set_names(
-        as.list(c("Misspecification", interleaved_model_header)),
-        names(final_chunk_data)
-      ) %>% tibble::as_tibble()
+      model_header_final <- rlang::set_names(as.list(header1_labels), col_names) %>% tibble::as_tibble()
+      metric_header_final <- rlang::set_names(as.list(header2_labels), col_names) %>% tibble::as_tibble()
+      names(block_data) <- col_names
       
-      metric_header_final <- rlang::set_names(
-        as.list(c("", interleaved_metric_header)),
-        names(final_chunk_data)
-      ) %>% tibble::as_tibble()
-      
-      # Set column names of data to match headers for binding
-      names(final_chunk_data) <- names(model_header_final)
-      
-      # Combine headers and data
-      block <- dplyr::bind_rows(model_header_final, metric_header_final, final_chunk_data)
-      all_blocks[[i]] <- block
+      all_blocks[[i]] <- dplyr::bind_rows(model_header_final, metric_header_final, block_data)
     }
     
-    # Combine all model blocks vertically
     final_table <- purrr::reduce(seq_along(all_blocks), function(acc, i) {
       if (i == 1) return(all_blocks[[i]])
-      
-      # Create a separator row with correct width
-      separator_row <- rlang::set_names(
-        as.list(rep("", ncol(all_blocks[[i]]))),
-        names(all_blocks[[i]])
-      ) %>% tibble::as_tibble()
-      
-      if (add_separator_rows) {
-        dplyr::bind_rows(acc, separator_row, all_blocks[[i]])
-      } else {
-        dplyr::bind_rows(acc, all_blocks[[i]])
-      }
+      separator_row <- rlang::set_names(as.list(rep("", ncol(all_blocks[[i]]))), names(all_blocks[[i]])) %>% tibble::as_tibble()
+      if (add_separator_rows) dplyr::bind_rows(acc, separator_row, all_blocks[[i]]) else dplyr::bind_rows(acc, all_blocks[[i]])
     }, .init = NULL)
     
     return(final_table)

@@ -33,21 +33,21 @@ model_15_replicated_errors <- "Vigor =~ UWES_1 + UWES_2 + UWES_5\n Dedication =~
 
 # 4. FIT ALL MODELS USING CFA (using 'dat' and ML estimator as per user's log)
 # -----------------------------------------------------------------------------
-fit_1  <- cfa(model_1_one_factor_schaufeli, data = dat, std.lv = TRUE)
-fit_2  <- cfa(model_2_two_factor_willmer, data = dat, std.lv = TRUE)
-fit_3  <- cfa(model_3_two_factor_chaudhary, data = dat, std.lv = TRUE)
-fit_4  <- cfa(model_4_two_factor_panthee, data = dat, std.lv = TRUE)
-fit_5  <- cfa(model_5_three_factor_schaufeli, data = dat, std.lv = TRUE)
-fit_6  <- cfa(model_6_three_factor_corr_dominguez, data = dat, std.lv = TRUE)
-fit_7  <- cfa(model_7_three_factor_corr_balducci, data = dat, std.lv = TRUE)
-fit_8  <- cfa(model_8_three_factor_corr_chaudhary, data = dat, std.lv = TRUE)
-fit_9  <- cfa(model_9_three_factor_corr_littman, data = dat, std.lv = TRUE)
-fit_10 <- cfa(model_10_three_factor_corr_seppala, data = dat, std.lv = TRUE)
-fit_11 <- cfa(model_11_three_factor_corr_zecca, data = dat, std.lv = TRUE)
-fit_12 <- cfa(model_12_hierarchical_dominguez, data = dat, std.lv = TRUE)
-fit_13 <- cfa(model_13_partial_bifactor_debruin, data = dat, std.lv = TRUE, orthogonal=TRUE)
-fit_14 <- cfa(model_14_combined_modified, data = dat, std.lv = TRUE)
-fit_15 <- cfa(model_15_replicated_errors, data = dat, std.lv = TRUE)
+fit_1  <- cfa(model_1_one_factor_schaufeli, data = data, std.lv = TRUE)
+fit_2  <- cfa(model_2_two_factor_willmer, data = data, std.lv = TRUE)
+fit_3  <- cfa(model_3_two_factor_chaudhary, data = data, std.lv = TRUE)
+fit_4  <- cfa(model_4_two_factor_panthee, data = data, std.lv = TRUE)
+fit_5  <- cfa(model_5_three_factor_schaufeli, data = data, std.lv = TRUE)
+fit_6  <- cfa(model_6_three_factor_corr_dominguez, data = data, std.lv = TRUE)
+fit_7  <- cfa(model_7_three_factor_corr_balducci, data = data, std.lv = TRUE)
+fit_8  <- cfa(model_8_three_factor_corr_chaudhary, data = data, std.lv = TRUE)
+fit_9  <- cfa(model_9_three_factor_corr_littman, data = data, std.lv = TRUE)
+fit_10 <- cfa(model_10_three_factor_corr_seppala, data = data, std.lv = TRUE)
+fit_11 <- cfa(model_11_three_factor_corr_zecca, data = data, std.lv = TRUE)
+fit_12 <- cfa(model_12_hierarchical_dominguez, data = data, std.lv = TRUE)
+fit_13 <- cfa(model_13_partial_bifactor_debruin, data = data, std.lv = TRUE, orthogonal=TRUE)
+fit_14 <- cfa(model_14_combined_modified, data = data, std.lv = TRUE)
+fit_15 <- cfa(model_15_replicated_errors, data = data, std.lv = TRUE)
 
 # 5. GENERATE AND ARRANGE PLOTS
 # -----------------------------------------------------------------------------
@@ -99,7 +99,7 @@ create_plot_with_title(fit_10, "J) Modified 3-Factor (8~~9)\n(Seppälä et al., 
 create_plot_with_title(fit_11, "K) Modified 3-Factor (Zecca)\n(Zecca et al., 2015)", layout = "tree2", residuals = TRUE)
 create_plot_with_title(fit_12, "L) Hierarchical Model\n(Domínguez-Salas et al., 2022)", layout = "tree2")
 create_plot_with_title(fit_13, "M) Partial Bi-Factor Model\n(de Bruin & Henn, 2013)", layout = "tree2")
-create_plot_with_title(fit_14, "N) Combined Modified 3-Factor\n(1~~2, 3~~4, 8~~9)", layout = "tree2", residuals = TRUE)
+create_plot_with_title(fit_14, "N) Within-Factor Correlated Error-3-Factor\n(1~~2, 3~~4, 8~~9)", layout = "tree2", residuals = TRUE)
 create_plot_with_title(fit_15, "O) Replicated Errors Model\n(1~~2, 8~~9)", layout = "tree2", residuals = TRUE)
 
 # No empty plots needed - all 15 positions are filled

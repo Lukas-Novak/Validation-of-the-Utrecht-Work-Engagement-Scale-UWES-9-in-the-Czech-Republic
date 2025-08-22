@@ -1,31 +1,32 @@
 Misspecification,SRMR_pos_1,RMSEA_pos_1,CFI_pos_1,Magnitude_pos_1,sep_col_2,SRMR_pos_2,RMSEA_pos_2,CFI_pos_2,Magnitude_pos_2,sep_col_3,SRMR_pos_3,RMSEA_pos_3,CFI_pos_3,Magnitude_pos_3
-Misspecification,Model combined_modified,,,,,Model hierarch_factor,,,,,Model one_factor,,,
+Misspecification,Model hierarch_factor,,,,,Model one_factor,,,,,Model replicated_errors,,,
 ,SRMR,RMSEA,CFI,Magnitude,,SRMR,RMSEA,CFI,Magnitude,,SRMR,RMSEA,CFI,Magnitude
-Level-0,0.011,0.028,0.999,NONE,,0.012,0.035,0.999,NONE,,0.014,0.025,0.995,NA
-Level-1,NONE,NONE,NONE,0.15,,NONE,NONE,NONE,0.177,,NONE,NONE,NONE,NA
-Level-2,NONE,NONE,NONE,0.121,,NONE,NONE,NONE,0.143,,NONE,NONE,NONE,NA
-Level-3,NA,NA,NA,NA,,NA,NA,NA,NA,,NONE,NONE,NONE,NA
-Fitted Model,**0.017**,**0.104**,**0.994**,NA,,**0.021**,**0.117**,**0.991**,NA,,**0.026**,**0.139**,**0.986**,NA
-Misspecification,Model replicated_errors,,,,,Model three_factor,,,,,Model dfi_three_factor_corr_error_chaudhary,,,
+Level-0,0.012,0.035,0.999,NONE,,0.014,0.025,0.995,NA,,0.011,0.028,0.999,NONE
+Level-1,NONE,NONE,NONE,0.177,,NONE,NONE,NONE,NA,,NONE,NONE,NONE,0.15
+Level-2,NONE,NONE,NONE,0.143,,NONE,NONE,NONE,NA,,NONE,NONE,NONE,0.121
+Level-3,NA,NA,NA,NA,,NONE,NONE,NONE,NA,,NA,NA,NA,NA
+Fitted Model,**0.021**,**0.117**,**0.991**,NA,,**0.026**,**0.139**,**0.986**,NA,,**0.017**,**0.102**,**0.994**,NA
+Misspecification,Model three_factor,,,,,Model dfi_three_factor_corr_error_chaudhary,,,,,Model dfi_three_factor_corr_error_littman_ovadia,,,
 ,SRMR,RMSEA,CFI,Magnitude,,SRMR,RMSEA,CFI,Magnitude,,SRMR,RMSEA,CFI,Magnitude
-Level-0,0.011,0.028,0.999,NONE,,0.013,0.026,0.995,NONE,,0.011,0.028,0.999,NONE
-Level-1,NONE,NONE,NONE,0.15,,NONE,NONE,NONE,0.177,,NONE,NONE,NONE,0.178
-Level-2,NONE,NONE,NONE,0.121,,NONE,NONE,NONE,0.143,,NONE,NONE,NONE,0.144
-Fitted Model,**0.017**,**0.102**,**0.994**,NA,,**0.021**,**0.117**,**0.991**,NA,,**0.021**,**0.12**,**0.991**,NA
-Misspecification,Model dfi_three_factor_corr_error_littman_ovadia,,,,,Model dfi_three_factor_corr_errors_balducci,,,,,Model three_factor_corr_errors_Dominguez,,,
+Level-0,0.013,0.026,0.995,NONE,,0.011,0.028,0.999,NONE,,0.011,0.029,0.999,NONE
+Level-1,NONE,NONE,NONE,0.177,,NONE,NONE,NONE,0.178,,NONE,NONE,NONE,0.178
+Level-2,NONE,NONE,NONE,0.143,,NONE,NONE,NONE,0.144,,NONE,NONE,NONE,0.121
+Fitted Model,**0.021**,**0.117**,**0.991**,NA,,**0.021**,**0.12**,**0.991**,NA,,**0.018**,**0.101**,**0.994**,NA
+Misspecification,Model dfi_three_factor_corr_errors_balducci,,,,,Model three_factor_corr_errors_Dominguez,,,,,Model dfi_three_factor_seppala,,,
 ,SRMR,RMSEA,CFI,Magnitude,,SRMR,RMSEA,CFI,Magnitude,,SRMR,RMSEA,CFI,Magnitude
-Level-0,0.011,0.029,0.999,NONE,,0.011,0.03,0.999,NONE,,0.011,0.028,0.999,NONE
-Level-1,NONE,NONE,NONE,0.178,,NONE,NONE,NONE,0.122,,NONE,NONE,NONE,0.15
-Level-2,NONE,NONE,NONE,0.121,,NA,NA,NA,NA,,NONE,NONE,NONE,0.121
-Fitted Model,**0.018**,**0.101**,**0.994**,NA,,**0.017**,**0.104**,**0.994**,NA,,**0.017**,**0.102**,**0.994**,NA
-Misspecification,Model dfi_three_factor_seppala,,,,,Model dfi_three_factor_simbula_tran,,,,,Model dfi_three_factor_zecca,,,
+Level-0,0.011,0.03,0.999,NONE,,0.011,0.028,0.999,NONE,,0.011,0.028,0.999,NONE
+Level-1,NONE,NONE,NONE,0.122,,NONE,NONE,NONE,0.15,,NONE,NONE,NONE,0.15
+Level-2,NA,NA,NA,NA,,NONE,NONE,NONE,0.121,,NONE,NONE,NONE,0.143
+Fitted Model,**0.017**,**0.104**,**0.994**,NA,,**0.017**,**0.102**,**0.994**,NA,,**0.02**,**0.118**,**0.991**,NA
+Misspecification,Model dfi_three_factor_simbula_tran,,,,,Model dfi_three_factor_zecca,,,,,Model two_factor,,,
 ,SRMR,RMSEA,CFI,Magnitude,,SRMR,RMSEA,CFI,Magnitude,,SRMR,RMSEA,CFI,Magnitude
-Level-0,0.011,0.028,0.999,NONE,,0.011,0.028,0.999,NONE,,0.011,0.028,0.999,NONE
-Level-1,NONE,NONE,NONE,0.15,,NONE,NONE,NONE,0.15,,NONE,NONE,NONE,0.15
-Level-2,NONE,NONE,NONE,0.143,,NONE,NONE,NONE,0.121,,NONE,NONE,NONE,0.121
-Fitted Model,**0.02**,**0.118**,**0.991**,NA,,**0.017**,**0.102**,**0.994**,NA,,**0.017**,**0.104**,**0.994**,NA
-Misspecification,Model two_factor,,,,,Model dfi_two_factor_chaudhary,,,,,Model two_factor_panthee,,,
+Level-0,0.011,0.028,0.999,NONE,,0.011,0.028,0.999,NONE,,0.013,0.025,0.995,NONE
+Level-1,NONE,NONE,NONE,0.15,,NONE,NONE,NONE,0.15,,NONE,NONE,NONE,0.174
+Level-2,NONE,NONE,NONE,0.121,,NONE,NONE,NONE,0.121,,NA,NA,NA,NA
+Fitted Model,**0.017**,**0.102**,**0.994**,NA,,**0.017**,**0.104**,**0.994**,NA,,**0.024**,**0.13**,**0.988**,NA
+Misspecification,Model dfi_two_factor_chaudhary,,,,,Model two_factor_panthee,,,,,Model within_factor_corr,,,
 ,SRMR,RMSEA,CFI,Magnitude,,SRMR,RMSEA,CFI,Magnitude,,SRMR,RMSEA,CFI,Magnitude
-Level-0,0.013,0.025,0.995,NONE,,0.012,0.028,0.999,NONE,,0.012,0.028,0.999,NONE
-Level-1,NONE,NONE,NONE,0.174,,NONE,NONE,NONE,0.187,,NONE,NONE,NONE,0.19
-Fitted Model,**0.024**,**0.13**,**0.988**,NA,,**0.022**,**0.122**,**0.99**,NA,,**0.024**,**0.131**,**0.988**,NA
+Level-0,0.012,0.028,0.999,NONE,,0.012,0.028,0.999,NONE,,0.011,0.028,0.999,NONE
+Level-1,NONE,NONE,NONE,0.187,,NONE,NONE,NONE,0.19,,NONE,NONE,NONE,0.15
+Level-2,NA,NA,NA,NA,,NA,NA,NA,NA,,NONE,NONE,NONE,0.121
+Fitted Model,**0.022**,**0.122**,**0.99**,NA,,**0.024**,**0.131**,**0.988**,NA,,**0.017**,**0.104**,**0.994**,NA
