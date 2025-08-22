@@ -84,7 +84,12 @@ cache_dynamic <- function(model, cache_dir, data = NULL, reps = 500, robust = TR
   }
   
   # 6. Argument Handling and Execution
-  args_list <- list(model = model, reps = reps, robust = robust, estimator = final_estimator, ...)
+  args_list <- list(model = model, reps = reps, estimator = final_estimator, ...)
+  
+  # Add robust argument only for functions that support it (catHB and nnorHB)
+  if (dynamic_function_name %in% c("catHB", "nnorHB")) {
+    args_list$robust <- robust
+  }  
   
   # The 'data' argument is ONLY for non-categorical (continuous) models.
   if (!is_categorical) {

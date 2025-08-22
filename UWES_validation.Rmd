@@ -307,7 +307,7 @@ BFI_E.rel=ufs::scaleStructure(select(starts_with(c("BFI_E_")), .data = data), di
 
 Results of the Kruskal-Wallis test followed by the Games-Howell and the Dunn test revealed that there are significant differences in socio-demographic groups in the UWES total and subscale scores: professional workers had significantly higher score in the UWES total and Vigor, Absorption and Dedication subscales scores as compared with workers. Similarly, chief workers reported higher UWES total score and also Dedication and Vigor subscale scores compared with workers (see Table 1). In terms of education, people with higher vocational school or university had significantly higher total and Absorption subscale score as compared with people with non graduation high school or lower education (Table 1). There were not other significant differences between socio-demographic groups. For means and standard deviations of the UWES total and subscale score see online Supplementary table 1.
 
-```{r socio-demographic group comparison and descriptives, include=FALSE}
+```{r socio-demographic-comparison, include=FALSE}
 # UWES
 # Gender
 car::leveneTest(as.numeric(data$UWES) ~ data$Gender, data = data, center = mean) 
@@ -374,7 +374,7 @@ wilcox.test(UWES_A ~ Gender, data = data)
 t.test(UWES_A ~ Gender, data = data) # Welsh t-test
 ```
 
-```{r table one - first part from UWES total score, include=FALSE}
+```{r table one - first part from_UWES_total_score, include=FALSE}
 desc.table = data %>%
     pivot_longer(c("Gender","Education", "Family_status", "Religiosity","Work_position"),
                  names_to = "key", values_to = "value") %>%
@@ -1075,7 +1075,7 @@ bartlett.UWES=cortest.bartlett(UWES.rep.poly, diag = T, n=nrow(data)) #  Bartlet
 KMO(UWES.rep.poly) # 0.96
 ```
 
-```{r CFA UWES - three fac, include=FALSE}
+```{r CFA-UWES-three-fac, include=FALSE}
 # three factor model 
 three.fac.mod = "Vigor =~ UWES_1 + UWES_2 + UWES_5 
                Dedication =~ UWES_3 + UWES_4 + UWES_7
@@ -1103,7 +1103,7 @@ DFI_three_factor <- cache_dynamic(
 
 ```
 
-```{r CFA two factor model, include=FALSE}
+```{r CFA_two_factor_model, include=FALSE}
 # two factor model 
 two.fac.mod="VigDeg =~ UWES_1 + UWES_2 + UWES_3 + UWES_4 + UWES_5 + UWES_7
              Abs =~  UWES_6 + UWES_8 + UWES_9"
@@ -1127,7 +1127,7 @@ dif.test.two.three.fac=lavaan::anova(UWES.three.fac,UWES.two.fac)
 
 ```
 
-```{r CFA one factor model, include=FALSE}
+```{r CFA_one_factor_model, include=FALSE}
 # one factor model 
 one.fac.mod="WE =~ UWES_1 + UWES_2 + UWES_3 + UWES_4 + UWES_5 + UWES_6 + UWES_7 + UWES_8 + UWES_9"
 
@@ -1149,7 +1149,7 @@ one.fac.mod.cor.er.UWES.resid=resid(UWES.one.fac, "cor")
 dif.test.one.three.fac=lavaan::anova(UWES.three.fac,UWES.one.fac)
 ```
 
-```{r CFA hierarchical factor model, include=FALSE}
+```{r CFA_hierarchical_factor_model, include=FALSE}
 
 # # Define the names of the ordered categorical variables
 # ordered_vars <- c("UWES_1", "UWES_2", "UWES_3", "UWES_4", "UWES_5", 
@@ -1179,7 +1179,7 @@ DFI_hierarch_factor <- cache_dynamic(
 # dif.test.one.three.fac=lavaan::anova(UWES.three.fac,UWES.hier.fac.hier)
 ```
 
-```{r CFA partial bi-factor model de Bruin, eval=FALSE, include=FALSE}
+```{r CFA_partial_bi_factor_model_de_Bruin, eval=FALSE, include=FALSE}
 # de Bruin, G. P., & Henn, C. M. (2013). Dimensionality of the 9-item Utrecht Work Engagement Scale (UWES–9). Psychological Reports, 112(3), 788–799. https://doi.org/10.2466/01.03.PR0.112.3.788-799
 
 # Partial bi-factor model from de Bruin & Henn (2013). 
@@ -1218,7 +1218,7 @@ partial.bifac.deBruin.resid <- resid(UWES.partial.bifac.deBruin, "cor")
 # dif.test.partial.bifac.three.fac <- lavaan::anova(UWES.three.fac, UWES.partial.bifac.deBruin)
 ```
 
-```{r CFA three factor model with correlated errors Dominguez, include=FALSE}
+```{r CFA_three_factor_model_with_correlated_errors_Dominguez, include=FALSE}
 # Domínguez-Salas, S., Rodríguez-Domínguez, C., Arcos-Romero, A. I., Allande-Cussó, R., García-Iglesias, J. J., & Gómez-Salgado, J. (2022). Psychometric Properties of the Utrecht Work Engagement Scale (UWES-9) in a Sample of Active Health Care Professionals in Spain. Psychology research and behavior management, 15, 3461–3472. https://doi.org/10.2147/PRBM.S387242
 
 # Modified three-factor model with correlated errors from Domínguez-Salas et al. (2022).
@@ -1515,7 +1515,7 @@ DFI_within_factor_corr <- cache_dynamic(
 )
 ```
 
-```{r CFA replicated_errors_model, include=FALSE}
+```{r CFA_replicated_errors_model, include=FALSE}
 # This model tests the three-factor structure while accounting for the two most
 # consistently replicated correlated errors in the international literature.
 # This provides a strong test of a more parsimonious modified model.
@@ -1674,7 +1674,7 @@ block_section(close_section)
 ```
 
 ## Item statistic and reliability
-```{r internal consistency examination, message=FALSE, warning=FALSE, include=FALSE}
+```{r internal_consistency_examination, message=FALSE, warning=FALSE, include=FALSE}
 # UWES total
 UWES.rel.tot=ufs::scaleStructure(select(ends_with(c("UWES_1", "UWES_2","UWES_3","UWES_4",
                                               "UWES_5", "UWES_6", "UWES_7", "UWES_8",
@@ -1687,7 +1687,7 @@ UWES.rel.ded=ufs::scaleStructure(select(ends_with(c("UWES_3", "UWES_4", "UWES_7"
 UWES.rel.abs=ufs::scaleStructure(select(ends_with(c("UWES_6", "UWES_8", "UWES_9")), .data = data), digits = 2, poly = TRUE, samples = 5000)
 ```
 
-```{r item statistic table, message=FALSE, warning=FALSE, include=FALSE}
+```{r item_statistic_table, message=FALSE, warning=FALSE, include=FALSE}
 # there is need to drop NAs before calculation of polychoric correlations (i.e. for extraction of p-values to poly correlations) but in order to make results of previous code compatible, there is need to do this in the procedures above
 data.no.na = data %>% 
   filter(!is.na(UWES))
@@ -1792,7 +1792,7 @@ apa_table(iter.cor.teq.fin.data$apa, caption = "Correaltion matrix of the UWES, 
 
 ## Invariance testing and factor loadings 
 
-```{r gender invariance UWES, include=FALSE}
+```{r gender_invariance_UWES, include=FALSE}
 # --- Step 1: Define the models with MANUAL scaling ---
 
 # Model for the single-group (overall) baseline fit
@@ -1906,7 +1906,7 @@ tab.fit %>%
 
 ## Association of the UWES with chronic health ilnesses 
 
-```{r frist regression, include=FALSE}
+```{r frist_regression, include=FALSE}
 # Side-by-side Regression Models
 # logistic regression model
 # we have 34 analysis thus 0.05/34 = 0.001470588 = criterion P-value
@@ -2167,7 +2167,7 @@ tbls = list(ra.b.tab.pok1,ra.b.tab.pok2),
 tab_span = c("**ADJ(ra)**", "**NA(ra)**"))
 ```
 
-```{r convert gtsum tab into tible, include=FALSE}
+```{r convert_gtsum_tab_into_tible, include=FALSE}
 table.2=ra.b.t1
 
 #show_header_names(table.2)
@@ -2243,7 +2243,7 @@ names(table.2.tib) <- names.tab2
          t()
 ```
 
-```{r preparation to print tab, message=FALSE, warning=FALSE, include=FALSE}
+```{r preparation_to_print_tab, message=FALSE, warning=FALSE, include=FALSE}
 
 # the only step here which is required here is to manually divide dataset into four parts and then rbind these togather 
 
@@ -2281,7 +2281,7 @@ tab %>%
 
 # Association of the UWES with health risk behaviour 
 
-```{r second regression, include=FALSE}
+```{r second_regression, include=FALSE}
 # Side-by-side Regression Models
 # logistic regression model
 # we have 44 analysis thus 0.05/44 = 0.001136364 = criterion P-value
@@ -2374,7 +2374,7 @@ tbls = list(ra.c.tab.pok1,ra.c.tab.pok2),
 tab_span = c("**ADJ(ra)**", "**NA(ra)**"))
 ```
 
-```{r convert gtsum tab 2 into tible, include=FALSE}
+```{r convert_gtsum_tab_2_into_tible, include=FALSE}
 table.3=ra.c.t1
 
 #show_header_names(table.3)
@@ -2451,7 +2451,7 @@ names(table.3.tib) <- names.tab2
          t()
 ```
 
-```{r preparation to print tab 2, message=FALSE, warning=FALSE, include=FALSE}
+```{r preparation_to_print_tab_2, message=FALSE, warning=FALSE, include=FALSE}
 # the only step here which is required here is to manually divide dataset into four parts and then rbind these togather 
 
 # even a little bit wider
