@@ -110,6 +110,14 @@ create_dynamic_table <- function(models,
   
   # --- Helper function to process each DFI object ---
   process_dfi_object <- function(dfi_object, model_name) {
+    
+    # --- FIX 1: Add validation to safely skip malformed or NULL objects ---
+    if (is.null(dfi_object) || is.null(dfi_object$cutoffs) || is.null(dfi_object$fit)) {
+      warning(paste("Skipping invalid or incomplete DFI object:", model_name), call. = FALSE)
+      return(NULL) # Return NULL to be ignored by purrr::map_df
+    }
+    # --- END FIX ---
+    
     cutoffs_matrix <- dfi_object$cutoffs
     cutoffs_rownames <- rownames(cutoffs_matrix)
     level_rows <- which(stringr::str_detect(cutoffs_rownames, "^Level-"))
@@ -209,7 +217,6 @@ create_dynamic_table <- function(models,
         by = "Misspecification"
       )
       
-      # --- FIX: Add explicit sorting for rows ---
       chunk_data <- unsorted_chunk_data %>%
         dplyr::mutate(
           sort_key = dplyr::case_when(
@@ -220,11 +227,12 @@ create_dynamic_table <- function(models,
         ) %>%
         dplyr::arrange(sort_key) %>%
         dplyr::select(-sort_key)
-      # --- END FIX ---
       
       col_names <- "Misspecification"
-      header1_labels <- "Misspecification"
-      header2_labels <- ""
+      # --- FIX 2: Swap header labels to shift "Misspecification" down one row ---
+      header1_labels <- ""
+      header2_labels <- "Misspecification"
+      # --- END FIX ---
       
       for (j in 1:models_per_row) {
         if (j > 1) {

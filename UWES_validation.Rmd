@@ -70,7 +70,7 @@ knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
 ```
 
 ```{r loading libraries, include=FALSE}
-packages=c("psych","dplyr","lavaan","base","foreign","Routliers","MVN","parameters", "EFA.MRFA","RGenData","semPlot","psycho","apa","corx","effectsize","qwraps2","finalfit","ggstatsplot","dunn.test","devtools","rticles","ICC.Sample.Size","tidyverse","magrittr","osfr","expss","gtsummary","huxtable","equaltestMI","haven","rcompanion","ufs","semTools","semPlot","insight","flextable","officer","officedown") 
+packages=c("psych","dplyr","lavaan","base","foreign","Routliers","MVN","parameters","cocor", "EFA.MRFA","RGenData","semPlot","psycho","apa","corx","effectsize","qwraps2","finalfit","ggstatsplot","dunn.test","devtools","rticles","ICC.Sample.Size","tidyverse","magrittr","osfr","expss","gtsummary","huxtable","equaltestMI","haven","rcompanion","ufs","semTools","semPlot","insight","flextable","officer","officedown") 
 
 # Install packages not yet installed
 installed_packages <- packages %in% rownames(installed.packages())
@@ -319,13 +319,16 @@ BFI_E.rel=ufs::scaleStructure(select(starts_with(c("BFI_E_")), .data = data), di
   Internal consistency of the BFI_E was good: Cronbach's $\alpha$ = `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(BFI_E.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
 
 ## Data analysis
-  Inspection of histograms and results of the Mardia test of multivariate skewness and kurtosis indicated that the normality assumption is violated in the UWES items. Moreover, examination of residual plots and result of the Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, *df* = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`) suggested heteroscedasticity. Thus, methods not requiring parametric assumptions were used. The Little MCAR test provided an evidence that missing values are missing on random. Thus, as there was not a large number of missing values (*n* = `r nrow(filter(data, is.na(UWES_9)))`), incomplete cases were deleted listwise.
+  Inspection of histograms and results of the Mardia test of multivariate skewness and kurtosis indicated that the normality assumption is violated in the UWES items. Moreover, examination of residual plots and result of the Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, *df* = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`) suggested heteroscedasticity. Examination of the polychoric correlation matrix revealed no extreme multicollinearity among items, with all inter-item correlations below 0.90. Thus, methods not requiring parametric assumptions were used. The Little MCAR test provided an evidence that missing values are missing on random. Thus, as there was not a large number of missing values (*n* = `r nrow(filter(data, is.na(UWES_9)))`), incomplete cases were deleted listwise.
   
   
-  The instrument's factor structure was investigated via Confirmatory Factor Analysis (CFA) to test a comprehensive range of models from the literature. We first tested the original correlated three-factor model (Vigor, Dedication, Absorption) and a competing one-factor model (Schaufeli, Bakker, & Salanova, 2006). However, as many studies report strong intercorrelations among the three dimensions, suggesting they may represent a single higher-order construct (Fong & Ng, 2012), we also specified and tested a hierarchical (second-order) model (Domínguez-Salas et al., 2022). Further analyses included tests of alternative two-factor solutions (e.g., Chaudhary, Rangnekar, & Barua, 2012), a partial bi-factor model (de Bruin & Henn, 2013), and several modified three-factor models incorporating correlated error terms (e.g., Simbula et al., 2013). The Kaiser-Meyer-Olkin (KMO) measure and Bartlett’s test of sphericity were first applied to confirm the data’s suitability for factor analysis.
-  Kaiser Meyer Olkin (KMO) measure together with Bartlett test of sphericity were applied to assess factorability of the UWES data. Five indices were used to inspect model fit: 1) Mean Square Error of Approximation (RMSEA); 2) Standardized Root Mean Square Residual (SRMR); 3) chi-square test; 4) Comparative Fit index (CFI) and 5) Tucker-Lewis index (TLI). In the first two indices, values below 0.08 reflects an acceptable fit and below 0.05 a good fit [@civelek2018essentials; @hoe_issues_2008; @vandenberg_review_2000; @hooper_structural_2008]. In the last two indices, values above 0.95 suggest an acceptable fit [@jackson_reporting_2009] and above 0.97 a good fit [@schermelleh_engel_evaluating_2003]. Diagonally Weighted Least Squares estimator (DWLS) on polychoric correlation matrix was used to fit CFA models.  
+  The instrument's factor structure was investigated via Confirmatory Factor Analysis (CFA) to test a comprehensive range of models from the literature. We first tested the original correlated three-factor model (Vigor, Dedication, Absorption) and a competing one-factor model (Schaufeli, Bakker, & Salanova, 2006). However, as many studies report strong intercorrelations among the three dimensions, suggesting they may represent a single higher-order construct (Fong & Ng, 2012), we also specified and tested a hierarchical (second-order) model (Domínguez-Salas et al., 2022). Further analyses included tests of alternative two-factor solutions (e.g., Chaudhary, Rangnekar, & Barua, 2012), a partial and full bi-factor model (de Bruin & Henn, 2013), and several modified three-factor models incorporating correlated error terms (e.g., Simbula et al., 2013).
   
-  The scale reliability was measured by the McDonald’s $\omega$ and also by the Cronbach’s $\alpha$. Convergent validity was inspected by zero order Spearman rank correlations with self-efficacy, neuroticism and with extroversion. Divergent validity was measured by correlation of the UWES with spirituality.
+  Kaiser-Meyer-Olkin (KMO) measure, together with the Bartlett test of sphericity, was applied to assess the factorability of the UWES data. Five indices were used to inspect model fit: 1) Mean Square Error of Approximation (RMSEA); 2) Standardised Root Mean Square Residual (SRMR); 3) chi-square test; 4) Comparative Fit index (CFI); and 5) Tucker-Lewis index (TLI). While these traditional fit indices are widely reported, their fixed cutoff values (e.g., RMSEA < .06, CFI > .95) have been criticized for poor generalizability, particularly because their performance is highly dependent on the specific characteristics of the model being tested (McNeish & Wolf, 2022). Therefore, to provide a more rigorous and accurate assessment of model fit, we adopted the Dynamic Fit Index (DFI) approach (McNeish & Wolf, 2021). This method generates customized fit index cutoffs tailored to the unique characteristics of each model. The Weighted Least Squares Mean and Variance adjusted (WLSMV) on the polychoric correlation matrix was used to fit CFA models.
+  
+  The invariance of a measurement was explored between males and females. Configural, metric, scalar, and strict invariance were supported if ΔCFI was < 0.01 between invariance models. The scale reliability was measured by the McDonald’s $\omega$ and also by the Cronbach’s $\alpha$. In addition to these, model-based Composite Reliability (CR) was calculated to assess the internal consistency of each factor, with values > 0.70 indicating good reliability (Fornell & Larcker, 1981).
+  
+  Construct validity was evaluated through several ways. First, we explored internal convergent validity during CFA, which assessed the degree to which items of a specific factor are related. More specifically, this was tested using the Average Variance Extracted (AVE), with values > 0.50 considered acceptable (Fornell & Larcker, 1981). Next we assessed, internal discriminant validity, which evaluated whether the factors are statistically distinct. For this purpous, the Heterotrait-Monotrait Ratio of Correlations (HTMT) test was used. If values from this test do not reach 0.90 discriminant validity is supported (Henseler et al., 2015). In the further step, we tested vonvergent and divergent validity externally i.e., via zero-order Spearman rank correlations with self-efficacy, neuroticism, and extroversion (convergent), and with spirituality (divergent). Relatedly, to provide a formal test of external discriminant validity, the magnitudes of the dependent correlations between the UWES subscales and these external criteria were compared using the z-test from Hittner, May, and Silver (2003).
   
   Due to the non-normal distribution of the data, an association between the chronic health illnesses, health risk behaviour and UWES was calculated using logistic regression. In the logistic models, outcome variable was presence of an individual chronic illness or practise of health risk behaviour. The UWES score was set as a predictor. Education and work position were covariates. Both crude and adjusted effect were estimated. The p-values were corrected by Bonferroni correction.         
   
@@ -1080,7 +1083,7 @@ m.sd.tab = m.sd.tab %>%
  
  op_section <- prop_section(type = "continuous")
 close_section <- prop_section(
-    page_size = page_size(orient = "landscape", width = 12, height = 12), 
+    page_size = page_size(orient = "landscape", width = 13, height = 15), 
     type = "continuous")
 ```
 
@@ -1603,12 +1606,44 @@ DFI_replicated_errors <- cache_dynamic(
 lavaan::anova(UWES_replicated_errors,UWES_within_factor_corr)
 ```
 
+```{r model-comparisons, include=FALSE}
+# This chunk performs all chi-square difference tests and stores the results
+# to prevent errors from NA values in the anova table.
+
+# --- USER ACTION REQUIRED ---
+# Make sure these object names match the fitted lavaan models in your environment.
+model_balducci <- uwes_three_fac_corr_errors_balducci
+model_dominguez <- UWES.three.fac.corr.errors.Dominguez
+model_zecca <- uwes_three_fac_zecca
+# ---
+
+# --- Perform the comparisons ---
+# Test 1: Balducci (more complex) vs. Domínguez-Salas (simpler)
+anova_balducci_vs_dominguez <- lavaan::anova(model_balducci, model_dominguez, robust = TRUE)
+
+# Test 2: Domínguez-Salas (simpler) vs. Zecca (more complex)
+anova_dominguez_vs_zecca <- lavaan::anova(model_dominguez, model_zecca, robust = TRUE)
+
+# --- Perform the comparisons ---
+anova_balducci_vs_dominguez <- lavaan::anova(model_balducci, model_dominguez, robust = TRUE)
+anova_dominguez_vs_zecca <- lavaan::anova(model_dominguez, model_zecca, robust = TRUE)
+
+# --- Extract and store the CORRECT values (the second element) ---
+chisq_diff_bal_dom <- anova_balducci_vs_dominguez$'Chisq diff'
+df_diff_bal_dom <- anova_balducci_vs_dominguez$'Df diff'
+p_val_bal_dom <- anova_balducci_vs_dominguez$'Pr(>Chisq)'
+
+chisq_diff_dom_zec <- anova_dominguez_vs_zecca$'Chisq diff'
+df_diff_dom_zec <- anova_dominguez_vs_zecca$'Df diff'
+p_val_dom_zec <- anova_dominguez_vs_zecca$'Pr(>Chisq)'
+```
+
 ```{r calculate-construct-validity-and-setup, include=FALSE}
 # Calculate Composite Reliability (CR)
-cr_values <- compRelSEM(UWES.three.fac.corr.errors.Dominguez)
+cr_values <- compRelSEM(uwes_three_fac_corr_errors_balducci)
 
 # Calculate Average Variance Extracted (AVE)
-ave_values <- AVE(UWES.three.fac.corr.errors.Dominguez)
+ave_values <- AVE(uwes_three_fac_corr_errors_balducci)
 
 # Calculate Heterotrait-Monotrait Ratio (HTMT)
 htmt_results <- htmt(model = three.fac.mod.corr.errors.Dominguez, data = uwes_items, ordered = TRUE)
@@ -1630,25 +1665,77 @@ htmt_va <- sprintf("%.2f", htmt_results["Absorption", "Vigor"])
 htmt_da <- sprintf("%.2f", htmt_results["Absorption", "Dedication"])
 ```
 
-### Confirmatory Factor Analysis and Construct Validity
+```{r test-correlation-differences, include=FALSE}
+# Select variables for validity testing
+variab.cor.data=data[, c("UWES","UWES_V","UWES_D","UWES_A",
+                         "BFI_E","BFI_N","Age","Gender","DSES","GSES")]
 
-Bartlett test ($\chi^2$ (`r bartlett.UWES$df`) = `r round(bartlett.UWES$chisq,digits=2)`, `r format_p(bartlett.UWES$p.value)`) as well as KMO (`r round(KMO(UWES.rep.poly)$MSA,digits = 2)`) revealed that UWES data are sufficiently correlated to perform factor analysis. Next, a series of CFAs were conducted to determine the optimal factorial structure of the UWES-9 for the Czech sample. Results of these analysis are presented in the Table \@ref(tab:DFITable). Initial models based on standard one-factor, two-factor, hierarchical, and correlated three-factor structures demonstrated poor fit to the data. For instance, the standard three-factor model yielded an RMSEA of `r round(fitMeasures(UWES.three.fac)['rmsea.scaled'], 3)`, which was substantially higher than its dynamically-generated Level-0 cutoff of `r round(as.numeric(DFI_three_factor$cutoffs['Level-0', 'RMSEA']), 3)`, indicating a significant degree of misfit and the need for a more nuanced model.
+# recode variables to numeric
+variab.cor.data = variab.cor.data %>% 
+  mutate_all(as.numeric) %>% 
+  as.matrix()
 
-This led to the testing of modified three-factor models to account for sources of local misfit. Two primary models were retained for a final, decisive comparison. The first, based on the work of **Domínguez-Salas et al. (2022)**, was specified based on the most consistent findings in the international literature. This model included correlated errors between items 1 and 2 (Vigor) and items 8 and 9 (Absorption), a modification independently identified across several validation studies.
+# --- Test comparisons with Neuroticism (BFI_N) ---
+cocor_vd_n <- cocor(~ UWES_V + BFI_N | UWES_D + BFI_N, data = variab.cor.data)
+cocor_va_n <- cocor(~ UWES_V + BFI_N | UWES_A + BFI_N, data = variab.cor.data)
+cocor_da_n <- cocor(~ UWES_D + BFI_N | UWES_A + BFI_N, data = variab.cor.data)
 
-The second model, following **Zecca et al. (2015)**, included the same two correlations plus an additional error covariance between items 3 and 4 (Dedication). This more complex model was tested to confirm whether any remaining misfit in the Domínguez-Salas et al. (2022) model could be systematically explained by this additional theoretically-grounded correlation. The purpose of this test was to ensure that the most parsimonious model was selected only after confirming that a more complex—but still justifiable—model did not provide a statistically superior explanation of the data.
+# --- Test comparisons with Self-Efficacy (GSES) ---
+cocor_vd_gses <- cocor(~ UWES_V + GSES | UWES_D + GSES, data = variab.cor.data)
+cocor_va_gses <- cocor(~ UWES_V + GSES | UWES_A + GSES, data = variab.cor.data)
+cocor_da_gses <- cocor(~ UWES_D + GSES | UWES_A + GSES, data = variab.cor.data)
 
-To adjudicate between these nested models, a scaled chi-square difference test was performed. The test revealed no significant improvement in fit for the more complex model with three correlated errors ($\chi^2$diff(`r lavaan::anova(UWES.three.fac.corr.errors.Dominguez, uwes_three_fac_zecca, robust = TRUE)$'Df diff'`) = `r format(round(lavaan::anova(UWES.three.fac.corr.errors.Dominguez, uwes_three_fac_zecca, robust = TRUE)$'Chisq diff', 2), nsmall = 2)`, *p* = `r format(round(lavaan::anova(UWES.three.fac.corr.errors.Dominguez, uwes_three_fac_zecca, robust = TRUE)$'Pr(>Chisq)', 2), nsmall = 2)`). Based on the principle of parsimony, the simpler model from **Domínguez-Salas et al. (2022)** was selected as the final and most appropriate model.
+# --- Test comparisons with Extraversion (BFI_E) ---
+cocor_vd_e <- cocor(~ UWES_V + BFI_E | UWES_D + BFI_E, data = variab.cor.data)
+cocor_va_e <- cocor(~ UWES_V + BFI_E | UWES_A + BFI_E, data = variab.cor.data)
+cocor_da_e <- cocor(~ UWES_D + BFI_E | UWES_A + BFI_E, data = variab.cor.data)
 
-The fit of this final model was evaluated against dynamically generated fit index cutoffs. The model produced an excellent CFI (`r format(round(fitMeasures(UWES.three.fac.corr.errors.Dominguez)['cfi.scaled'], 3), nsmall = 3)`) and a low SRMR (`r format(round(fitMeasures(UWES.three.fac.corr.errors.Dominguez)['srmr'], 3), nsmall = 3)`). However, the RMSEA (`r format(round(fitMeasures(UWES.three.fac.corr.errors.Dominguez)['rmsea.scaled'], 3), nsmall = 3)`) was considerably higher than its dynamically generated Level-0 cutoff of `r format(round(as.numeric(DFI_three_factor_corr_errors_Dominguez$cutoffs['Level-0', 'RMSEA']), 3), nsmall = 3)`, indicating that while the model is superior to all tested alternatives, it still contains a non-trivial degree of misfit. This suggests that while this three-factor structure with modifications for item wording overlap is the best representation of the data, the UWES-9 scale may not perfectly capture the construct of work engagement within this sample.
+# --- Store formatted p-values for inline reporting ---
+p_val_vd_n <- format_p(cocor_vd_n@hittner2003$p.value)
+p_val_va_n <- format_p(cocor_va_n@hittner2003$p.value)
+p_val_da_n <- format_p(cocor_da_n@hittner2003$p.value)
+p_val_vd_gses <- format_p(cocor_vd_gses@hittner2003$p.value)
+p_val_va_gses <- format_p(cocor_va_gses@hittner2003$p.value)
+p_val_da_gses <- format_p(cocor_da_gses@hittner2003$p.value)
+p_val_vd_e <- format_p(cocor_vd_e@hittner2003$p.value)
+p_val_va_e <- format_p(cocor_va_e@hittner2003$p.value)
+p_val_da_e <- format_p(cocor_da_e@hittner2003$p.value)
+```
 
-To further evaluate the psychometric properties of this final model, we examined its construct validity. The model demonstrated excellent reliability and convergent validity at the factor level. Composite Reliability (CR) for the Vigor, Dedication, and Absorption factors were `r cr_vigor`, `r cr_dedication`, and `r cr_absorption`, respectively, all well above the recommended 0.70 threshold. Similarly, the Average Variance Extracted (AVE) for each factor was high (Vigor = `r ave_vigor`; Dedication = `r ave_dedication`; Absorption = `r ave_absorption`), comfortably exceeding the 0.50 benchmark for convergent validity.
+<!-- ### Confirmatory Factor Analysis and Construct Validity -->
 
-However, the high inter-factor correlations (see Figure \@ref(fig:my-figure)) prompted a critical test of discriminant validity. We calculated the Heterotrait-Monotrait Ratio of Correlations (HTMT) to assess the distinctness of the three factors. The results showed a ratio of `r htmt_vd` between Vigor and Dedication, `r htmt_va` between Vigor and Absorption, and `r htmt_da` between Dedication and Absorption. As all values substantially exceeded the 0.90 threshold, the analysis indicates that the three factors, while structurally sound, are not empirically distinct constructs in our sample.
+<!-- Our investigation into the UWES-9's factor structure began by confirming the data's suitability for factor analysis via the Bartlett test ($\chi^2$ (`r bartlett.UWES$df`) = `r round(bartlett.UWES$chisq,digits=2)`, `r format_p(bartlett.UWES$p.value)`) and the KMO measure (`r round(KMO(UWES.rep.poly)$MSA,digits = 2)`). With this confirmed, we conducted a series of CFAs to determine the optimal factorial structure for the Czech sample, with results presented in Table \@ref(tab:DFITable). -->
 
-The finding that a three-factor model provides the best statistical fit, while its factors simultaneously lack discriminant validity, presents a nuanced interpretive challenge. This indicates that while the UWES items do form three statistically distinguishable clusters as specified by the instrument's theory, these factors share an overwhelming degree of conceptual variance. The extremely high HTMT ratios suggest that, in practice, the factors represent closely related facets of a single underlying work engagement construct rather than functionally independent dimensions. Thus, for further analyses, we used UWES total score rather than invididual subscales score.
+<!-- We first discovered that the standard, textbook models—including one-factor, two-factor, hierarchical, and the original correlated three-factor structures—demonstrated poor fit to the data. For instance, the standard three-factor model yielded an RMSEA of `r round(fitMeasures(UWES.three.fac)['rmsea.scaled'], 3)`, substantially higher than its dynamically-generated Level-0 cutoff of `r round(as.numeric(DFI_three_factor$cutoffs['Level-0', 'RMSEA']), 3)`, indicating a significant degree of misfit. -->
 
-<!-- Therefore, while the three-factor structure is retained as the best-fitting measurement model, using the individual subscale scores as distinct variables in subsequent analyses (e.g., regressions) would be problematic. The profound empirical overlap would make it difficult to disentangle their unique predictive effects and could lead to unstable results. For analyses where the primary goal is to understand the relationship between overall work engagement and other outcomes, a total score provides a more stable, parsimonious, and conceptually clear measure. This approach honors the superior statistical fit of the three-factor architecture while acknowledging the practical and conceptual implications of the factors' lack of distinctiveness. -->
+<!-- This initial finding prompted a more focused investigation into modified three-factor models that could account for local dependencies, such as item wording overlap. Based on the validation literature, we identified two primary candidates for a final, decisive comparison. The first, based on **Domínguez-Salas et al. (2022)**, included correlated errors between items 1 and 2 (Vigor) and items 8 and 9 (Absorption). The second, a more complex model following **Zecca et al. (2015)**, included these same two correlations plus a third between items 3 and 4 (Dedication). -->
+
+<!-- To adjudicate between these two competing models, we performed a scaled chi-square difference test. The test revealed that the additional complexity of the Zecca et al. model offered no significant improvement in fit ($\chi^2$diff(`r lavaan::anova(UWES.three.fac.corr.errors.Dominguez, uwes_three_fac_zecca, robust = TRUE)$'Df diff'`) = `r format(round(lavaan::anova(UWES.three.fac.corr.errors.Dominguez, uwes_three_fac_zecca, robust = TRUE)$'Chisq diff', 2), nsmall = 2)`, *p* = `r format(round(lavaan::anova(UWES.three.fac.corr.errors.Dominguez, uwes_three_fac_zecca, robust = TRUE)$'Pr(>Chisq)', 2), nsmall = 2)`). Consequently, based on the principle of parsimony, we selected the simpler model from **Domínguez-Salas et al. (2022)** as the final and best-fitting representation of the data. -->
+
+<!-- An evaluation of this final model revealed an excellent CFI (`r format(round(fitMeasures(UWES.three.fac.corr.errors.Dominguez)['cfi.scaled'], 3), nsmall = 3)`) and a low SRMR (`r format(round(fitMeasures(UWES.three.fac.corr.errors.Dominguez)['srmr'], 3), nsmall = 3)`). However, its RMSEA (`r format(round(fitMeasures(UWES.three.fac.corr.errors.Dominguez)['rmsea.scaled'], 3), nsmall = 3)`) remained higher than its dynamically generated cutoff of `r format(round(as.numeric(DFI_three_factor_corr_errors_Dominguez$cutoffs['Level-0', 'RMSEA']), 3), nsmall = 3)`, suggesting that while this structure is superior to all alternatives, it is not a perfect representation of work engagement in this sample. -->
+
+### Confirmatory Factor Analysis
+  Bartlett test  ($\chi^2$ (`r bartlett.UWES$df`) = `r round(bartlett.UWES$chisq,digits=2)`, `r format_p(bartlett.UWES$p.value)`) as well as KMO (`r round(KMO(UWES.rep.poly)$MSA,digits = 2)`)revealed that UWES data are sufficiently correlated to perform factor analysis. Next, a series of CFAs were conducted to determine the optimal factorial structure of the UWES-9 for the Czech sample. Results of these analyses are presented in Table \@ref(tab:DFITable).
+
+  Initial models based on standard one-factor, two-factor, hierarchical, and the original correlated three-factor structures demonstrated poor fit to the data. For instance, the standard three-factor model yielded an RMSEA of `r round(fitMeasures(UWES.three.fac)['rmsea.scaled'], 3)`, which was substantially higher than its dynamically-generated Level-0 cutoff of `r round(as.numeric(DFI_three_factor$cutoffs['Level-0', 'RMSEA']), 3)`, indicating a significant degree of misfit. This led to the testing of more complex models that would be theoretically meaningful and, at the same time, account for sources of local misfit. Thus, in the next step, we tested bi-factor models. 
+
+  Fitting bi-factor models, however, resulted in severe problems with estimation, making the results of these models not possible to interpret. Therefore, in the further step, we tested factor three models that reached the highest model fit in past studies. The first was the three-factor model, firstly proposed by Domínguez-Salas et al. (2022), which included correlated errors between items 1 and 2 (Vigor) and items 8 and 9 (Absorption). The second, a more complex model following Zecca et al. (2015), included these same two correlations between residuals plus a third between items 3 and 4 (Dedication). The third and the most complex was the model of Balducci et al. (2010), who proposed the same correlations between error terms as Domínguez-Salas et al. (2022), with additional correlations between items 2 and 5 (Vigor) and 6 and 8 (Absorption).
+
+
+  It was revealed that these three models exhibit the best fit with the data as compared with other tested models. Thus, in the further step, we examined which of these three factor models provided the most optimal fit. The Chi-square difference test comparing these models revealed that the simpler Domínguez-Salas et al. model ($\chi^2$diff(`r df_diff_bal_dom[2]`) = `r format(round(chisq_diff_bal_dom[2], 2), nsmall = 2)`, *p* = `r format_p(p_val_bal_dom[2])`) and model of Zecca et al. (2015) ($\chi^2$diff(`r df_diff_dom_zec[2]`) = `r format(round(chisq_diff_dom_zec[2], 2), nsmall = 2)`, *p* = `r format(round(p_val_dom_zec[2], 2), nsmall = 2)`) represented a statistically significant loss of fit compared to the more complex model of Balducci et al. (2010). Therefore, the Balducci et al. model can be considered as the best-fitting in our data.
+
+  Further evaluation of this final model revealed an excellent CFI (`r format(round(fitMeasures(uwes_three_fac_corr_errors_balducci)['cfi.robust'], 3), nsmall = 3)`) and a low SRMR (`r format(round(fitMeasures(uwes_three_fac_corr_errors_balducci)['srmr'], 3), nsmall = 3)`). However, its RMSEA (`r format(round(fitMeasures(uwes_three_fac_corr_errors_balducci)['rmsea.robust'], 3), nsmall = 3)`) remained higher than its dynamically generated cutoff of `r format(round(as.numeric(dfi_three_factor_corr_errors_balducci$cutoffs['Level-0', 'RMSEA']), 3), nsmall = 3)`, it still contains a non-trivial degree of misfit. This suggests that while this three-factor structure with modifications is the best representation of the data, the UWES-9 scale may not perfectly capture the construct of work engagement within the present study sample.
+
+### Construct Validity Evaluation
+  With the best-fitting model established we conducted an evaluation of its construct validity. We first assessed convergent validity by calculating the AVE for each factor. The results for Vigor (`r ave_vigor`), Dedication (`r ave_dedication`), and Absorption (`r ave_absorption`) all exceeded the 0.50 benchmark, indicating that for each factor, a majority of the variance in its items was captured by the construct itself rather than by measurement error.
+
+  However, given the high inter-factor correlations (see Figure \@ref(fig:my-figure)), a specific test of discriminant validity was necessary to determine if the factors were empirically distinct. Thus, we employed the HTMT for this purpose. <!-- which is a modern and stringent test of the distinctiveness of latent factors.  -->The analysis yielded values of `r htmt_vd` (Vigor-Dedication), `r htmt_va` (Vigor-Absorption), and `r htmt_da` (Dedication-Absorption). As all values substantially exceeded the 0.90 threshold, this provided definitive evidence that the factors, while structurally sound, are not internally distinct from one another.
+
+This finding led to our final validity test, where we examined the scale's relationships with external criteria to see if the subscales behaved differently despite their internal overlap. As shown in Table \@ref(tab:CorTab), the UWES scores behaved as expected: the total score and all subscales were positively associated with extroversion and self-efficacy, and negatively associated with neuroticism. For divergent validity, no significant correlation was found with spirituality, with the exception of the Dedication subscale.
+
+To formally test whether the magnitude of these correlations differed across subscales, we used Hittner et al.'s (2003) z-test. The analysis revealed specific differences in the subscales' external relationships. For example, the correlation between Vigor and extraversion was significantly stronger than that of Absorption and extraversion (*p* = `r p_val_va_e`). In contrast, the difference in their correlations with neuroticism was not always statistically significant (e.g., Vigor vs. Dedication, *p* = `r p_val_vd_n`; Vigor vs. Absorption, *p* = `r p_val_va_n`).
+
+This provides a complete psychometric picture: The UWES-9 factors are so highly inter-correlated that they fail modern tests of internal discriminant validity (HTMT). However, they retain enough unique variance to exhibit some statistically distinct relationships with key external criteria. For subsequent analyses within this paper where the primary goal is to understand the relationship between *overall* work engagement and other outcomes, a total score remains the most stable and parsimonious measure. We therefore use the total score for our primary analyses, while acknowledging that the subscales may offer nuanced, albeit highly overlapping, perspectives.
 
 (ref:my-figure-caption) SEM plot of the modified three-factor model (Domínguez-Salas et al., 2022) with factor loadings and item residuals.
 
@@ -1674,23 +1761,23 @@ block_section(op_section)
 ```
 
 ```{r DFITable, echo=FALSE}
-# # 1. Grab the object names as characters
-names_dfi <- ls(pattern = "^DFI_|^dfi_")
-names_dfi
-
-# 2. Build the argument list
-call_args <- list(
-  models           = names_dfi,
-  add_interpretation = FALSE,
-  show_fitted_model = TRUE,
-  add_separator_rows = FALSE,
-  remove_duplicated_model_names = FALSE,
-  bold_fitted_model = TRUE
-)
-
-# 3. Call the function
-table_DFI <- do.call(create_dynamic_table, call_args)
-table_DFI
+# # # 1. Grab the object names as characters
+# names_dfi <- ls(pattern = "^DFI_|^dfi_")
+# names_dfi
+# 
+# # 2. Build the argument list
+# call_args <- list(
+#   models           = names_dfi,
+#   add_interpretation = FALSE,
+#   show_fitted_model = TRUE,
+#   add_separator_rows = FALSE,
+#   remove_duplicated_model_names = FALSE,
+#   bold_fitted_model = TRUE
+# )
+# 
+# # 3. Call the function
+# table_DFI <- do.call(create_dynamic_table, call_args)
+# table_DFI
 
 
 # Define the lookup table (dictionary) for model names
@@ -1842,7 +1929,7 @@ kurtosis=round(skew.kurt.UWES$kurtosis, digits = 2)
 # combine all
 UWES.items.des=cbind(poly.mat.star,M,SD,ITC,Skewness,kurtosis) 
 UWES.items.des = UWES.items.des %>% 
-  as_tibble() %>% 
+  as_tibble(rownames = "Items") %>% 
   mutate("M(SD)" = paste0("",M," (",SD,")")) %>% 
   select(!c("M","SD"))
 
@@ -1852,7 +1939,7 @@ close_section <- prop_section(
   type = "continuous")
 ```
 
-  Internal consistency of the UWES total score was excellent: Cronbach's $\alpha$ = `r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.tot$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.tot$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.tot$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. When assessing the internal consistency of the UWES subcales, the highest values yielded Dedication subscale: Cronbach's $\alpha$ = `r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.ded$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.ded$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.ded$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`] followed by the Vigor subscale: Cronbach's $\alpha$ = `r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.vig$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.vig$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.vig$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. The lowest internal consistency was observed in the Absorption factor: Cronbach's $\alpha$ = `r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.abs$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.abs$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.abs$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. The Table \@ref(tab:ItemStats) illustrates statistics of UWES items. In general, correlations between these items and item-total correlations were high. The lowest item-total correlation had item 9.    
+  Internal consistency of the UWES total score was excellent: Cronbach's $\alpha$ = `r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.tot$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.tot$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.tot$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. When assessing the internal consistency of the UWES subcales, the highest values yielded Dedication subscale: Cronbach's $\alpha$ = `r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.ded$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.ded$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.ded$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`] followed by the Vigor subscale: Cronbach's $\alpha$ = `r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.vig$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.vig$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.vig$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. The lowest internal consistency was observed in the Absorption factor: Cronbach's $\alpha$ = `r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.abs$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.abs$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.abs$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. Reliability of the UWES was supported by the CR: it´s values for Vigor (`r cr_vigor`), Dedication (`r cr_dedication`), and Absorption (`r cr_absorption`), were excellent as they all range above the 0.70 threshold for good reliability. The Table \@ref(tab:ItemStats) illustrates statistics of UWES items. In general, correlations between these items and item-total correlations were high. The lowest item-total correlation had item 9.  
 
 ```{r}
 block_section(op_section)
@@ -1861,7 +1948,7 @@ block_section(op_section)
 ```{r ItemStats, echo=FALSE}
 # creating table 
 UWES.items.des %>% 
-  as_tibble(rownames = NA) %>% 
+  as_tibble() %>% 
      mutate_all(~(replace(., is.na(.), ""))) %>% 
   as_huxtable(add_colnames = F) %>% 
   apa_table(
@@ -1875,13 +1962,6 @@ block_section(close_section)
   Correlation analysis indicated that there is significant positive association between all UWES subscale and total score and extroversion. The highest correlation was found in the Vigor subscale. In addition, there was significant negative correlation between all UWES subscales and total score with neuroticism. The highest association was also found in the Vigor subscale. Moreover, the UWES total and its all subscales were associated with self-efficacy. The strongest association was observed in the Vigor subscale. Finally, there was no correlation between the UWES composite and subcale score with spirituality with exception of Dedication subscale (see Table \@ref(tab:CorTab)).   
 
 ```{r correlation_table, include=FALSE}
-variab.cor.data=data[, c("UWES","UWES_V","UWES_D","UWES_A",
-                         "BFI_E","BFI_N","Age","Gender","DSES","GSES")]
-# recode variables to numeric
-variab.cor.data = variab.cor.data %>% 
-  mutate_all(as.numeric) %>% 
-  as.matrix()
-
 iter.cor.teq.fin.data=corx::corx(variab.cor.data, method = "spearman", triangle = "lower", describe = c(M = mean, SD = sd), stars = c(0.05, 0.01, 0.001),note = "M = mean, SD = standard devation")
 
 # create vector of rownames
@@ -1922,11 +2002,15 @@ block_section(close_section)
 # Model for the single-group (overall) baseline fit
 # We still standardize the latent variance to 1 for interpretability
 overall.model.UWES <- "
-    Vigor =~ UWES_1 + UWES_2 + UWES_5
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
     Dedication =~ UWES_3 + UWES_4 + UWES_7
     Absorption =~ UWES_6 + UWES_8 + UWES_9
-    # UWES_1 ~~ UWES_2
-    # UWES_8 ~~ UWES_9
+    
+    # Correlated errors specific to the Italian sample in the study
+    UWES_1 ~~ UWES_2
+    UWES_2 ~~ UWES_5
+    UWES_6 ~~ UWES_8
+    UWES_8 ~~ UWES_9
 "
 # --- Step 2: Run the single-group baseline model ---
 baseline.cfa <- cfa(overall.model.UWES,
@@ -2001,9 +2085,103 @@ tab.fit = tab.fit %>%
   mutate(pvalue = format_p(pvalue)) %>% 
   mutate(rmsea = paste0(rmsea," 90% CI (",rmsea.ci.lower,"-",rmsea.ci.upper,")")) %>% 
   select(!starts_with(c("rmsea.ci.","rmsea.ci.lower","rmsea.ci.upper")))
+
+# =============================================================================
+# MEASUREMENT INVARIANCE ANALYSIS FOR UWES ACROSS GENDER GROUPS - diagnostics
+# =============================================================================
+# Step 1: Single-group analyses to understand the technical issues
+
+# Analyze male group separately to establish baseline functioning
+fit.male <- cfa(overall.model.UWES, 
+                data = filter(data.invar, Gender == "Male"),
+                ordered = TRUE, 
+                estimator = "WLSMV", 
+                meanstructure = TRUE)
+
+# Analyze female group separately to identify source of problems
+fit.female <- cfa(overall.model.UWES, 
+                  data = filter(data.invar, Gender == "Female"),
+                  ordered = TRUE, 
+                  estimator = "WLSMV", 
+                  meanstructure = TRUE)
+
+# Step 4: Extract sample sizes for reporting
+# -------------------------------------------
+# Get number of observations in each group for demographic reporting
+n_male <- nobs(fit.male)
+n_female <- nobs(fit.female)
+
+# Step 5: Extract factor correlations to identify multicollinearity issues
+# -------------------------------------------------------------------------
+# Extract correlation matrix from male group (should be normal)
+male_correlations <- lavInspect(fit.male, "cor.lv")
+# Get individual correlations and round for reporting
+cor_male_vigor_dedication <- round(male_correlations[2,1], 3)
+cor_male_vigor_absorption <- round(male_correlations[3,1], 3)
+cor_male_dedication_absorption <- round(male_correlations[3,2], 3)
+# Find range of correlations for concise reporting
+cor_male_min <- min(cor_male_vigor_dedication, cor_male_vigor_absorption, cor_male_dedication_absorption)
+cor_male_max <- max(cor_male_vigor_dedication, cor_male_vigor_absorption, cor_male_dedication_absorption)
+
+# Extract correlation matrix from female group (problematic)
+female_correlations <- lavInspect(fit.female, "cor.lv")
+# Focus on the impossible correlation (>1.0) that causes matrix singularity
+cor_female_vigor_absorption <- round(female_correlations[3,1], 3)
+
+# Step 6: Extract fit indices from scalar invariance model
+# --------------------------------------------------------
+# Get scaled fit indices (robust versions unavailable due to convergence issues)
+scalar_fit_measures <- fitmeasures(fit.scalar, c("cfi.scaled", "rmsea.scaled", "pvalue.scaled"))
+# Round for clean reporting
+scalar_cfi <- round(scalar_fit_measures["cfi.scaled"], 3)
+scalar_rmsea <- round(scalar_fit_measures["rmsea.scaled"], 3)
+scalar_pvalue <- round(scalar_fit_measures["pvalue.scaled"], 3)
+
+# Step 7: Calculate model comparison statistics (Delta CFI)
+# ---------------------------------------------------------
+# Extract CFI from each invariance level to assess model deterioration
+configural_cfi <- round(fitmeasures(fit.configural, "cfi.scaled"), 3)
+metric_cfi <- round(fitmeasures(fit.metric, "cfi.scaled"), 3)
+# Calculate changes between successive models
+delta_cfi_configural_metric <- abs(metric_cfi - configural_cfi)
+delta_cfi_metric_scalar <- abs(scalar_cfi - metric_cfi)
+# Find maximum change for reporting worst-case scenario
+max_delta_cfi <- max(delta_cfi_configural_metric, delta_cfi_metric_scalar)
+
+# Step 8: Set invariance evaluation criteria
+# -------------------------------------------
+# Standard threshold for acceptable model change in invariance testing
+delta_cfi_threshold <- 0.01
+
+# Step 9: Display extracted values for verification and transparency
+# ------------------------------------------------------------------
+# cat("Sample sizes:\n")
+# cat("Males:", n_male, "\n")
+# cat("Females:", n_female, "\n\n")
+# 
+# cat("Male factor correlations (normal range):\n")
+# cat("Vigor-Dedication:", cor_male_vigor_dedication, "\n")
+# cat("Vigor-Absorption:", cor_male_vigor_absorption, "\n")
+# cat("Dedication-Absorption:", cor_male_dedication_absorption, "\n")
+# cat("Range:", cor_male_min, "to", cor_male_max, "\n\n")
+# 
+# cat("Female problematic correlation:\n")
+# cat("Vigor-Absorption:", cor_female_vigor_absorption, "(impossible - exceeds 1.0)\n\n")
+# 
+# cat("Scalar model fit indices:\n")
+# cat("CFI:", scalar_cfi, "\n")
+# cat("RMSEA:", scalar_rmsea, "\n")
+# cat("p-value:", scalar_pvalue, "\n\n")
+# 
+# cat("Model comparison:\n")
+# cat("Configural CFI:", configural_cfi, "\n")
+# cat("Metric CFI:", metric_cfi, "\n")
+# cat("Scalar CFI:", scalar_cfi, "\n")
+# cat("Maximum Delta CFI:", round(max_delta_cfi, 3), "\n")
+# cat("Threshold:", delta_cfi_threshold, "\n")
 ```
 
-The results of the measurement invariance testing are summarized in Table \@ref(tab:InvarTab)). In this analysis, we report the scaled fit indices, as the robust versions could not be computed for the scalar and strict invariance models. <--This can occure when highly constrained models are tested with the WLSMV estimator-->. The change in the scaled Comparative Fit Index ($\Delta$CFI) was less than 0.01 across all model comparisons. This finding strongly supports full measurement invariance and indicates that the UWES assesses work engagement equivalently in males and females.
+The results of the measurement invariance testing are summarized in Table \@ref(tab:InvarTab)). In this analysis, we report the scaled fit indices, as the robust versions could not be computed for the scalar and strict invariance models. <!-- This can occure when highly constrained models are tested with the WLSMV estimator --> Due to extremely high factor intercorrelations in the female subsample (empirical correlations exceeding 1.0), formal multi-group invariance testing was not computationally stable and results needs to be interpreted with caution. The change in the scaled Comparative Fit Index ($\Delta$CFI) was less than 0.01 across all model comparisons. This finding strongly supports full measurement invariance and indicates that the UWES assesses work engagement equivalently in males and females.
 
 ```{r InvarTab, echo=FALSE}
 # creating table 

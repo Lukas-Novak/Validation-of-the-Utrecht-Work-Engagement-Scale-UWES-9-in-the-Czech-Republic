@@ -11,7 +11,8 @@ lower_cov[upper.tri(lower_cov, diag = TRUE)] <- NA
 lower_df <- as.data.frame(lower_cov)
 
 # Optional: drop rows with all NA
-lower_df <- lower_df[rowSums(!is.na(lower_df)) > 0, ]
+lower_df <- lower_df[rowSums(!is.na(lower_df)) > 0, ] %>% 
+  mutate_all(~replace(., is.na(.),  " "))
 
 # Now use apa_table
 apa_table(lower_df,
