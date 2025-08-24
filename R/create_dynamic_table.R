@@ -1,7 +1,7 @@
 # Make sure you have these packages listed in your package's DESCRIPTION file under "Imports"
 #' @importFrom dplyr mutate bind_rows select slice rename_with if_else case_when group_by ungroup n row_number all_of filter lead lag cur_group_id any_of
 #' @importFrom tibble tibble add_column as_tibble
-#' @importFrom stringr str_detect str_remove
+#' @importFrom stringr str_detect str_remove str_extract str_remove_all
 #' @importFrom purrr map_df map reduce
 #' @importFrom tidyr pivot_wider
 #' @importFrom rlang set_names
@@ -46,6 +46,11 @@
 #' @param models_per_row An integer specifying how many models to display side-by-side
 #'   in wide format before wrapping to a new row. Defaults to `3`. Only applies
 #'   when there are more than 3 models.
+#' @param bold_fitted_model A logical value. If `TRUE`, the values in the 'Fitted Model'
+#'   row will be formatted as bold. Defaults to `FALSE`.
+#' @param bold_model_names A logical value. If `TRUE`, the model names in the
+#'   'Model' column (long format) or the model header (wide format) will be
+#'   formatted as bold. Defaults to `FALSE`.
 #'
 #' @return A formatted tibble (`tbl_df`) summarizing the DFI results for all
 #'   provided models, ready for reporting.
@@ -66,25 +71,12 @@
 #' # DFI_D <- dynamic::cfaHB(fit_object_D)
 #'
 #' # --- LONG FORMAT EXAMPLES ---
-#' # Get the default table for two models
-#' # create_dynamic_table(c("DFI_A", "DFI_B"))
-#'
-#' # Add a separator row and interpretation
-#' # create_dynamic_table(c("DFI_A", "DFI_B"), add_separator_rows = TRUE, add_interpretation = TRUE)
+#' # Make the model names bold
+#' # create_dynamic_table(c("DFI_A", "DFI_B"), bold_model_names = TRUE)
 #'
 #' # --- WIDE FORMAT EXAMPLES ---
-#' # With four models, the function automatically switches to wide format
-#' # create_dynamic_table(c("DFI_A", "DFI_B", "DFI_C", "DFI_D"))
-#'
-#' # Control wrapping by setting models_per_row
-#' # create_dynamic_table(c("DFI_A", "DFI_B", "DFI_C", "DFI_D"), models_per_row = 2)
-#'
-#' # Add a separator between the wrapped rows of models
-#' # create_dynamic_table(
-#' #   c("DFI_A", "DFI_B", "DFI_C", "DFI_D"),
-#' #   models_per_row = 2,
-#' #   add_separator_rows = TRUE
-#' # )
+#' # With four models, make the model names in the header bold
+#' # create_dynamic_table(c("DFI_A", "DFI_B", "DFI_C", "DFI_D"), bold_model_names = TRUE)
 #' }
 create_dynamic_table <- function(models,
                                  show_magnitude = TRUE,
@@ -93,7 +85,8 @@ create_dynamic_table <- function(models,
                                  remove_duplicated_model_names = TRUE,
                                  add_interpretation = FALSE,
                                  models_per_row = 3,
-                                 bold_fitted_model = FALSE) {
+                                 bold_fitted_model = FALSE,
+                                 bold_model_names = FALSE) {
   
   # --- Input Validation ---
   if (!is.character(models)) {
@@ -110,13 +103,10 @@ create_dynamic_table <- function(models,
   
   # --- Helper function to process each DFI object ---
   process_dfi_object <- function(dfi_object, model_name) {
-    
-    # --- FIX 1: Add validation to safely skip malformed or NULL objects ---
     if (is.null(dfi_object) || is.null(dfi_object$cutoffs) || is.null(dfi_object$fit)) {
       warning(paste("Skipping invalid or incomplete DFI object:", model_name), call. = FALSE)
-      return(NULL) # Return NULL to be ignored by purrr::map_df
+      return(NULL)
     }
-    # --- END FIX ---
     
     cutoffs_matrix <- dfi_object$cutoffs
     cutoffs_rownames <- rownames(cutoffs_matrix)
@@ -167,8 +157,8 @@ create_dynamic_table <- function(models,
           Interpretation = dplyr::if_else(
             Misspecification == "Fitted Model",
             dplyr::case_when(
-              RMSEA <= 0.06 & CFI >= 0.95 & SRMR <= 0.08 ~ "Good",
-              RMSEA <= 0.08 & CFI >= 0.90 & SRMR <= 0.10 ~ "Acceptable",
+              as.numeric(RMSEA) <= 0.06 & as.numeric(CFI) >= 0.95 & as.numeric(SRMR) <= 0.08 ~ "Good",
+              as.numeric(RMSEA) <= 0.08 & as.numeric(CFI) >= 0.90 & as.numeric(SRMR) <= 0.10 ~ "Acceptable",
               TRUE ~ "Poor"
             ),
             NA_character_
@@ -191,11 +181,14 @@ create_dynamic_table <- function(models,
   
   # --- DECIDE TABLE FORMAT (LONG vs. WIDE) ---
   if (num_models <= 3) {
+    # --- LONG FORMAT ---
+    if (bold_model_names) {
+      raw_table <- raw_table %>%
+        dplyr::mutate(Model = paste0("**", Model, "**"))
+    }
     return(raw_table)
-  }
-  
-  # --- START: ROBUST WIDE FORMAT LOGIC ---
-  if (num_models > 3) {
+  } else {
+    # --- WIDE FORMAT ---
     model_chunks <- split(unique(raw_table$Model), ceiling(seq_along(unique(raw_table$Model)) / models_per_row))
     all_blocks <- list()
     metrics <- setdiff(names(raw_table), c("Model", "Misspecification"))
@@ -229,10 +222,8 @@ create_dynamic_table <- function(models,
         dplyr::select(-sort_key)
       
       col_names <- "Misspecification"
-      # --- FIX 2: Swap header labels to shift "Misspecification" down one row ---
       header1_labels <- ""
       header2_labels <- "Misspecification"
-      # --- END FIX ---
       
       for (j in 1:models_per_row) {
         if (j > 1) {
@@ -241,7 +232,14 @@ create_dynamic_table <- function(models,
           header2_labels <- c(header2_labels, "")
         }
         col_names <- c(col_names, paste0(metrics, "_pos_", j))
-        model_name_label <- if (j <= length(chunk_models)) paste("Model", chunk_models[j]) else ""
+        
+        model_name_label <- if (j <= length(chunk_models)) {
+          full_label <- paste("Model", chunk_models[j])
+          if (bold_model_names) paste0("**", full_label, "**") else full_label
+        } else {
+          ""
+        }
+        
         metric_labels <- if (j <= length(chunk_models)) metrics else rep("", length(metrics))
         header1_labels <- c(header1_labels, model_name_label, rep("", length(metrics) - 1))
         header2_labels <- c(header2_labels, metric_labels)

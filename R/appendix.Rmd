@@ -12,11 +12,12 @@ lower_df <- as.data.frame(lower_cov)
 
 # Optional: drop rows with all NA
 lower_df <- lower_df[rowSums(!is.na(lower_df)) > 0, ] %>% 
-  mutate_all(~replace(., is.na(.),  " "))
+  mutate_if(is.numeric, round, 2) %>% 
+  mutate_all(~replace(., is.na(.),  " ")) 
 
 # Now use apa_table
 apa_table(lower_df,
-          caption = "Lower-triangular correlations between residuals",
+          caption = "Lower-triangular correlations between residuals of the final factor solution",
           note = "UWES = Utrecht Work Engagement Scale")
 ```
 
