@@ -81,7 +81,7 @@ publication_name_map <- c(
   "fit_three_factor_corr_seppala" = "5e. Modified 3F (8~~9)\n(Seppälä et al., 2009)",
   "fit_three_factor_corr_zecca" = "5f. Modified 3F (Zecca)\n(Zecca et al., 2015)",
   "fit_partial_bifactor" = "6a. Partial Bi-Factor\n(de Bruin & Henn, 2013)",
-  "fit_full_bifactor" = "6b. Full Bi-Factor Model"
+  "fit_full_bifactor" = "6b. Full Bi-Factor Model (de Bruin & Henn, 2013)"
 )
 
 # 6. GENERATE AND ARRANGE PLOTS
