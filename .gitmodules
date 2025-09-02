@@ -1,0 +1,3 @@
+[submodule "Supplementary_materials/dynamic"]
+	path = Supplementary_materials/dynamic
+	url = https://gitlab.com/lukas.novak/dynamic.git

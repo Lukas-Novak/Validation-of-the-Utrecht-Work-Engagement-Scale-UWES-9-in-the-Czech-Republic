@@ -26,53 +26,24 @@ author:
     affiliation   : "1"
     role:
       - Writing - Review & Editing
-
 affiliation:
   - id            : "1"
     institution   : "Palacky University Olomouc - Social Health Institute"
   - id            : "2"
     institution   : "The Czech Academy of Sciences, Institute of Psychology, Prague, Czech Republic"
-
-
 authornote: |
-
-
-
 abstract: |
-
   Introduction
   
     One or two sentences providing a **basic introduction** to the field,  comprehensible to a scientist in any discipline.
-  
-  Two to three sentences of **more detailed background**, comprehensible  to scientists in related disciplines.
-  
-  One sentence clearly stating the **general problem** being addressed by  this particular study.
-  
-
-  Methods 
-  
   Sample of 707 employees (Age: M = 43.65, SD = 10.08, Females: 38.47%) recruited from different companies in the Czech Republic was used for purpouses of this study. Neuroticism, extraversion, self-efficacy, spirituality, chronic health diseases and frequency of health risk behavior were measured.
-  
-  Results 
-  
   Higher UWES total score was reported in professional workers, chief workers and in people with higher vocational school or university. The confirmatory factor analysis (CFA) supported the original three-factor solution: χ2 (24) = 75.373; p < 0.001; CFI = 0.999; TLI = 0.999; RMSEA = 0.058; SRMR = 0.021. Measrement equivalence suggested that on configural, metric, scalar and strict level, the UWES assess work engagement invariantly between males and females. The UWES had an excelent internal consistency (α = 0.96, McDonald’s ω = 0.96) and its convergent validity was supported by positive association with extraversion, self-efficacy and by negative association with neuroticism. Logistic regression revealed that higher score in the UWES was associated with lower chance of developing skin diseases and pain of unclear origin. There was no association of the UWES and health risk behaviours such as smoking, alcohol drinking or illegal drug use.
-  
-  Conclusion
-  
    Two or three sentences explaining what the **main result** reveals in direct comparison to what was thought to be the case previously, or how the  main result adds to previous knowledge.
-  
-  One or two sentences to put the results into a more **general context**.
-  
-  Two or three sentences to provide a **broader perspective**, readily comprehensible to a scientist in any discipline.
-  
-  
 keywords          : "keywords"
 wordcount         : "X"
-
 bibliography      : ["r-references.bib"]
 link-citations    : yes
 linkcolor         : blue
-
 floatsintext      : no
 figurelist        : no
 tablelist         : no
@@ -80,10 +51,11 @@ footnotelist      : no
 linenumbers       : yes
 mask              : no
 draft             : no
-
 documentclass     : "apa6"
 classoption       : "man"
 output            : papaja::apa6_word
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include = FALSE}
@@ -98,7 +70,7 @@ knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
 ```
 
 ```{r loading libraries, include=FALSE}
-packages=c("psych","dplyr","lavaan","base","foreign","Routliers","MVN","parameters", "EFA.MRFA","RGenData","semPlot","psycho","apa","corx","effectsize","qwraps2","finalfit","ggstatsplot","dunn.test","devtools","rticles","ICC.Sample.Size","tidyverse","magrittr","osfr","expss","gtsummary","huxtable","equaltestMI","haven","rcompanion","ufs","semTools","semPlot","insight","flextable") 
+packages=c("psych","dplyr","lavaan","base","foreign","Routliers","MVN","parameters","cocor","insight", "EFA.MRFA","RGenData","semPlot","psycho","apa","corx","effectsize","qwraps2","finalfit","ggstatsplot","dunn.test","devtools","rticles","ICC.Sample.Size","tidyverse","magrittr","osfr","expss","gtsummary","huxtable","equaltestMI","haven","rcompanion","ufs","semTools","semPlot","insight","flextable","officer","officedown") 
 
 # Install packages not yet installed
 installed_packages <- packages %in% rownames(installed.packages())
@@ -130,16 +102,58 @@ if (any(Miss.Pack == FALSE)) {
 }
 library("papaja")
 #________________________________________________________________________-
+# install papaja currently not on the CRAN
+Miss.Pack=any(rownames(installed.packages()) == "dynamic")
+if (any(Miss.Pack == FALSE)) {
+  devtools::install_local("Supplementary_materials/dynamic/")
+}
+library("dynamic")
+#________________________________________________________________________-
+# Function to check, install and load psychtoolbox package
+install_and_load_psychtoolbox <- function() {
+  external_lib <- "../perth_alexithymia_questionnaire_validation/Packages/"
+  if (file.exists(external_lib) && "psychtoolbox" %in% list.files(external_lib)) {
+    library("psychtoolbox", lib.loc = external_lib)
+    cat("Loaded psychtoolbox from external library:", external_lib, "\n")
+  } else {
+    if ("psychtoolbox" %in% rownames(installed.packages())) {
+      library("psychtoolbox")
+      cat("Loaded psychtoolbox from default library\n")
+    } else {
+      cat("psychtoolbox not found. Installing from GitLab...\n")
+      if (!"devtools" %in% rownames(installed.packages())) {
+        install.packages("devtools")
+      }
+      library(devtools)
+      devtools::install_gitlab("lukas.novak/psychtoolbox")
+      library("psychtoolbox")
+      cat("Successfully installed and loaded psychtoolbox\n")
+    }
+  }
+}
+
+# Run the function
+install_and_load_psychtoolbox()
+
+# Helper functions:
+# Cache Dynamic Fit Index (DFI) Cutoffs for Categorical Multi-Factor CFA Models
+source("/home/rstudio/uwes-validation//R/cache_dynamic.R")
+source("/home/rstudio/uwes-validation//R/create_dynamic_table.R")
+
+# Helper function to format Cohen's q
+format_q <- function(q_value) {
+  return(format(round(q_value, 2), nsmall = 2))
+}
 ```
 
 # Introduction
 
-Based on theoretical assumptions and previous empirical evidence [@Chan_Ho_Ip_Wong_2020] we expected significant positive association between self-efficacy and UWES total score (Hypotheses x). 
+Based on theoretical assumptions and previous empirical evidence [@Chan_Ho_Ip_Wong_2020] we expected significant positive association between self-efficacy and UWES total score (Hypotheses x).
 
 \newpage
 
 # Methods
-  
+
 ```{r data load and variable recode, include=FALSE}
 path_to_dat = paste0(getwd(),"/Data")
 data.raw=readRDS(paste0(path_to_dat,"/UWES_study.Rds"))
@@ -251,6 +265,36 @@ mvn(data = select(.data = data, starts_with("UWES_")),
 # summary: normality in UWES can be rejected  
 ```
 
+```{r multicollinearity check, include=FALSE}
+# MULTICOLLINEARITY CHECK
+# Extract UWES items for correlation matrix
+uwes_items <- select(.data = data, matches("UWES_\\d"))
+
+# Calculate polychoric correlation matrix (appropriate for ordinal data)
+library(psych)
+poly_cor <- polychoric(uwes_items)
+
+# Check correlation matrix for high correlations (> 0.90)
+high_cor <- which(abs(poly_cor$rho) > 0.90 & poly_cor$rho != 1, arr.ind = TRUE)
+
+if(nrow(high_cor) > 0) {
+  cat("High correlations (> 0.90) found between items:\n")
+  for(i in 1:nrow(high_cor)) {
+    item1 <- colnames(poly_cor$rho)[high_cor[i,1]]
+    item2 <- colnames(poly_cor$rho)[high_cor[i,2]]
+    cor_val <- round(poly_cor$rho[high_cor[i,1], high_cor[i,2]], 3)
+    cat(paste(item1, "and", item2, ":", cor_val, "\n"))
+  }
+} else {
+  cat("No extreme multicollinearity detected (all correlations < 0.90)\n")
+}
+
+# Alternative: Calculate VIF-like measure using determinant
+det_cor <- det(poly_cor$rho)
+cat(paste("Correlation matrix determinant:", round(det_cor, 4), "\n"))
+cat("(Values close to 0 indicate multicollinearity issues)\n")
+```
+
 ```{r Homoscedasticity_and_other_assumptions, include=FALSE}
 # fake regression 
 random=rchisq(nrow(data), 5) # generate random data
@@ -262,14 +306,13 @@ bp.t.1 = car::ncvTest(fake_regres) # homogeneity of variances can be rejected
 # bp.t.1=lmtest::bptest(fake_regres) 
 ```
 
-## Participants  
-  From the survey (*n* = `r nrow(data.rec)`), we excluded participants being either without work (*n* = `r nrow(filter(data.rec, Economical_status == "Without work"))`), pensioners (*n* = `r nrow(filter(data.rec, Economical_status == "Pensioner"))`) or those who did not answer a question regarding economical status (*n* = `r sum(is.na(data.rec$Economical_status),na.rm = T)`). This resulted in `r nrow(data.work)` participants. To increase data quality, we removed subjects finishing the survey in a short period of time i.e. < 15 minutes (*n* = `r nrow(filter(data.rec, status == "SPEEDER"))`). The survey typically lasted > 30 minutes. We also excluded respondents answering discrepantly to quality check items (*n* = `r nrow(data.work)-nrow(data)-nrow(filter(data.rec, status == "SPEEDER"))`). These items included information about weight, height and age. Tolerance in these control questions was set on 2 kilograms, 2 centimeters, and 2 years respectively. After removal of these subjects, the final number of participants was `r nrow(data)` (Age: *M* = `r mean(data$Age, na.rm = T) %>% round(digits = 2)`, *SD* = `r sd(data$Age, na.rm = T) %>% round(digits = 2)`, Females: `r round(per.male_female.s1[["Female"]]*100,digits = 2)`%).   
+## Participants
+
+From the survey (*n* = `r nrow(data.rec)`), we excluded participants being either without work (*n* = `r nrow(filter(data.rec, Economical_status == "Without work"))`), pensioners (*n* = `r nrow(filter(data.rec, Economical_status == "Pensioner"))`) or those who did not answer a question regarding economical status (*n* = `r sum(is.na(data.rec$Economical_status),na.rm = T)`). This resulted in `r nrow(data.work)` participants. To increase data quality, we removed subjects finishing the survey in a short period of time i.e. \< 15 minutes (*n* = `r nrow(filter(data.rec, status == "SPEEDER"))`). The survey typically lasted \> 30 minutes. We also excluded respondents answering discrepantly to quality check items (*n* = `r nrow(data.work)-nrow(data)-nrow(filter(data.rec, status == "SPEEDER"))`). These items included information about weight, height and age. Tolerance in these control questions was set on 2 kilograms, 2 centimeters, and 2 years respectively. After removal of these subjects, the final number of participants was `r nrow(data)` (Age: *M* = `r mean(data$Age, na.rm = T) %>% round(digits = 2)`, *SD* = `r sd(data$Age, na.rm = T) %>% round(digits = 2)`, Females: `r round(per.male_female.s1[["Female"]]*100,digits = 2)`%).
 
 ## Measures
 
 ### Utrecht Work Engagement Scale (UWES)
-
-
 
 ```{r DSES rel, include=FALSE}
 # DSES  
@@ -278,7 +321,7 @@ DSES.rel=ufs::scaleStructure(select(starts_with(c("DSES_")), .data = data), digi
 
 ### Daily Spiritual Experience Scale (DSES)
 
-  Internal consistency of the DSES was excellent: Cronbach's $\alpha$ = `r round(DSES.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(DSES.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(DSES.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(DSES.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(DSES.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(DSES.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`].
+Internal consistency of the DSES was excellent: Cronbach's $\alpha$ = `r round(DSES.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(DSES.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(DSES.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(DSES.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(DSES.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(DSES.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`].
 
 ```{r GSES rel, include=FALSE}
 # GSES  
@@ -287,7 +330,7 @@ GSES.rel=ufs::scaleStructure(select(starts_with(c("GSES_")), .data = data), digi
 
 ### General Self Efficacy Scale (GSES)
 
-  Internal consistency of the GSES was excellent: Cronbach's $\alpha$ = `r round(GSES.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(GSES.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(GSES.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(GSES.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(GSES.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(GSES.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
+Internal consistency of the GSES was excellent: Cronbach's $\alpha$ = `r round(GSES.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(GSES.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(GSES.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(GSES.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(GSES.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(GSES.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`].
 
 ```{r BFI_N rel, include=FALSE}
 # BFI_N  
@@ -296,781 +339,128 @@ BFI_N.rel=ufs::scaleStructure(select(starts_with(c("BFI_N_")), .data = data), di
 
 ### Big Five Inventory - Neuroticism subscale (BFI_N)
 
-  Internal consistency of the BFI_N was good: Cronbach's $\alpha$ = `r round(BFI_N.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(BFI_N.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(BFI_N.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(BFI_N.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(BFI_N.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(BFI_N.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
+Internal consistency of the BFI_N was good: Cronbach's $\alpha$ = `r round(BFI_N.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(BFI_N.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(BFI_N.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(BFI_N.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(BFI_N.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(BFI_N.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`].
 
 ```{r BFI_E rel, include=FALSE}
 # BFI_E  
 BFI_E.rel=ufs::scaleStructure(select(starts_with(c("BFI_E_")), .data = data), digits = 2, poly = TRUE, samples = 5000)
 ```
+
 ### Big Five Inventory - Extraversion subscale (BFI_E)
 
-  Internal consistency of the BFI_E was good: Cronbach's $\alpha$ = `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(BFI_E.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. 
+Internal consistency of the BFI_E was good: Cronbach's $\alpha$ = `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(BFI_E.rel$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(BFI_E.rel$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(BFI_E.rel$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`].
 
 ## Data analysis
-  Inspection of histograms and results of the Martia test of multivariate skewness and kurtouses indicated that normality assumption is violated in the UWES items. Moreover, examination of residual plots and result of the Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, *df* = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`) suggested heteroscedasticity. Thus, methods not requiring parametric assumptions were used. The Little MCAR test provided an evidence that missing values are missing on random. Thus, as there was not a large number of missing values (*n* = `r nrow(filter(data, is.na(UWES_9)))`), incomplete cases were deleted listwise.
-  Factor structure of the instrument was investigated via Confirmatory Factor Analysis (CFA). Original 3 dimensional factor structure was tested along with two and one factor solution, frequently reported across studies - see review of @Kulikowski_2017. Item composition of tested factor solutions can be found in the study of @Willmer_2019. Kaiser Meyer Olkin (KMO) measure together with Bartlett test of sphericity were applied to assess factorability of the UWES data. Five indices were used to inspect model fit: 1) Mean Square Error of Approximation (RMSEA); 2) Standardized Root Mean Square Residual (SRMR); 3) chi-square test; 4) Comparative Fit index (CFI) and 5) Tucker-Lewis index (TLI). In the first two indices, values below 0.08 reflects an acceptable fit and below 0.05 a good fit [@civelek2018essentials; @hoe_issues_2008; @vandenberg_review_2000; @hooper_structural_2008]. In the last two indices, values above 0.95 suggest an acceptable fit [@jackson_reporting_2009] and above 0.97 a good fit [@schermelleh_engel_evaluating_2003]. Diagonally Weighted Least Squares estimator (DWLS) on polychoric correlation matrix was used to fit CFA models.  
+
+Inspection of histograms and results of the Mardia test of multivariate skewness and kurtosis indicated that the normality assumption is violated in the UWES items. Moreover, examination of residual plots and the result of the Breusch-Pagan test ($\chi^2$ = `r round(bp.t.1$ChiSquare,digits=2)`, *df* = `r bp.t.1$Df`, `r format_p(bp.t.1$p)`) suggested heteroscedasticity. Examination of the polychoric correlation matrix revealed no extreme multicollinearity among items, with all inter-item correlations below 0.90. Thus, methods not requiring parametric assumptions were used. The Little MCAR test provided evidence that missing values are missing on random. Thus, as there was not a large number of missing values (*n* = `r nrow(filter(data, is.na(UWES_9)))`) incomplete cases were deleted listwise.
+
+The instrument's factor structure was investigated via Confirmatory Factor Analysis (CFA). A series of competing models was specified, reflecting those most prominent in the validation literature. For the full overview and model definitions, see Figure 1 below. The analysis included the original correlated three-factor model (Vigor, Dedication, Absorption) and a unidimensional one-factor model (Schaufeli, Bakker, & Salanova, 2006). To account for the consistently high inter-factor correlations, a hierarchical model, with the three factors loading onto a single second-order Work Engagement factor, was also tested (Domínguez-Salas et al., 2022). Additionally, several alternative configurations were examined, including various two-factor solutions (e.g., Chaudhary, Rangnekar, & Barua, 2012), a partial and full bi-factor model (de Bruin & Henn, 2013), and modified three-factor models with correlated error terms (e.g., Simbula et al., 2013).
+
+```{r printOfModelsFigure, message=FALSE, warning=FALSE, include=FALSE}
+# Justin print long list of all models
+
+# Check if we need to regenerate the plot
+source_file <- "./R/sem_plot_all_models.R"
+output_file <- "./Figures/Figure_1_All_CFA_Models_Final.svg"  # Adjust to your actual output filename
+
+# Function to check if plot needs regeneration
+needs_regeneration <- function(source_file, output_file) {
+  # Check if output file exists
+  if (!file.exists(output_file)) {
+    return(TRUE)
+  }
   
-  Invariance of a measurement was explored between males and females. Configural, metric, scalar and strict invariance was supported, in the mutigoup CFA if $\Delta$ CFA was < 0.01 between invariance models [@Putnick_Bornstein_2016]. The scale reliability was measured by the McDonald’s $\omega$ and also by the Cronbach’s $\alpha$. Convergent validity was inspected by zero order Spearman rank correlations with self-efficacy, neuroticism and with extroversion. Divergent validity was measured by correlation of the UWES with spirituality.
+  # Check if source file is newer than output file
+  source_mtime <- file.mtime(source_file)
+  output_mtime <- file.mtime(output_file)
   
-  Due to the non-normal distribution of the data, an association between the chronic health illnesses, health risk behaviour and UWES was calculated using logistic regression. In the logistic models, outcome variable was presence of an individual chronic illness or practise of health risk behaviour. The UWES score was set as a predictor. Education and work position were covariates. Both crude and adjusted effect were estimated. The p-values were corrected by Bonferroni correction.         
-  
-  Comparison between socio-demographic groups in the UWES total and subscale score, was performed by Mann–Whitney U test and by Kruskal–Wallis test. For post-hoc testing, Games-Howell and Dunn test were utilized. In these two tests, effect size was reported in Vargha and Delaney $\hat{A}$ [@vargha_critique_2000]. The interpretation of the $\hat{A}$ is as follows: small effect (0.56 - 0.64), medium effect (0.64 - 0.71), large effect (> 0.71). All statistical calculations were conducted in `r cite_r()`. Primary packages used for analysis included: *lavaan* [@R-lavaan], *papaja* [@R-papaja] *psych* [@R-psych], *usf* [@R-ufs].     
-  
+  return(source_mtime > output_mtime)
+}
+
+# Only run the expensive plotting code if needed
+if (needs_regeneration(source_file, output_file)) {
+  cat("Regenerating plot - source code has changed or output doesn't exist\n")
+  source(source_file)
+} else {
+  cat("Skipping plot generation - no changes detected\n")
+}
+```
+
+```{r TestedModels, include=FALSE}
+op_section <- prop_section(type = "continuous")
+close_section <- prop_section(
+    page_size = page_size(orient = "landscape", width = 15, height = 13), 
+    type = "continuous")
+```
+
+```{r}
+block_section(op_section)
+```
+
+```{r figure-uwes-models, echo=FALSE, fig.cap="Confirmatory Factor Analysis Models for UWES-9. All 14 unique tested models are displayed with their respective factor structures and correlated errors where applicable.", fig.width=20, fig.height=14, dpi=300, out.width="100%", out.height="100%"}
+
+knitr::include_graphics("./Figures/Figure_1_All_CFA_Models_Final.svg")
+```
+
+```{r}
+block_section(close_section)
+```
+
+Kaiser-Meyer-Olkin (KMO) measure, together with the Bartlett test of sphericity, was applied to assess the factorability of the UWES data. Five indices were used to inspect model fit: 1) Mean Square Error of Approximation (RMSEA); 2) Standardised Root Mean Square Residual (SRMR); 3) chi-square test; 4) Comparative Fit index (CFI); and 5) Tucker-Lewis index (TLI). While these traditional fit indices are widely reported, their fixed cutoff values (e.g., RMSEA \< .06, CFI \> .95) have been criticized for poor generalizability, particularly because their performance is highly dependent on the specific characteristics of the model being tested (McNeish & Wolf, 2022). Therefore, to provide a more rigorous and accurate assessment of model fit, we adopted the Dynamic Fit Index (DFI) approach (McNeish & Wolf, 2021). This method generates customized fit index cutoffs tailored to the unique characteristics of each model, such as the number of factors, items, sample size, and the magnitude of factor loadings. Using Monte Carlo simulation, the DFI method generates a distribution of fit indices for the researchers' model under the assumption that it is correctly specified (Level-0) and compares it to distributions where the model contains a degree of hypothetical misspecification (e.g., Level-1, containing minor omitted cross-loadings). This process yields a direct, empirical benchmark (the Level-0 cutoff) representing the expected fit for a well-fitting model with the current data's characteristics. The Weighted Least Squares Mean and Variance adjusted (WLSMV) on the polychoric correlation matrix was used to fit CFA models.
+
+The invariance of a measurement was explored between males and females. Configural, metric, scalar, and strict invariance were supported if $\Delta$CFI was \< 0.01 between invariance models. The scale reliability was measured by McDonald’s $\omega$ and also by Cronbach’s $\alpha$. In addition to these, model-based Composite Reliability (CR) was calculated to assess the internal consistency of each factor, with values \> 0.70 indicating good reliability (Fornell & Larcker, 1981).
+
+Construct validity was evaluated in several ways. First, we explored internal convergent validity during CFA, which assessed the degree to which items of a specific factor are related. More specifically, this was tested using the Average Variance Extracted (AVE), with values \> 0.50 considered acceptable (Fornell & Larcker, 1981). Next, we assessed internal discriminant validity, which evaluated whether the factors are statistically distinct. For this purpose, the Heterotrait-Monotrait Ratio of Correlations (HTMT) test was used. If values from this test do not reach 0.90, discriminant validity is supported (Henseler et al., 2015). In the further step, we tested convergent and divergent validity externally, i.e., via zero-order Spearman rank correlations with self-efficacy, neuroticism, and extraversion (convergent), and with spirituality (divergent). Relatedly, to provide a formal test of external discriminant validity, the magnitudes of the dependent correlations between the UWES subscales and these external criteria were compared using the z-test from Hittner, May, and Silver (2003). To quantify the magnitude of these differences, we calculated Cohen's q as an effect size. Cohen's q values are interpreted as follows: q $\approx$ 0.10 indicates a small effect, q $\approx$ 0.30 a medium effect, and q $\approx$ 0.50 a large effect.
+
+Due to the non-normal distribution of the data, an association between the chronic health illnesses, health risk behaviour, and UWES was calculated using logistic regression. In the logistic models, the outcome variable was the presence of an individual chronic illness or the practice of health risk behaviour. The UWES score was set as a predictor. Education and work position were covariates. Both crude and adjusted effects were estimated. The p-values were corrected by the Bonferroni correction.
+
+Comparisons between socio-demographic groups in the UWES total and subscale scores were performed using the Kruskal-Wallis test. Significant omnibus tests were followed by post-hoc analysis using the Games-Howell test for groups with unequal variances or Dunn’s test where variances were equal. To quantify the magnitude of effects, epsilon-squared ($\epsilon^2$) was reported for the overall Kruskal-Wallis test, while Cohen's *d* and the Rank-Biserial Correlation (*rbc*) were reported for the respective post-hoc comparisons. The interpretation of effect sizes followed established conventions: for epsilon-squared, values of 0.01, 0.06, and 0.14 are considered small, medium, and large effects, respectively. For Cohen's *d*, benchmarks of 0.2, 0.5, and 0.8 were used for small, medium, and large effects, and for the rank-biserial correlation, values of 0.1, 0.3, and 0.5 were used to interpret small, medium, and large effects. All statistical calculations were conducted in `r cite_r()`. Primary packages used for analysis included: *lavaan* [\@R-lavaan], *papaja* [\@R-papaja], *psych* [\@R-psych], and *usf* [\@R-ufs].
+
 # Results
 
 ## Socio-demographic results
 
-Results of the Kruskal-Wallis test followed by the Games-Howell and the Dunn test revealed that there are significant differences in socio-demographic groups in the UWES total and subscale scores: professional workers had significantly higher score in the UWES total and Vigor, Absorption and Dedication subscales scores as compared with workers. Similarly, chief workers reported higher UWES total score and also Dedication and Vigor subscale scores compared with workers (see Table 1). In terms of education, people with higher vocational school or university had significantly higher total and Absorption subscale score as compared with people with non graduation high school or lower education (Table 1). There were not other significant differences between socio-demographic groups. For means and standard deviations of the UWES total and subscale score see online Supplementary table 1.
+Results of the Kruskal-Wallis test, followed by the Games-Howell and the Dunn test, revealed that there are significant differences in socio-demographic groups in the UWES total and subscale scores: professional workers had significantly higher scores in the UWES total, Dedication, and Absorption subscales as compared with workers. Similarly, managers reported higher UWES total scores and also higher Dedication, Absorption, and Vigor subscale scores compared with workers (see Table \@ref(tab:SocDemTabPrint)).In terms of education, individuals with a higher vocational school or university degree had a significantly higher total UWES score compared to those with a non-graduation high school or lower education. For the Absorption subscale, the university-educated group scored significantly higher than both the non-graduation high school and the high school-educated groups (Table \@ref(tab:SocDemTabPrint)). Furthermore, a significant difference was found based on family status, where individuals in a relationship reported a higher score on the Absorption subscale than those not in a relationship. There were no other significant differences between the tested socio-demographic groups.
 
-```{r socio-demographic group comparison and descriptives, include=FALSE}
-# UWES
-# Gender
-car::leveneTest(as.numeric(data$UWES) ~ data$Gender, data = data, center = mean) 
-# Education
-car::leveneTest(as.numeric(data$UWES) ~ data$Education, data = data, center = mean) # heteroscedasticity
-# Religiosity
-car::leveneTest(as.numeric(data$UWES) ~ data$Religiosity, data = data, center = mean) 
-# Family status
-car::leveneTest(as.numeric(data$UWES) ~ data$Family_status, data = data, center = mean) 
-# Work_position
-car::leveneTest(as.numeric(data$UWES) ~ data$Work_position, data = data, center = mean) # heteroscedasticity
-#....................................................................................................................
-# UWES
-# Gender
-car::leveneTest(as.numeric(data$UWES_D) ~ data$Gender, data = data, center = mean) # heteroscedasticity
-# Education
-car::leveneTest(as.numeric(data$UWES_D) ~ data$Education, data = data, center = mean)
-# Religiosity
-car::leveneTest(as.numeric(data$UWES_D) ~ data$Religiosity, data = data, center = mean) 
-# Family status
-car::leveneTest(as.numeric(data$UWES_D) ~ data$Family_status, data = data, center = mean) 
-# Work_position
-car::leveneTest(as.numeric(data$UWES_D) ~ data$Work_position, data = data, center = mean) # heteroscedasticity
-#....................................................................................................................
-# UWES
-# Gender
-car::leveneTest(as.numeric(data$UWES_A) ~ data$Gender, data = data, center = mean) # heteroscedasticity
-# Education
-car::leveneTest(as.numeric(data$UWES_A) ~ data$Education, data = data, center = mean) # heteroscedasticity
-# Religiosity
-car::leveneTest(as.numeric(data$UWES_A) ~ data$Religiosity, data = data, center = mean) 
-# Family status
-car::leveneTest(as.numeric(data$UWES_A) ~ data$Family_status, data = data, center = mean) 
-# Work_position
-car::leveneTest(as.numeric(data$UWES_A) ~ data$Work_position, data = data, center = mean) # heteroscedasticity
-#....................................................................................................................
-# UWES
-# Gender
-car::leveneTest(as.numeric(data$UWES_V) ~ data$Gender, data = data, center = mean) 
-# Education
-car::leveneTest(as.numeric(data$UWES_V) ~ data$Education, data = data, center = mean) # heteroscedasticity
-# Religiosity
-car::leveneTest(as.numeric(data$UWES_V) ~ data$Religiosity, data = data, center = mean) 
-# Family status
-car::leveneTest(as.numeric(data$UWES_V) ~ data$Family_status, data = data, center = mean) 
-# Work_position
-car::leveneTest(as.numeric(data$UWES_V) ~ data$Work_position, data = data, center = mean) # heteroscedasticity
+```{r SocDemTableCreation, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
+# Define grouping and outcome variables
+my_groups <- c("Gender", "Education", "Family_status", "Religiosity", "Work_position")
+my_outcomes <- c("UWES", "UWES_D", "UWES_A", "UWES_V")
 
+# Run the entire analysis with one command
+soc_dem_tb <- mult.g.comp(
+    df = data,
+    groups = my_groups,
+    outcome.var = my_outcomes,
+    short_results = FALSE, # Set to FALSE to get detailed statistics (like in your old code)
+    show_non_significant_results = FALSE 
+) 
 
-# differences between genders
-# total score
-wilcox.test(UWES ~ Gender, data = data)
-
-# Vigor subscale
-wilcox.test(UWES_V ~ Gender, data = data)
-
-# Dedication subscale
-wilcox.test(UWES_D ~ Gender, data = data)
-t.test(UWES_D ~ Gender, data = data) # Welsh t-test
-
-
-# Absorption subscale
-wilcox.test(UWES_A ~ Gender, data = data)
-t.test(UWES_A ~ Gender, data = data) # Welsh t-test
+op_section <- prop_section(type = "continuous")
+close_section <- prop_section(
+    page_size = page_size(orient = "landscape", width = 19, height = 24), 
+    type = "continuous")
 ```
 
-```{r table one - first part from UWES total score, include=FALSE}
-desc.table = data %>%
-    pivot_longer(c("Gender","Education", "Family_status", "Religiosity","Work_position"),
-                 names_to = "key", values_to = "value") %>%
-    group_by(key,value) %>%
-    summarise (mean = round(mean(UWES, na.rm = T),digits = 2),
-               sd = round(sd(UWES, na.rm = T),digits = 2),
-               n = n()) %>%
-  mutate(percent = n / sum(n)*100)
-
-
-data.to.exper = data %>%
-    pivot_longer(c("Gender","Education","Family_status","Religiosity","Work_position"),
-                 names_to = "key", values_to = "value") %>%
-    group_by(key,value) %>%
-    summarise (mean = round(mean(UWES, na.rm = T),digits = 2),
-               sd = round(sd(UWES, na.rm = T),digits = 2),
-               UWES = UWES,
-               n = n()) %>% 
-  mutate(percent = n / sum(n)*100) 
-
-#..............................................................................................
-# By the command below, there is need to explore, where are significnat differences between socio-demographic groups
-#..............................................................................................
- stat.tab.1=
-     data.to.exper %>%
-     group_by(key) %>% 
-     do(., kruskal.test(.$UWES~.$value) %>% tidy) %>% 
-     mutate(UWES = "UWES") %>%
-     mutate(firstrowforvar=T) %>% 
-     select(key, UWES, statistic, parameter, p.value, firstrowforvar) 
-
- table1.categorical.both <- desc.table %>%
-   group_by(key) %>%
-   # we join on firstrowforvar to make sure we don't duplicate the tests
-   mutate(firstrowforvar=row_number()==1) %>%
-   left_join(., stat.tab.1, by=c("key", "firstrowforvar")) %>%
-   # this is gross, but we don't want to repeat the variable names in our table
-   ungroup() %>%
-   mutate(Variables = ifelse(firstrowforvar==T, as.character(key), NA)) %>%
-   select(Variables, value, n, percent,mean,sd, statistic, parameter, p.value)
-#..............................................................................................
-# there are significat differences in: Education, Family status and work_position 
-#..............................................................................................
-# removing results of Kruscal-Wallis test
-table1.categorical.both = table1.categorical.both %>% 
-  select(Variables,value,n, percent,mean,sd) %>% 
-  mutate(mean = str_replace(mean, "NaN", NA_character_)) %>% 
-  janitor::remove_empty(which = c("rows")) %>% 
-  filter(!is.na(value) & !is.na(mean)) # removing missing values
-#.............................................................................
-#.............................................................................
-# post hoc testing
-#.............................................................................
-#.............................................................................
-# Games-Howell for Education 
-oa.edu=rstatix::games_howell_test(UWES ~ Education, data = data, detailed = T) 
-# Dunn test 
-dunn.test(data$UWES, data$Education, list = T, altp = T, method = "bonferroni", kw=T, label = T, table = T)
-# selecting significnat results from Games-Howell
-edu.join=oa.edu %>% filter(p.adj < 0.05) %>%
-  select(group1,group2,df,statistic,p.adj) %>%
-  rename(value=group1)
-#  Merging into table 1  
-table.continuous =
-  full_join(table1.categorical.both, edu.join)
-# merging ES into table 1 
-# extracting significant comparistons from the Post-hoc test
-edu.es.g=oa.edu %>%
-  filter(p.adj < 0.05) %>% 
-  select(group1,group2)
-# extracting ES from VDA
-ES.edu=multiVDA(x = data$UWES, g = data$Education, statistic = "VDA", digits = 2) %>%
-  as.data.frame() %>%
-  separate(col = pairs.Comparison, sep = " - ", into = c("group1","group2")) %>% 
-  filter(group1 == edu.es.g$group1 & group2 == edu.es.g$group2) %>%  
-  select(group1,group2,pairs.VDA) %>% 
-  rename(value = group1)
-#  Merging into table 1  
-table.continuous =
-  full_join(table.continuous, ES.edu)
-#................................................
-# Family status 
-#................................................
-# Games-Howell for Family status 
-uwes.fs=rstatix::games_howell_test(UWES ~ Family_status, data = data, detailed = T) 
-# Dunn test 
-# du=FSA::dunnTest(UWES~ Family_status,data = data, method="bonferroni")
-# du=du$res %>% as_tibble()
-# after post hoc testing, the resutls were not significant
-#................................................
-# Work_position
-#................................................
-# Dunn test 
-dunn.test(data$UWES, data$Work_position, list = T, altp = T, method = "bonferroni", kw=T, label = T, table = T)
-# Games-Howell for Work_position 
-uwes.wp=rstatix::games_howell_test(UWES ~ Work_position, data = data, detailed = T) 
-# selecting significnat results from Games-Howell
-uwes.join=uwes.wp %>% filter(p.adj < 0.05) %>%
-  select(group1,group2,df,statistic,p.adj) %>%
-  rename(value=group1)
-#  Merging into table 1  
-table.continuous.2 =
-  full_join(table1.categorical.both, uwes.join)
-# merging ES into table 1 
-# extracting significant comparistons from the Post-hoc test
-wp.es.g=uwes.wp %>%
-  filter(p.adj < 0.05) %>% 
-  select(group1,group2)
-# extracting ES from VDA
-ES.wp=multiVDA(x = data$UWES, g = data$Work_position, statistic = "VDA", digits = 2) %>%
-  as.data.frame() %>%
-  separate(col = pairs.Comparison, sep = " - ", into = c("group1","group2")) %>% 
-  filter(group1 == wp.es.g$group1 & group2 == wp.es.g$group2) %>%  
-  select(group1,group2,pairs.VDA) %>% 
-  rename(value = group1)
-#  Merging into table 1  
-table.continuous.2 =
-  full_join(table.continuous.2, ES.wp)
-
-# removing empty rows and NaNs 
-two.var.tab=full_join(table.continuous, table.continuous.2) %>%
-    mutate(mean = str_replace(mean, "NaN", NA_character_)) %>% 
-  janitor::remove_empty(which = c("rows"))
-
-# removing duplicites
-two.var.tab = two.var.tab %>%
-  group_by(Variables, value) %>% 
-  mutate(duplicate = n()) %>% # count number of duplicite cases
-  mutate(to.rm = ifelse(duplicate > 1 & is.na(group2),TRUE,FALSE)) %>%  
-  filter(to.rm == FALSE) %>% 
-  ungroup() %>% 
-  select(!c("to.rm","duplicate"))
-
-# sorting working status - extracting positions from original data frame
-  sort.bypos = data$Work_position %>% levels()  # selecting order based on which we want to sort variable
-  
-# arranging
-  two.var.tab = two.var.tab %>% 
-  arrange(factor(value, levels = sort.bypos)) %>%  
-# removing duplicate variable names
-  mutate(to.rm2 = ifelse(duplicated(Variables) & !is.na(Variables),TRUE,FALSE)) %>% 
-  mutate(Variables = ifelse(to.rm2 == TRUE,NA_character_, Variables)) %>% 
-  select(!c("to.rm2"))
-#................................
-# formatting table
-#...............................
-two.var.tab = two.var.tab %>% 
-  mutate("UWES_T: M(SD)" = paste0("",mean," (",sd,")"),
-         "n(%)" = paste0("",n," ","(",round(percent,digits = 0),"%)"),
-         Gr.dif.UWES.total = paste0("",group2,": ","x2(",round(df,digits = 0),")","=",round(statistic,digits = 2),
-                                    "", format_p(p.adj,stars_only = T),", A=",pairs.VDA), # there are stars only to save space
-         Gr.dif.UWES.total = str_replace(Gr.dif.UWES.total, pattern = "(?<=^NA:)( .*)", replacement = ""),
-         Gr.dif.UWES.total = str_replace(Gr.dif.UWES.total, pattern = "^NA:", replacement = "")) %>% 
-  select(Variables,value,"n(%)","UWES_T: M(SD)",Gr.dif.UWES.total) 
+```{r}
+block_section(op_section)
 ```
 
-```{r table one - second part from UWES Dedication subscale score, include=FALSE}
-desc.table.ded = data %>%
-    pivot_longer(c("Gender","Education", "Family_status", "Religiosity","Work_position"),
-                 names_to = "key", values_to = "value") %>%
-    group_by(key,value) %>%
-    summarise (mean = round(mean(UWES_D, na.rm = T),digits = 2),
-               sd = round(sd(UWES_D, na.rm = T),digits = 2),
-               n = n()) %>%
-  mutate(percent = n / sum(n)*100)
-
-
-data.to.exper.ded = data %>%
-    pivot_longer(c("Gender","Education","Family_status","Religiosity","Work_position"),
-                 names_to = "key", values_to = "value") %>%
-    group_by(key,value) %>%
-    summarise (mean = round(mean(UWES_D, na.rm = T),digits = 2),
-               sd = round(sd(UWES_D, na.rm = T),digits = 2),
-               UWES_D = as.numeric(UWES_D),
-               n = n()) %>% 
-  mutate(percent = n / sum(n)*100) 
-
-#..............................................................................................
-# By the command below, there is need to explore, where are significnat differences between socio-demographic groups
-#..............................................................................................
- stat.tab.ded=
-     data.to.exper.ded %>%
-     group_by(key) %>% 
-     do(., kruskal.test(.$UWES_D~.$value) %>% tidy) %>% 
-     mutate(UWES_D = "UWES_D") %>%
-     mutate(firstrowforvar=T) %>% 
-     select(key, UWES_D, statistic, parameter, p.value, firstrowforvar) 
-
- table1.categorical.both.ded <- desc.table.ded %>%
-   group_by(key) %>%
-   # we join on firstrowforvar to make sure we don't duplicate the tests
-   mutate(firstrowforvar=row_number()==1) %>%
-   left_join(., stat.tab.ded, by=c("key", "firstrowforvar")) %>%
-   # this is gross, but we don't want to repeat the variable names in our table
-   ungroup() %>%
-   mutate(Variables = ifelse(firstrowforvar==T, as.character(key), NA)) %>%
-   select(Variables, value, n, percent,mean,sd, statistic, parameter, p.value)
-#..............................................................................................
-# there are significat differences in: Education, Family status and work_position 
-#..............................................................................................
-# removing results of Kruscal-Wallis test
-table1.categorical.both.ded = table1.categorical.both.ded %>% 
-  select(Variables,value,n, percent,mean,sd) %>% 
-  mutate(mean = str_replace(mean, "NaN", NA_character_)) %>% 
-  janitor::remove_empty(which = c("rows")) %>% 
-  filter(!is.na(value) & !is.na(mean)) # removing missing values
-#.............................................................................
-#.............................................................................
-# post hoc testing
-#.............................................................................
-#.............................................................................
-# Games-Howell for Education 
-oa.edu.ded=rstatix::games_howell_test(UWES_D ~ Education, data = data, detailed = T) # all ns 
-# Dunn test 
-dunn.test(data$UWES_D, data$Education, list = T, altp = T, method = "bonferroni", kw=T, label = T, table = T)
-# selecting significnat results from Games-Howell
-edu.join.ded=oa.edu.ded %>% filter(p.adj < 0.05) %>%
-  select(group1,group2,df,statistic,p.adj) %>%
-  rename(value=group1)
-#  Merging into table 1  
-table.continuous.ded =
-  full_join(table1.categorical.both.ded, edu.join.ded)
-# merging ES into table 1 
-# extracting significant comparistons from the Post-hoc test
-edu.es.g.ded=oa.edu.ded %>%
-  filter(p.adj < 0.05) %>% 
-  select(group1,group2)
-# ..........................this code is not run because when result is not significnat code can not be runned
-# extracting ES from VDA  
-# ES.edu.ded=multiVDA(x = data$UWES_D, g = data$Education, statistic = "VDA", digits = 2) %>% 
-#   as.data.frame() %>%
-#   separate(col = pairs.Comparison, sep = " - ", into = c("group1","group2")) %>% 
-#   filter(group1 == edu.es.g.ded$group1 & group2 == edu.es.g.ded$group2) %>%  
-#   select(group1,group2,pairs.VDA) %>% 
-#   rename(value = group1)
-#  Merging into table 1  
-# table.continuous =
-#   full_join(table.continuous, ES.edu.ded)
-#.........................
-#................................................
-# Family status 
-#................................................
-# Work_position
-#................................................
-# Dunn test 
-dunn.test(data$UWES_D, data$Work_position, list = T, altp = T, method = "bonferroni", kw=T, label = T, table = T)
-# Games-Howell for Work_position 
-UWES_D.wp=rstatix::games_howell_test(UWES_D ~ Work_position, data = data, detailed = T) 
-# selecting significnat results from Games-Howell
-UWES_D.join=UWES_D.wp %>% filter(p.adj < 0.05) %>%
-  select(group1,group2,df,statistic,p.adj) %>%
-  rename(value=group1)
-#  Merging into table 1  
-table.continuous.2.ded =
-  full_join(table1.categorical.both.ded, UWES_D.join)
-# merging ES into table 1 
-# extracting significant comparistons from the Post-hoc test
-wp.es.g.ded=UWES_D.wp %>%
-  filter(p.adj < 0.05) %>% 
-  select(group1,group2)
-# extracting ES from VDA
-ES.wp.ded=multiVDA(x = data$UWES_D, g = data$Work_position, statistic = "VDA", digits = 2) %>%
-  as.data.frame() %>%
-  separate(col = pairs.Comparison, sep = " - ", into = c("group1","group2")) %>% 
-  filter(group1 == wp.es.g.ded$group1 & group2 == wp.es.g.ded$group2) %>%  
-  select(group1,group2,pairs.VDA) %>% 
-  rename(value = group1)
-#  Merging into table 1  
-table.continuous.2.ded =
-  full_join(table.continuous.2.ded, ES.wp.ded) 
-
-# removing empty rows and NaNs 
-two.var.tab.ded=full_join(table.continuous.ded, table.continuous.2.ded) %>%
-    mutate(mean = str_replace(mean, "NaN", NA_character_)) %>% 
-  janitor::remove_empty(which = c("rows"))
-
-# removing duplicites
-two.var.tab.ded = two.var.tab.ded %>%
-  group_by(Variables, value) %>% 
-  mutate(duplicate = n()) %>% # count number of duplicite cases
-  mutate(to.rm = ifelse(duplicate > 1 & is.na(group2),TRUE,FALSE)) %>%  
-  filter(to.rm == FALSE) %>% 
-  ungroup() %>% 
-  select(!c("to.rm","duplicate"))
-
-# sorting working status - extracting positions from original data frame
-  sort.bypos = data$Work_position %>% levels()  # selecting order based on which we want to sort variable
-  
-# arranging
-  two.var.tab.ded = two.var.tab.ded %>% 
-  arrange(factor(value, levels = sort.bypos)) %>%  
-# removing duplicate variable names
-  mutate(to.rm2 = ifelse(duplicated(Variables) & !is.na(Variables),TRUE,FALSE)) %>% 
-  mutate(Variables = ifelse(to.rm2 == TRUE,NA_character_, Variables)) %>% 
-  select(!c("to.rm2"))
-#................................
-# formatting table
-#...............................
-two.var.tab.ded = two.var.tab.ded %>% 
-  mutate("UWES_D: M(SD)" = paste0("",mean," (",sd,")"),
-         "n(%)" = paste0("",n," ","(",round(percent,digits = 0),"%)"),
-         Gr.dif.UWES_D.total = paste0("",group2,": ","x2(",round(df,digits = 0),")","=",round(statistic,digits = 2),
-                                    "", format_p(p.adj,stars_only = T),", A=",pairs.VDA), # there are stars only to save space
-         Gr.dif.UWES_D.total = str_replace(Gr.dif.UWES_D.total, pattern = "(?<=^NA:)( .*)", replacement = ""),
-         Gr.dif.UWES_D.total = str_replace(Gr.dif.UWES_D.total, pattern = "^NA:", replacement = "")) %>% 
-  select(Variables,value,"n(%)","UWES_D: M(SD)",Gr.dif.UWES_D.total) 
-```
-
-```{r table one - third part from UWES Vigor subscale score, include=FALSE}
-desc.table.vig = data %>%
-    pivot_longer(c("Gender","Education", "Family_status", "Religiosity","Work_position"),
-                 names_to = "key", values_to = "value") %>%
-    group_by(key,value) %>%
-    summarise (mean = round(mean(UWES_V, na.rm = T),digits = 2),
-               sd = round(sd(UWES_V, na.rm = T),digits = 2),
-               n = n()) %>%
-  mutate(percent = n / sum(n)*100)
-
-
-data.to.exper.vig = data %>%
-    pivot_longer(c("Gender","Education","Family_status","Religiosity","Work_position"),
-                 names_to = "key", values_to = "value") %>%
-    group_by(key,value) %>%
-    summarise (mean = round(mean(UWES_V, na.rm = T),digits = 2),
-               sd = round(sd(UWES_V, na.rm = T),digits = 2),
-               UWES_V = as.numeric(UWES_V),
-               n = n()) %>% 
-  mutate(percent = n / sum(n)*100) 
-
-#..............................................................................................
-# By the command below, there is need to explore, where are significnat differences between socio-demographic groups
-#..............................................................................................
- stat.tab.vig=
-     data.to.exper.vig %>%
-     group_by(key) %>% 
-     do(., kruskal.test(.$UWES_V~.$value) %>% tidy) %>% 
-     mutate(UWES_V = "UWES_V") %>%
-     mutate(firstrowforvar=T) %>% 
-     select(key, UWES_V, statistic, parameter, p.value, firstrowforvar) 
-
- table1.categorical.both.vig <- desc.table.vig %>%
-   group_by(key) %>%
-   # we join on firstrowforvar to make sure we don't duplicate the tests
-   mutate(firstrowforvar=row_number()==1) %>%
-   left_join(., stat.tab.vig, by=c("key", "firstrowforvar")) %>%
-   # this is gross, but we don't want to repeat the variable names in our table
-   ungroup() %>%
-   mutate(Variables = ifelse(firstrowforvar==T, as.character(key), NA)) %>%
-   select(Variables, value, n, percent,mean,sd, statistic, parameter, p.value)
-#..............................................................................................
-# there are significat differences in: Education, Family status and work_position 
-#..............................................................................................
-# removing results of Kruscal-Wallis test
-table1.categorical.both.vig = table1.categorical.both.vig %>% 
-  select(Variables,value,n, percent,mean,sd) %>% 
-  mutate(mean = str_replace(mean, "NaN", NA_character_)) %>% 
-  janitor::remove_empty(which = c("rows")) %>% 
-  filter(!is.na(value) & !is.na(mean)) # removing missing values
-#.............................................................................
-#.............................................................................
-# post hoc testing
-#.............................................................................
-#.............................................................................
-# Games-Howell for Education 
-oa.edu.vig=rstatix::games_howell_test(UWES_V ~ Education, data = data, detailed = T) # all ns 
-# Dunn test 
-dunn.test(data$UWES_V, data$Education, list = T, altp = T, method = "bonferroni", kw=T, label = T, table = T)
-# selecting significnat results from Games-Howell
-edu.join.vig=oa.edu.vig %>% filter(p.adj < 0.05) %>%
-  select(group1,group2,df,statistic,p.adj) %>%
-  rename(value=group1)
-#  Merging into table 1  
-table.continuous.vig =
-  full_join(table1.categorical.both.vig, edu.join.vig)
-# merging ES into table 1 
-# extracting significant comparistons from the Post-hoc test
-edu.es.g.vig=oa.edu.vig %>%
-  filter(p.adj < 0.05) %>% 
-  select(group1,group2)
-# ..........................this code is not run because when result is not significnat code can not be runned
-# extracting ES from VDA  
-# ES.edu.vig=multiVDA(x = data$UWES_V, g = data$Education, statistic = "VDA", digits = 2) %>% 
-#   as.data.frame() %>%
-#   separate(col = pairs.Comparison, sep = " - ", into = c("group1","group2")) %>% 
-#   filter(group1 == edu.es.g.vig$group1 & group2 == edu.es.g.vig$group2) %>%  
-#   select(group1,group2,pairs.VDA) %>% 
-#   rename(value = group1)
-#  Merging into table 1  
-# table.continuous =
-#   full_join(table.continuous, ES.edu.vig)
-#.........................
-#................................................
-# Family status 
-#................................................
-# Work_position
-#................................................
-# Dunn test 
-dunn.test(data$UWES_V, data$Work_position, list = T, altp = T, method = "bonferroni", kw=T, label = T, table = T)
-# Games-Howell for Work_position 
-UWES_V.wp=rstatix::games_howell_test(UWES_V ~ Work_position, data = data, detailed = T) 
-# selecting significnat results from Games-Howell
-UWES_V.join=UWES_V.wp %>% filter(p.adj < 0.05) %>%
-  select(group1,group2,df,statistic,p.adj) %>%
-  rename(value=group1)
-#  Merging into table 1  
-table.continuous.2.vig =
-  full_join(table1.categorical.both.vig, UWES_V.join)
-# merging ES into table 1 
-# extracting significant comparistons from the Post-hoc test
-wp.es.g.vig=UWES_V.wp %>%
-  filter(p.adj < 0.05) %>% 
-  select(group1,group2)
-# extracting ES from VDA
-ES.wp.vig=multiVDA(x = data$UWES_V, g = data$Work_position, statistic = "VDA", digits = 2) %>%
-  as.data.frame() %>%
-  separate(col = pairs.Comparison, sep = " - ", into = c("group1","group2")) %>% 
-  filter(group1 == wp.es.g.vig$group1 & group2 == wp.es.g.vig$group2) %>%  
-  select(group1,group2,pairs.VDA) %>% 
-  rename(value = group1)
-#  Merging into table 1  
-table.continuous.2.vig =
-  full_join(table.continuous.2.vig, ES.wp.vig) 
-
-# removing empty rows and NaNs 
-two.var.tab.vig=full_join(table.continuous.vig, table.continuous.2.vig) %>%
-    mutate(mean = str_replace(mean, "NaN", NA_character_)) %>% 
-  janitor::remove_empty(which = c("rows"))
-
-# removing duplicites
-two.var.tab.vig = two.var.tab.vig %>%
-  group_by(Variables, value) %>% 
-  mutate(duplicate = n()) %>% # count number of duplicite cases
-  mutate(to.rm = ifelse(duplicate > 1 & is.na(group2),TRUE,FALSE)) %>%  
-  filter(to.rm == FALSE) %>% 
-  ungroup() %>% 
-  select(!c("to.rm","duplicate"))
-
-# sorting working status - extracting positions from original data frame
-  sort.bypos = data$Work_position %>% levels()  # selecting order based on which we want to sort variable
-  
-# arranging
-  two.var.tab.vig = two.var.tab.vig %>% 
-  arrange(factor(value, levels = sort.bypos)) %>%  
-# removing duplicate variable names
-  mutate(to.rm2 = ifelse(duplicated(Variables) & !is.na(Variables),TRUE,FALSE)) %>% 
-  mutate(Variables = ifelse(to.rm2 == TRUE,NA_character_, Variables)) %>% 
-  select(!c("to.rm2"))
-#................................
-# formatting table
-#...............................
-two.var.tab.vig = two.var.tab.vig %>% 
-  mutate("UWES_V: M(SD)" = paste0("",mean," (",sd,")"),
-         "n(%)" = paste0("",n," ","(",round(percent,digits = 0),"%)"),
-         Gr.dif.UWES_V.total = paste0("",group2,": ","x2(",round(df,digits = 0),")","=",round(statistic,digits = 2),
-                                    "", format_p(p.adj,stars_only = T),", A=",pairs.VDA), # there are stars only to save space
-         Gr.dif.UWES_V.total = str_replace(Gr.dif.UWES_V.total, pattern = "(?<=^NA:)( .*)", replacement = ""),
-         Gr.dif.UWES_V.total = str_replace(Gr.dif.UWES_V.total, pattern = "^NA:", replacement = "")) %>% 
-  select(Variables,value,"n(%)","UWES_V: M(SD)",Gr.dif.UWES_V.total) 
-```
-
-```{r table one - third part from UWES ABSORBTION subscale score, include=FALSE}
-desc.table.abs = data %>%
-    pivot_longer(c("Gender","Education", "Family_status", "Religiosity","Work_position"),
-                 names_to = "key", values_to = "value") %>%
-    group_by(key,value) %>%
-    summarise (mean = round(mean(UWES_A, na.rm = T),digits = 2),
-               sd = round(sd(UWES_A, na.rm = T),digits = 2),
-               n = n()) %>%
-  mutate(percent = n / sum(n)*100)
-
-
-data.to.exper.abs = data %>%
-    pivot_longer(c("Gender","Education","Family_status","Religiosity","Work_position"),
-                 names_to = "key", values_to = "value") %>%
-    group_by(key,value) %>%
-    summarise (mean = round(mean(UWES_A, na.rm = T),digits = 2),
-               sd = round(sd(UWES_A, na.rm = T),digits = 2),
-               UWES_A = as.numeric(UWES_A),
-               n = n()) %>% 
-  mutate(percent = n / sum(n)*100) 
-
-#..............................................................................................
-# By the command below, there is need to explore, where are significnat differences between socio-demographic groups
-#..............................................................................................
- stat.tab.abs=
-     data.to.exper.abs %>%
-     group_by(key) %>% 
-     do(., kruskal.test(.$UWES_A~.$value) %>% tidy) %>% 
-     mutate(UWES_A = "UWES_A") %>%
-     mutate(firstrowforvar=T) %>% 
-     select(key, UWES_A, statistic, parameter, p.value, firstrowforvar) 
-
- table1.categorical.both.abs <- desc.table.abs %>%
-   group_by(key) %>%
-   # we join on firstrowforvar to make sure we don't duplicate the tests
-   mutate(firstrowforvar=row_number()==1) %>%
-   left_join(., stat.tab.abs, by=c("key", "firstrowforvar")) %>%
-   # this is gross, but we don't want to repeat the variable names in our table
-   ungroup() %>%
-   mutate(Variables = ifelse(firstrowforvar==T, as.character(key), NA)) %>%
-   select(Variables, value, n, percent,mean,sd, statistic, parameter, p.value)
-#..............................................................................................
-# there are significat differences in: Education, Family status and work_position 
-#..............................................................................................
-# removing results of Kruscal-Wallis test
-table1.categorical.both.abs = table1.categorical.both.abs %>% 
-  select(Variables,value,n, percent,mean,sd) %>% 
-  mutate(mean = str_replace(mean, "NaN", NA_character_)) %>% 
-  janitor::remove_empty(which = c("rows")) %>% 
-  filter(!is.na(value) & !is.na(mean)) # removing missing values
-#.............................................................................
-#.............................................................................
-# post hoc testing
-#.............................................................................
-#.............................................................................
-# Games-Howell for Education 
-oa.edu.abs=rstatix::games_howell_test(UWES_A ~ Education, data = data, detailed = T) # all ns 
-# Dunn test 
-dunn.test(data$UWES_A, data$Education, list = T, altp = T, method = "bonferroni", kw=T, label = T, table = T)
-# selecting significnat results from Games-Howell
-edu.join.abs=oa.edu.abs %>% filter(p.adj < 0.01) %>% # THERE IS NEED TO BE EXTRA CARAFUL! - DUE TO THE DIFFERENCES BETWEEN DUNN AND GAMES HOWEL TEST, ONLY RESULTS BELO P # < 0.01 ARE SELECTED BECAUSE THIS SELECTS RESULTS WHICH WERE SIGNIFICANT IN BOTH GAMES-HOWEL AND DUNN TEST 
-  select(group1,group2,df,statistic,p.adj) %>%
-  rename(value=group1)
-#  Merging into table 1  
-table.continuous.abs =
-  full_join(table1.categorical.both.abs, edu.join.abs)
-# merging ES into table 1 
-# extracting significant comparistons from the Post-hoc test
-edu.es.g.abs=oa.edu.abs %>%
-  filter(p.adj < 0.01) %>% # THERE IS NEED TO BE EXTRA CARAFUL! - DUE TO THE DIFFERENCES BETWEEN DUNN AND GAMES HOWEL TEST, ONLY 
-  select(group1,group2)
-# extracting ES from VDA  
-ES.edu.abs=multiVDA(x = data$UWES_A, g = data$Education, statistic = "VDA", digits = 2) %>%
-  as.data.frame() %>%
-  separate(col = pairs.Comparison, sep = " - ", into = c("group1","group2")) %>%
-  filter(group1 == edu.es.g.abs$group1 & group2 == edu.es.g.abs$group2) %>%
-  select(group1,group2,pairs.VDA) %>%
-  rename(value = group1)
-# Merging into table 1
-table.continuous.abs =
-  full_join(table.continuous.abs, ES.edu.abs)
-#................................................
-# Family status 
-#................................................
-# Work_position
-#................................................
-# Dunn test 
-dunn.test(data$UWES_A, data$Work_position, list = T, altp = T, method = "bonferroni", kw=T, label = T, table = T)
-# Games-Howell for Work_position 
-UWES_A.wp=rstatix::games_howell_test(UWES_A ~ Work_position, data = data, detailed = T) 
-# selecting significnat results from Games-Howell
-UWES_A.join=UWES_A.wp %>% filter(p.adj < 0.05) %>%
-  select(group1,group2,df,statistic,p.adj) %>%
-  rename(value=group1)
-#  Merging into table 1  
-table.continuous.2.abs =
-  full_join(table1.categorical.both.abs, UWES_A.join)
-# merging ES into table 1 
-# extracting significant comparistons from the Post-hoc test
-wp.es.g.abs=UWES_A.wp %>%
-  filter(p.adj < 0.05) %>% 
-  select(group1,group2)
-# extracting ES from VDA
-ES.wp.abs=multiVDA(x = data$UWES_A, g = data$Work_position, statistic = "VDA", digits = 2) %>%
-  as.data.frame() %>%
-  separate(col = pairs.Comparison, sep = " - ", into = c("group1","group2")) %>% 
-  filter(group1 == wp.es.g.abs$group1 & group2 == wp.es.g.abs$group2) %>%  
-  select(group1,group2,pairs.VDA) %>% 
-  rename(value = group1)
-#  Merging into table 1  
-table.continuous.2.abs =
-  full_join(table.continuous.2.abs, ES.wp.abs) 
-
-# removing empty rows and NaNs 
-two.var.tab.abs=full_join(table.continuous.abs, table.continuous.2.abs) %>%
-    mutate(mean = str_replace(mean, "NaN", NA_character_)) %>% 
-  janitor::remove_empty(which = c("rows"))
-
-# removing duplicites
-two.var.tab.abs = two.var.tab.abs %>%
-  group_by(Variables, value) %>% 
-  mutate(duplicate = n()) %>% # count number of duplicite cases
-  mutate(to.rm = ifelse(duplicate > 1 & is.na(group2),TRUE,FALSE)) %>%  
-  filter(to.rm == FALSE) %>% 
-  ungroup() %>% 
-  select(!c("to.rm","duplicate"))
-
-# sorting working status - extracting positions from original data frame
-  sort.bypos = data$Work_position %>% levels()  # selecting order based on which we want to sort variable
-  
-# arranging
-  two.var.tab.abs = two.var.tab.abs %>% 
-  arrange(factor(value, levels = sort.bypos)) %>%  
-# removing duplicate variable names
-  mutate(to.rm2 = ifelse(duplicated(Variables) & !is.na(Variables),TRUE,FALSE)) %>% 
-  mutate(Variables = ifelse(to.rm2 == TRUE,NA_character_, Variables)) %>% 
-  select(!c("to.rm2"))
-#................................
-# formatting table
-#...............................
-two.var.tab.abs = two.var.tab.abs %>% 
-  mutate("UWES_A: M(SD)" = paste0("",mean," (",sd,")"),
-         "n(%)" = paste0("",n," ","(",round(percent,digits = 0),"%)"),
-         Gr.dif.UWES_A.total = paste0("",group2,": ","x2(",round(df,digits = 0),")","=",round(statistic,digits = 2),
-                                    "", format_p(p.adj,stars_only = T),", A=",pairs.VDA), # there are stars only to save space
-         Gr.dif.UWES_A.total = str_replace(Gr.dif.UWES_A.total, pattern = "(?<=^NA:)( .*)", replacement = ""),
-         Gr.dif.UWES_A.total = str_replace(Gr.dif.UWES_A.total, pattern = "^NA:", replacement = "")) %>% 
-  select(Variables,value,"n(%)","UWES_A: M(SD)",Gr.dif.UWES_A.total) 
-```
-
-```{r, echo=FALSE}
-# merging tables togather
-two.var.tab.merg = two.var.tab %>% 
-  select(starts_with(c("Variables","value","n(%)","Gr.dif.")))
-
-two.var.tab.ded.merg = two.var.tab.ded %>% 
-  select(starts_with(c("Variables","value","n(%)","Gr.dif.")))
-
-two.var.tab.abs.merg = two.var.tab.abs %>% 
-  select(starts_with(c("Variables","value","n(%)","Gr.dif.")))
-
-two.var.tab.vig.merg = two.var.tab.vig %>% 
-  select(starts_with(c("Variables","value","n(%)","Gr.dif.")))
-
-soc.dem.tb=full_join(two.var.tab.merg,
-          two.var.tab.ded.merg) 
-soc.dem.tb= full_join(soc.dem.tb, two.var.tab.abs.merg, by = c("Variables", "value", "n(%)"))
-soc.dem.tb = full_join(soc.dem.tb, two.var.tab.vig.merg, by = c("Variables", "value", "n(%)"))
-
-# renaming
-soc.dem.tb = soc.dem.tb %>% 
-  rename("UWES_T" ="Gr.dif.UWES.total",
-         "UWES_D" = "Gr.dif.UWES_D.total",
-         "UWES_A" = "Gr.dif.UWES_A.total",
-         "UWES_V" = "Gr.dif.UWES_V.total")
-
-soc.dem.tb %>%  
+```{r SocDemTabPrint, echo=FALSE, message=FALSE, warning=FALSE}
+soc_dem_tb %>%  
   as_tibble() %>% 
   mutate_all(~(replace(., is.na(.), ""))) %>%
   as_huxtable(add_colnames = F) %>% 
   set_bottom_border(row = 1, value = 1) %>%  # the 1 here indicates the rownumber 
   set_font("times") %>% 
   set_font_size(10) %>% 
-  apa_table(caption = "Socio-demographic results of the three samples", span_text_columns = F)
+  apa_table(
+    caption = "Descriptive Statistics and Group Comparisons for Utrecht Work Engagement Scale (UWES) Scores Across Socio-Demographic Variables",
+    note = "M = Mean; SD = Standard Deviation; n = count. Group differences were assessed using the Kruskal-Wallis test, reported as the *H* statistic with its degrees of freedom (df), p-value, and epsilon-squared effect size. Significant omnibus tests were followed by pairwise post-hoc comparisons. For groups with unequal variances, the Games-Howell test is reported (t-statistic and Cohen's *d* effect size). For groups with equal variances, Dunn's test is reported (z-statistic and Rank-Biserial Correlation, *rbc*, effect size). UWES = Utrecht Work Engagement Scale total score; UWES_D = Dedication subscale; UWES_A = Absorption subscale; UWES_V = Vigor subscale.", span_text_columns = FALSE)
 ```
 
-\newpage
-
-```{r table with means and SD of the UWES, echo=FALSE}
-# merging MEANS AND SD TOGETHER
-m.sd.tab=full_join(two.var.tab,
-          two.var.tab.abs) 
-m.sd.tab= full_join(m.sd.tab, two.var.tab.ded)
-m.sd.tab = full_join(m.sd.tab, two.var.tab.vig)
-
-# selecting means and SDs 
-m.sd.tab = m.sd.tab %>% 
-  select(ends_with(c("Variables","value","M(SD)")))
-
-# removing duplicates
- m.sd.tab = m.sd.tab %>%  
-  mutate(to.rm = ifelse(duplicated(`UWES_T: M(SD)`) | is.na(`UWES_T: M(SD)`) &
-                        duplicated(`UWES_D: M(SD)`) | is.na(`UWES_D: M(SD)`) &
-                        duplicated(`UWES_A: M(SD)`) | is.na(`UWES_A: M(SD)`) &
-                        duplicated(`UWES_V: M(SD)`) | is.na(`UWES_V: M(SD)`) |
-                          duplicated(value),TRUE,FALSE)) %>% 
-  filter(to.rm == FALSE) %>% 
-  select(!c("to.rm"))
-```
-
-```{r echo=FALSE}
- # print table
- m.sd.tab %>%  
-  as_tibble() %>% 
-  mutate_all(~(replace(., is.na(.), ""))) %>%
-  as_huxtable(add_colnames = F) %>% 
-  set_bottom_border(row = 1, value = 1) %>%  # the 1 here indicates the rownumber 
-  set_font("times") %>% 
-  set_font_size(10) %>% 
-  apa_table(caption = "Means and standard deviations of the UWES total and subscale scores", span_text_columns = F,
-            note = "SD = standard deviation, M = mean, UWES_T = Utrecht Work Engagement Scale - Total score, UWES_A = Utrecht Work Engagement Scale - Absorption subscale, UWES_D = Utrecht Work Engagement Scale - Dedication subscale, UWES_V = Utrecht Work Engagement Scale - Vigor subscale")
+```{r}
+block_section(close_section)
 ```
 
 ```{r Bartlett test and KMO, include=FALSE}
@@ -1084,51 +474,54 @@ bartlett.UWES=cortest.bartlett(UWES.rep.poly, diag = T, n=nrow(data)) #  Bartlet
 KMO(UWES.rep.poly) # 0.96
 ```
 
-```{r CFA UWES - three fac, include=FALSE}
+```{r CFA-UWES-three-fac, include=FALSE}
 # three factor model 
 three.fac.mod = "Vigor =~ UWES_1 + UWES_2 + UWES_5 
                Dedication =~ UWES_3 + UWES_4 + UWES_7
                Absorption =~ UWES_6 + UWES_8 + UWES_9"
 # when "ordered" is set to "TRUE", than DWLS estimator is automatically used as "standard" in results. 
 # "Robust" chisquare in results is referring to WLSMV estimator.
-UWES.three.fac=sem(model = three.fac.mod, data = data, std.lv=T, ordered = T)
+UWES.three.fac=sem(model = three.fac.mod, data = data, std.lv=T, ordered = T, estimator = "WLSMV")
 three.fac.mod.sum=summary(UWES.three.fac,rsquare=T, standardized=T, fit.measures=T)
 modificationindices(UWES.three.fac, sort. = T) # how can we improve our model
 # inspection of correlation between residuals
 # Large positive values indicate the model underpredicts the correlation; large negative values suggest overprediction of the correlation. Usually values |r>.1| are worth closer consideration.
 resid(UWES.three.fac, "cor")
 
-mod.fit.indicies=c("Three factor model", as.table(fitMeasures(UWES.three.fac)[c('chisq', 'df', 'pvalue',
-                                                              'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                              "rmsea.ci.upper", 'srmr')]) %>% round(digits = 3)) %>% t() 
+DFI_three_factor <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = UWES.three.fac,
+  estimator = "WLSMV",
+  data = data
+  )
+
 ```
 
-```{r CFA two factor model, include=FALSE}
+```{r CFA_two_factor_model, include=FALSE}
 # two factor model 
 two.fac.mod="VigDeg =~ UWES_1 + UWES_2 + UWES_3 + UWES_4 + UWES_5 + UWES_7
              Abs =~  UWES_6 + UWES_8 + UWES_9"
 
 #when "ordered" is set to "TRUE", than DWLS estimator is auto  matically used as "standard" in results. "Robust" chisquare in results is referring to WLSMV estimator.
-UWES.two.fac=sem(model = two.fac.mod, data = data, std.lv=T, ordered = T)
+UWES.two.fac=cfa(model = two.fac.mod, data = data, std.lv=T, ordered = T)
 two.fac.mod.sum=summary(UWES.two.fac,rsquare=T, standardized=T, fit.measures=T)
 parameterestimates(UWES.two.fac, standardized = T) # whill show standardized estimates and many other things
 modificationindices(UWES.two.fac, sort. = T) # how can we improve our model
 fitmeasures(UWES.two.fac) # chisq.scaled - robust one
-# exporting fit indexes
-mod.fit.indicies =
-  c("Two factor model", as.table(fitMeasures(UWES.two.fac)[c("chisq", "df", 'pvalue',
-                                                                           'cfi',"tli",'rmsea',"rmsea.ci.lower", 
-                                                                           "rmsea.ci.upper", 'srmr')]) %>% 
-      round(digits = 3)) %>%
-  t() %>%
-  rbind(mod.fit.indicies)
 
+# DFI
+DFI_two_factor <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = UWES.two.fac,
+  data = data
+  )
 
 one.fac.mod.cor.er.UWES.resid=resid(UWES.two.fac, "cor")
 dif.test.two.three.fac=lavaan::anova(UWES.three.fac,UWES.two.fac)
+
 ```
 
-```{r CFA one factor model, include=FALSE}
+```{r CFA_one_factor_model, include=FALSE}
 # one factor model 
 one.fac.mod="WE =~ UWES_1 + UWES_2 + UWES_3 + UWES_4 + UWES_5 + UWES_6 + UWES_7 + UWES_8 + UWES_9"
 
@@ -1138,21 +531,24 @@ one.fac.mod.sum=summary(UWES.one.fac,rsquare=T, standardized=T, fit.measures=T)
 parameterestimates(UWES.one.fac, standardized = T) # whill show standardized estimates and many other things
 modificationindices(UWES.one.fac, sort. = T) # how can we improve our model
 fitmeasures(UWES.one.fac) # chisq.scaled - robust one
-# exporting fit indexes
-mod.fit.indicies =
-  c("One factor model", as.table(fitMeasures(UWES.one.fac)[c("chisq", "df", 'pvalue',
-                                                                           'cfi',"tli",'rmsea',"rmsea.ci.lower", 
-                                                                           "rmsea.ci.upper", 'srmr')]) %>% 
-      round(digits = 3)) %>%
-  t() %>%
-  rbind(mod.fit.indicies)
 
+# DFI
+DFI_one_factor <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = UWES.one.fac,
+  data = data
+  )
 
 one.fac.mod.cor.er.UWES.resid=resid(UWES.one.fac, "cor")
 dif.test.one.three.fac=lavaan::anova(UWES.three.fac,UWES.one.fac)
 ```
 
-```{r CFA hierarchical factor model, include=FALSE}
+```{r CFA_hierarchical_factor_model, include=FALSE}
+
+# # Define the names of the ordered categorical variables
+# ordered_vars <- c("UWES_1", "UWES_2", "UWES_3", "UWES_4", "UWES_5", 
+#                   "UWES_6", "UWES_7", "UWES_8", "UWES_9")
+
 # one factor model 
 hier.fac.mod=" Dedication =~ UWES_3 + UWES_4 + UWES_7
                Absorption =~ UWES_6 + UWES_8 + UWES_9
@@ -1165,62 +561,674 @@ hier.fac.mod.sum=summary(UWES.hier.fac.hier,rsquare=T, standardized=T, fit.measu
 parameterestimates(UWES.hier.fac.hier, standardized = T) # whill show standardized estimates and many other things
 modificationindices(UWES.hier.fac.hier, sort. = T) # how can we improve our model
 fitmeasures(UWES.hier.fac.hier) # chisq.scaled - robust one
-# exporting fit indexes
-mod.fit.indicies =
-  c("Hierarchical factor model", as.table(fitMeasures(UWES.hier.fac.hier)[c("chisq", "df", 'pvalue',
-                                                                           'cfi',"tli",'rmsea',"rmsea.ci.lower", 
-                                                                           "rmsea.ci.upper", 'srmr')]) %>% 
-      round(digits = 3)) %>%
-  t() %>%
-  rbind(mod.fit.indicies)
 
+# DFI
+DFI_hierarch_factor <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = UWES.hier.fac.hier,
+  data = data
+  )
 
 # one.fac.mod.cor.er.UWES.resid=resid(UWES.hier.fac.hier, "cor")
 # dif.test.one.three.fac=lavaan::anova(UWES.three.fac,UWES.hier.fac.hier)
 ```
 
-## Confirmatory Factor Analysis 
+```{r CFA_partial_bi_factor_model_de_Bruin, eval=FALSE, include=FALSE}
+# de Bruin, G. P., & Henn, C. M. (2013). Dimensionality of the 9-item Utrecht Work Engagement Scale (UWES–9). Psychological Reports, 112(3), 788–799. https://doi.org/10.2466/01.03.PR0.112.3.788-799
 
-  Bartlett test ($\chi^2$ (`r bartlett.UWES$df`) = `r round(bartlett.UWES$chisq,digits=2)`, `r format_p(bartlett.UWES$p.value)`) as well as KMO (`r round(KMO(UWES.rep.poly)$MSA,digits = 2)`) revealed that UWES data are sufficiently correlated to perform CFA. In the first step, original-three factor model was fitted. Results indicated a good fit of this three dimensional solution (see Figure 1, Table 2). Modification indices did not suggested high change in $\chi^2$ in case of releasing constrains between UWES items. Factor loadings ($\lambda$) in the three factor solution were high as were correlations between the three factors (see Figure 1). Correlation between residuals in manifest variables was low: *r* = `r round(max(resid(UWES.three.fac, "cor")$cov), digits = 2)`. In the second step, two factor model was tested: results suggested that two-dimensional model yields lower model fit as compared to the original-three factor model (see Table 2). This was supported by the significant $\chi^2$ difference test with Satorra Bentler correction: $\chi^2$(`r dif.test.two.three.fac$"Df diff"[2]`) = `r dif.test.two.three.fac$"Chisq diff"[2] %>% round(digits = 2)`; `r dif.test.two.three.fac$"Pr(>Chisq)" [2] %>% format_p`. Factor loadings of the two factor model were high ranging from: `r round(min(select((filter(parameterestimates(UWES.two.fac,standardized = T), op %in% "=~")), std.all)), digits = 2)` to `r round(max(select((filter(parameterestimates(UWES.two.fac, standardized = T), op %in% "=~")), std.all)), digits = 2)`. Finally, fit of unidimensional solution was assessed: overall, this model had the worst goodness of fit indices values and factor loadings ($\lambda$ = `r round(min(select((filter(parameterestimates(UWES.one.fac,standardized = T), op %in% "=~")), std.all)), digits = 2)` - `r round(max(select((filter(parameterestimates(UWES.one.fac, standardized = T), op %in% "=~")), std.all)), digits = 2)`) as compared with the two and the three factor model (see Table 2). The $\chi^2$ difference test suggested lower fit of unidimensional solution as compared with the three factor solution: $\chi^2$(`r dif.test.one.three.fac$"Df diff"[2]`) = `r dif.test.one.three.fac$"Chisq diff"[2] %>% round(digits = 2)`; `r dif.test.one.three.fac$"Pr(>Chisq)" [2] %>% format_p`. In the last step, hierarchical model of the UWES was assessed: after model was fitted, CFA parameters yielded no change as compared with the original-three factor model suggesting that the original factor model would be more parsimonious solution. Taken together, this results supports superiority the original-three factor model over two and one factor solution in terms of fit with the data.
-  
-(ref:my-figure-caption) SEM plot of the UWES three factor solution with factor loadings and item residuals.
+# Partial bi-factor model from de Bruin & Henn (2013). 
+# A general factor (WE) influences all items. 
+# Two specific group factors (Vigor and Absorption) influence their respective items.
+# The Dedication items' variance is fully explained by the general factor.
+# The general factor is specified to be uncorrelated with the group factors.
 
-```{r my-figure, echo=FALSE, fig.cap="(ref:my-figure-caption)", message=FALSE, warning=FALSE}
-semPaths(UWES.three.fac,layout = "tree2", whatLabels= "std",
-         residuals = T, thresholds = F,        
-         reorder = T, edge.label.cex= 1, fade=F, 
-         intercepts = F, rotation = 1, filetype = c("eps"), filename = "Figure.1",  
-         nCharNodes = 20,style = "OpenMx", edge.label.position = 0.62,
-         sizeLat = 9, sizeMan=8,edge.color="black")
+partial.bifac.mod.deBruin <- "
+    WE =~ UWES_1 + UWES_2 + UWES_3 + UWES_4 + UWES_5 + UWES_6 + UWES_7 + UWES_8 + UWES_9
+    Vigor =~ UWES_1 + UWES_2 + UWES_5
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Specify factors are orthogonal (uncorrelated)
+    WE ~~ 0*Vigor
+    WE ~~ 0*Absorption
+    Vigor ~~ 0*Absorption
+"
 
-knitr::include_graphics("Figure.1.eps") # this does not show image into word document however 
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+UWES.partial.bifac.deBruin <- sem(model = partial.bifac.mod.deBruin, data = data, std.lv = TRUE, ordered = TRUE)
+partial.bifac.deBruin.sum <- summary(UWES.partial.bifac.deBruin, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterestimates(UWES.partial.bifac.deBruin, standardized = TRUE) # Will show standardized estimates and many other things
+modificationindices(UWES.partial.bifac.deBruin, sort. = TRUE) # How can we improve our model
+fitmeasures(UWES.partial.bifac.deBruin) # chisq.scaled - robust one
+
+# DFI
+DFI_partial_bifactor_deBruin <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = UWES.partial.bifac.deBruin,
+  data = data
+)
+
+partial.bifac.deBruin.resid <- resid(UWES.partial.bifac.deBruin, "cor")
+# Example of model comparison if needed, e.g., comparing to the three-factor model
+# dif.test.partial.bifac.three.fac <- lavaan::anova(UWES.three.fac, UWES.partial.bifac.deBruin)
 ```
+
+```{r bi_factor_model, eval=FALSE, include=FALSE}
+bifac.mod <- "
+    WE =~ UWES_1 + UWES_2 + UWES_3 + UWES_4 + UWES_5 + UWES_6 + UWES_7 + UWES_8 + UWES_9
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Specify factors are orthogonal (uncorrelated)
+    WE ~~ 0*Vigor
+    WE ~~ 0*Absorption
+    Vigor ~~ 0*Absorption
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+UWES.bifac <- sem(model = bifac.mod, data = data, std.lv = TRUE, ordered = TRUE)
+UWES.bifac.sum <- summary(UWES.bifac, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+#............................................................................................
+#covariance matrix of latent variables is not positive definite - model can not be identified
+#............................................................................................
+```
+
+```{r CFA_three_factor_model_with_correlated_errors_Dominguez, include=FALSE}
+# Domínguez-Salas, S., Rodríguez-Domínguez, C., Arcos-Romero, A. I., Allande-Cussó, R., García-Iglesias, J. J., & Gómez-Salgado, J. (2022). Psychometric Properties of the Utrecht Work Engagement Scale (UWES-9) in a Sample of Active Health Care Professionals in Spain. Psychology research and behavior management, 15, 3461–3472. https://doi.org/10.2147/PRBM.S387242
+
+# Modified three-factor model with correlated errors from Domínguez-Salas et al. (2022).
+# This is based on the standard three-factor model but adds correlations between the error terms of items 1 and 2, and items 8 and 9.
+three.fac.mod.corr.errors.Dominguez <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated errors
+    UWES_1 ~~ UWES_2
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+UWES.three.fac.corr.errors.Dominguez <- sem(model = three.fac.mod.corr.errors.Dominguez, data = data, std.lv = TRUE, ordered = TRUE)
+three.fac.mod.corr.errors.Dominguez.sum <- summary(UWES.three.fac.corr.errors.Dominguez, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterestimates(UWES.three.fac.corr.errors.Dominguez, standardized = TRUE) # Will show standardized estimates and many other things
+modificationindices(UWES.three.fac.corr.errors.Dominguez, sort. = TRUE) # How can we improve our model
+fitmeasures(UWES.three.fac.corr.errors.Dominguez) # chisq.scaled - robust one
+
+# DFI
+DFI_three_factor_corr_errors_Dominguez <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = UWES.three.fac.corr.errors.Dominguez,
+  data = data
+)
+
+three.fac.mod.corr.errors.Dominguez.resid <- resid(UWES.three.fac.corr.errors.Dominguez, "cor")
+# Example of model comparison if needed, e.g., comparing to the standard three-factor model
+# dif.test.corr.errors.vs.standard.three.fac <- lavaan::anova(UWES.three.fac, UWES.three.fac.corr.errors.Dominguez)
+```
+
+```{r cfa_three_factor_corr_errors_balducci, include=FALSE}
+# Balducci, C., Fraccaroli, F., & Schaufeli, W. B. (2010). Psychometric properties of the Italian version of the Utrecht Work Engagement Scale (UWES-9): A cross-cultural analysis. European Journal of Psychological Assessment, 26(2), 143–149. https://doi.org/10.1027/1015-5759/a000020
+
+# Modified three-factor model from Balducci et al. (2010) with four correlated error terms.
+three_fac_mod_corr_errors_balducci <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated errors specific to the Italian sample in the study
+    UWES_1 ~~ UWES_2
+    UWES_2 ~~ UWES_5
+    UWES_6 ~~ UWES_8
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_three_fac_corr_errors_balducci <- sem(model = three_fac_mod_corr_errors_balducci, data = data, std.lv = TRUE, ordered = TRUE)
+three_fac_mod_corr_errors_balducci_sum <- summary(uwes_three_fac_corr_errors_balducci, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_three_fac_corr_errors_balducci, standardized = TRUE) 
+modificationIndices(uwes_three_fac_corr_errors_balducci, sort. = TRUE)
+fitMeasures(uwes_three_fac_corr_errors_balducci)
+
+# DFI
+dfi_three_factor_corr_errors_balducci <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = uwes_three_fac_corr_errors_balducci,
+  data = data
+)
+```
+
+```{r cfa_three_factor_corr_error_chaudhary, include=FALSE}
+# Chaudhary, R., Rangnekar, S., & Barua, M. K. (2012). Psychometric evaluation of utrecht work engagement scale in an indian sample. Asia-Pacific Journal of Management Research and Innovation, 8(3), 343–350. https://doi.org/10.1177/2319510X1200800314
+
+# Modified three-factor model with a correlated error term between the third Vigor item and the first Absorption item.
+three_fac_mod_corr_error_chaudhary <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated error based on modification indices in the study
+    UWES_5 ~~ UWES_6
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_three_fac_corr_error_chaudhary <- sem(model = three_fac_mod_corr_error_chaudhary, data = data, std.lv = TRUE, ordered = TRUE)
+three_fac_mod_corr_error_chaudhary_sum <- summary(uwes_three_fac_corr_error_chaudhary, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_three_fac_corr_error_chaudhary, standardized = TRUE)
+modificationIndices(uwes_three_fac_corr_error_chaudhary, sort. = TRUE)
+fitMeasures(uwes_three_fac_corr_error_chaudhary)
+
+# DFI
+dfi_three_factor_corr_error_chaudhary <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = uwes_three_fac_corr_error_chaudhary,
+  data = data
+)
+```
+
+```{r cfa_two_factor_model_chaudhary, include=FALSE}
+# Chaudhary, R., Rangnekar, S., & Barua, M. K. (2012). Psychometric evaluation of utrecht work engagement scale in an indian sample. Asia-Pacific Journal of Management Research and Innovation, 8(3), 343–350. https://doi.org/10.1177/2319510X1200800314
+
+# Alternative two-factor model where Vigor and Absorption items load onto one factor.
+two_fac_mod_chaudhary <- "
+    VigAbs =~ UWES_1 + UWES_2 + UWES_5 + UWES_6 + UWES_8 + UWES_9
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_two_fac_chaudhary <- cfa(model = two_fac_mod_chaudhary, data = data, std.lv = TRUE, ordered = TRUE)
+two_fac_mod_chaudhary_sum <- summary(uwes_two_fac_chaudhary, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_two_fac_chaudhary, standardized = TRUE)
+modificationIndices(uwes_two_fac_chaudhary, sort. = TRUE)
+fitMeasures(uwes_two_fac_chaudhary)
+
+# DFI
+dfi_two_factor_chaudhary <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = uwes_two_fac_chaudhary,
+  data = data
+)
+```
+
+```{r cfa_three_factor_corr_error_littman_ovadia, include=FALSE}
+# Littman-Ovadia, H., & Balducci, C. (2013). Psychometric properties of the Hebrew version of the utrecht work engagement scale (UWES-9). European Journal of Psychological Assessment, 29(1), 58–63. https://doi.org/10.1027/1015-5759/a000121
+
+# Modified three-factor model with a correlated error between the first two Vigor items.
+three_fac_mod_corr_error_littman_ovadia <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated error
+    UWES_1 ~~ UWES_2
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_three_fac_corr_error_littman_ovadia <- sem(model = three_fac_mod_corr_error_littman_ovadia, data = data, std.lv = TRUE, ordered = TRUE)
+three_fac_mod_corr_error_littman_ovadia_sum <- summary(uwes_three_fac_corr_error_littman_ovadia, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_three_fac_corr_error_littman_ovadia, standardized = TRUE) 
+modificationIndices(uwes_three_fac_corr_error_littman_ovadia, sort. = TRUE)
+fitMeasures(uwes_three_fac_corr_error_littman_ovadia)
+
+# DFI
+dfi_three_factor_corr_error_littman_ovadia <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = uwes_three_fac_corr_error_littman_ovadia,
+  data = data
+)
+```
+
+```{r cfa_three_factor_mod_simbula_tran, include=FALSE}
+# Simbula, S., Guglielmi, D., Schaufeli, W. B., & Depolo, M. (2013). An Italian validation of the Utrecht Work Engagement Scale: Characterization of engaged groups in a sample of schoolteachers. Bollettino di Psicologia Applicata, 268, 43-54.
+# Tran, T. T. T., Watanabe, K., Imamura, K., et al. (2020). Reliability and validity of the Vietnamese version of the 9-item Utrecht Work Engagement Scale. Journal of Occupational Health, 62(1), e12157. https://doi.org/10.1002/1348-9585.12157
+
+# Modified three-factor model with correlated errors.
+three_fac_mod_simbula_tran <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated errors
+    UWES_1 ~~ UWES_2
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_three_fac_simbula_tran <- sem(model = three_fac_mod_simbula_tran, data = data, std.lv = TRUE, ordered = TRUE)
+three_fac_simbula_tran_sum <- summary(uwes_three_fac_simbula_tran, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_three_fac_simbula_tran, standardized = TRUE) 
+modificationIndices(uwes_three_fac_simbula_tran, sort. = TRUE)
+fitMeasures(uwes_three_fac_simbula_tran)
+
+# DFI
+dfi_three_factor_simbula_tran <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = uwes_three_fac_simbula_tran,
+  data = data
+)
+```
+
+```{r cfa_three_factor_mod_seppala, include=FALSE}
+# Seppälä, P., Mauno, S., Feldt, T., Hakanen, J., Kinnunen, U., Tolvanen, A., & Schaufeli, W. (2009). The construct validity of the Utrecht Work Engagement Scale: Multisample and longitudinal evidence. Journal of Happiness Studies, 10(4), 459–481. https://doi.org/10.1007/s10902-008-9100-y
+
+# Modified three-factor model with a single correlated error.
+three_fac_mod_seppala <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated error
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_three_fac_seppala <- sem(model = three_fac_mod_seppala, data = data, std.lv = TRUE, ordered = TRUE)
+three_fac_seppala_sum <- summary(uwes_three_fac_seppala, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_three_fac_seppala, standardized = TRUE) 
+modificationIndices(uwes_three_fac_seppala, sort. = TRUE)
+fitMeasures(uwes_three_fac_seppala)
+
+# DFI
+dfi_three_factor_seppala <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = uwes_three_fac_seppala,
+  data = data
+)
+```
+
+```{r cfa_three_factor_mod_zecca, include=FALSE}
+# Zecca, G., Györkös, C., Becker, J., Massoudi, K., de Bruin, G. P., & Rossier, J. (2015). Validation of the French Utrecht Work Engagement Scale and its relationship with personality traits and impulsivity. Revue Européenne de Psychologie Appliquée/European Review of Applied Psychology, 65(1), 19-28. https://doi.org/10.1016/j.erap.2014.10.003
+
+# Modified three-factor model with within-factor correlated errors.
+three_fac_mod_zecca <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated errors
+    UWES_1 ~~ UWES_2
+    UWES_3 ~~ UWES_4
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used. 
+uwes_three_fac_zecca <- sem(model = three_fac_mod_zecca, data = data, std.lv = TRUE, ordered = TRUE)
+three_fac_zecca_sum <- summary(uwes_three_fac_zecca, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_three_fac_zecca, standardized = TRUE)
+modificationIndices(uwes_three_fac_zecca, sort. = TRUE)
+fitMeasures(uwes_three_fac_zecca)
+
+dfi_three_factor_zecca <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = uwes_three_fac_zecca,
+  data = data
+)
+```
+
+```{r cfa_two_factor_mod_panthee, include=FALSE}
+# Panthee, B., Shimazu, A., & Kawakami, N. (2014). Validation of Nepalese version of Utrecht Work Engagement Scale. Journal of Occupational Health, 56(6), 421–429. https://doi.org/10.1539/joh.14-0041-OA
+
+# Two-factor model (Dedication/Absorption and Vigor)
+two_fac_mod_panthee <- "
+    DedAbs =~ UWES_3 + UWES_4 + UWES_7 + UWES_6 + UWES_8 + UWES_9
+    Vigor =~ UWES_1 + UWES_2 + UWES_5
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+uwes_two_fac_panthee <- cfa(model = two_fac_mod_panthee, data = data, std.lv = TRUE, ordered = TRUE)
+two_fac_mod_panthee_sum <- summary(uwes_two_fac_panthee, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(uwes_two_fac_panthee, standardized = TRUE)
+modificationIndices(uwes_two_fac_panthee, sort. = TRUE)
+fitMeasures(uwes_two_fac_panthee)
+
+# DFI
+DFI_two_factor_panthee <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = uwes_two_fac_panthee,
+  data = data
+)
+
+op_section <- prop_section(type = "continuous")
+close_section <- prop_section(
+    page_size = page_size(orient = "landscape", width = 20, height = 15), 
+    type = "continuous")
+```
+
+```{r CFA_within_factor_corr_model, include=FALSE}
+# This model synthesizes the modifications that demonstrated the best (though still imperfect) 
+# performance in the DFI analyses. The goal is to address the multiple sources of local 
+# misfit simultaneously to create a model that aligns with the DFI's "Level-0" (correctly specified) benchmarks.
+# Theoretical justifications for correlated errors:
+# - UWES_1 ~~ UWES_2: Both items refer to high energy levels ("bursting with energy," "strong and vigorous"). Their similar, active wording suggests shared variance beyond the general Vigor factor.
+# - UWES_3 ~~ UWES_4: Both items refer to the inspirational aspect of the job ("enthusiastic about my job," "my job inspires me"). This shared focus on inspiration can create a correlation not captured by the broader Dedication factor.
+# - UWES_8 ~~ UWES_9: Both items refer to the immersive experience of work ("immersed in my work," "get carried away when I'm working"). This captures a cognitive state of flow that might have shared variance beyond the general Absorption factor.
+
+within_factor_corr_model <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # All plausible within-factor correlated errors
+    UWES_1 ~~ UWES_2
+    UWES_3 ~~ UWES_4
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used.
+UWES_within_factor_corr <- sem(model = within_factor_corr_model, data = data, std.lv = TRUE, ordered = TRUE)
+within_factor_corr_sum <- summary(UWES_within_factor_corr, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(UWES_within_factor_corr, standardized = TRUE)
+modificationIndices(UWES_within_factor_corr, sort. = TRUE)
+fitMeasures(UWES_within_factor_corr)
+
+# DFI for the within-factor correlated errors model
+DFI_within_factor_corr <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = UWES_within_factor_corr,
+  data = data
+)
+```
+
+```{r CFA_replicated_errors_model, include=FALSE}
+# This model tests the three-factor structure while accounting for the two most
+# consistently replicated correlated errors in the international literature.
+# This provides a strong test of a more parsimonious modified model.
+
+replicated_errors_model <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated errors replicated across multiple studies
+    UWES_1 ~~ UWES_2
+    UWES_8 ~~ UWES_9
+"
+
+# When "ordered" is set to "TRUE", the DWLS estimator is automatically used. 
+UWES_replicated_errors <- sem(model = replicated_errors_model, data = data, std.lv = TRUE, ordered = TRUE)
+replicated_errors_sum <- summary(UWES_replicated_errors, rsquare = TRUE, standardized = TRUE, fit.measures = TRUE)
+parameterEstimates(UWES_replicated_errors, standardized = TRUE)
+modificationIndices(UWES_replicated_errors, sort. = TRUE)
+fitMeasures(UWES_replicated_errors)
+
+# DFI for the replicated errors model
+DFI_replicated_errors <- cache_dynamic(
+  cache_dir  = "./Supplementary_materials/Data_generated_during_code_running", robust = TRUE,
+  model = UWES_replicated_errors,
+  data = data
+)
+
+lavaan::anova(UWES_replicated_errors,UWES_within_factor_corr)
+```
+
+```{r model-comparisons, include=FALSE}
+# This chunk performs all chi-square difference tests and stores the results
+# to prevent errors from NA values in the anova table.
+
+# --- USER ACTION REQUIRED ---
+# Make sure these object names match the fitted lavaan models in your environment.
+model_balducci <- uwes_three_fac_corr_errors_balducci
+model_dominguez <- UWES.three.fac.corr.errors.Dominguez
+model_zecca <- uwes_three_fac_zecca
+# ---
+
+# --- Perform the comparisons ---
+# Test 1: Balducci (more complex) vs. Domínguez-Salas (simpler)
+anova_balducci_vs_dominguez <- lavaan::anova(model_balducci, model_dominguez, robust = TRUE)
+
+# Test 2: Domínguez-Salas (simpler) vs. Zecca (more complex)
+anova_dominguez_vs_zecca <- lavaan::anova(model_dominguez, model_zecca, robust = TRUE)
+
+# --- Perform the comparisons ---
+anova_balducci_vs_dominguez <- lavaan::anova(model_balducci, model_dominguez, robust = TRUE)
+anova_dominguez_vs_zecca <- lavaan::anova(model_dominguez, model_zecca, robust = TRUE)
+
+# --- Extract and store the CORRECT values (the second element) ---
+chisq_diff_bal_dom <- anova_balducci_vs_dominguez$'Chisq diff'
+df_diff_bal_dom <- anova_balducci_vs_dominguez$'Df diff'
+p_val_bal_dom <- anova_balducci_vs_dominguez$'Pr(>Chisq)'
+
+chisq_diff_dom_zec <- anova_dominguez_vs_zecca$'Chisq diff'
+df_diff_dom_zec <- anova_dominguez_vs_zecca$'Df diff'
+p_val_dom_zec <- anova_dominguez_vs_zecca$'Pr(>Chisq)'
+```
+
+```{r calculate-construct-validity-and-setup, include=FALSE}
+# Calculate Composite Reliability (CR)
+cr_values <- compRelSEM(uwes_three_fac_corr_errors_balducci)
+
+# Calculate Average Variance Extracted (AVE)
+ave_values <- AVE(uwes_three_fac_corr_errors_balducci)
+
+# Calculate Heterotrait-Monotrait Ratio (HTMT)
+htmt_results <- htmt(model = three.fac.mod.corr.errors.Dominguez, data = uwes_items, ordered = TRUE)
+
+# STORE AND FORMAT VALUES FOR INLINE REPORTING 
+# Store CR values, formatted to two decimal places
+cr_vigor <- sprintf("%.2f", cr_values["Vigor"])
+cr_dedication <- sprintf("%.2f", cr_values["Dedication"])
+cr_absorption <- sprintf("%.2f", cr_values["Absorption"])
+
+# Store AVE values, formatted to two decimal places
+ave_vigor <- sprintf("%.2f", ave_values["Vigor"])
+ave_dedication <- sprintf("%.2f", ave_values["Dedication"])
+ave_absorption <- sprintf("%.2f", ave_values["Absorption"])
+
+# Store HTMT values, formatted to two decimal places
+htmt_vd <- sprintf("%.2f", htmt_results["Dedication", "Vigor"])
+htmt_va <- sprintf("%.2f", htmt_results["Absorption", "Vigor"])
+htmt_da <- sprintf("%.2f", htmt_results["Absorption", "Dedication"])
+```
+
+```{r test-correlation-differences, include=FALSE}
+# Select variables for validity testing
+variab.cor.data=data[, c("UWES","UWES_V","UWES_D","UWES_A",
+                         "BFI_E","BFI_N","Age","Gender","DSES","GSES")]
+# recode variables to numeric
+variab.cor.data = variab.cor.data %>% 
+  mutate_all(as.numeric) %>% 
+  as.matrix()
+
+# --- Test comparisons with Neuroticism (BFI_N) ---
+cocor_vd_n <- cocor(~ UWES_V + BFI_N | UWES_D + BFI_N, data = variab.cor.data)
+cocor_va_n <- cocor(~ UWES_V + BFI_N | UWES_A + BFI_N, data = variab.cor.data)
+cocor_da_n <- cocor(~ UWES_D + BFI_N | UWES_A + BFI_N, data = variab.cor.data)
+
+# --- Test comparisons with Self-Efficacy (GSES) ---
+cocor_vd_gses <- cocor(~ UWES_V + GSES | UWES_D + GSES, data = variab.cor.data)
+cocor_va_gses <- cocor(~ UWES_V + GSES | UWES_A + GSES, data = variab.cor.data)
+cocor_da_gses <- cocor(~ UWES_D + GSES | UWES_A + GSES, data = variab.cor.data)
+
+# --- Test comparisons with Extraversion (BFI_E) ---
+cocor_vd_e <- cocor(~ UWES_V + BFI_E | UWES_D + BFI_E, data = variab.cor.data)
+cocor_va_e <- cocor(~ UWES_V + BFI_E | UWES_A + BFI_E, data = variab.cor.data)
+cocor_da_e <- cocor(~ UWES_D + BFI_E | UWES_A + BFI_E, data = variab.cor.data)
+
+# --- Store formatted p-values for inline reporting ---
+p_val_vd_n <- format_p(cocor_vd_n@hittner2003$p.value)
+p_val_va_n <- format_p(cocor_va_n@hittner2003$p.value)
+p_val_da_n <- format_p(cocor_da_n@hittner2003$p.value)
+p_val_vd_gses <- format_p(cocor_vd_gses@hittner2003$p.value)
+p_val_va_gses <- format_p(cocor_va_gses@hittner2003$p.value)
+p_val_da_gses <- format_p(cocor_da_gses@hittner2003$p.value)
+p_val_vd_e <- format_p(cocor_vd_e@hittner2003$p.value)
+p_val_va_e <- format_p(cocor_va_e@hittner2003$p.value)
+p_val_da_e <- format_p(cocor_da_e@hittner2003$p.value)
+
+# --- Calculate Cohen's q for each comparison ---
+q_vd_n <- abs(atanh(cocor_vd_n@r.jk) - atanh(cocor_vd_n@r.jh))
+q_va_n <- abs(atanh(cocor_va_n@r.jk) - atanh(cocor_va_n@r.jh))
+q_da_n <- abs(atanh(cocor_da_n@r.jk) - atanh(cocor_da_n@r.jh))
+q_vd_gses <- abs(atanh(cocor_vd_gses@r.jk) - atanh(cocor_vd_gses@r.jh))
+q_va_gses <- abs(atanh(cocor_va_gses@r.jk) - atanh(cocor_va_gses@r.jh))
+q_da_gses <- abs(atanh(cocor_da_gses@r.jk) - atanh(cocor_da_gses@r.jh))
+q_vd_e <- abs(atanh(cocor_vd_e@r.jk) - atanh(cocor_vd_e@r.jh))
+q_va_e <- abs(atanh(cocor_va_e@r.jk) - atanh(cocor_va_e@r.jh))
+q_da_e <- abs(atanh(cocor_da_e@r.jk) - atanh(cocor_da_e@r.jh))
+
+# --- Store formatted q-values for inline reporting ---
+q_val_vd_n <- format_q(q_vd_n)
+q_val_va_n <- format_q(q_va_n)
+q_val_da_n <- format_q(q_da_n)
+q_val_vd_gses <- format_q(q_vd_gses)
+q_val_va_gses <- format_q(q_va_gses)
+q_val_da_gses <- format_q(q_da_gses)
+q_val_vd_e <- format_q(q_vd_e)
+q_val_va_e <- format_q(q_va_e)
+q_val_da_e <- format_q(q_da_e)
+```
+
+### Confirmatory Factor Analysis
+
+Bartlett test ($\chi^2$ (`r bartlett.UWES$df`) = `r round(bartlett.UWES$chisq,digits=2)`, `r format_p(bartlett.UWES$p.value)`) as well as KMO (`r round(KMO(UWES.rep.poly)$MSA,digits = 2)`) revealed that UWES data are sufficiently correlated to perform CFA. Next, a series of CFAs were conducted to determine the optimal factorial structure of the UWES-9 for the Czech sample. Results of these analyses are presented in Table \@ref(tab:DFITable). Initial models based on standard one-factor, two-factor, hierarchical, and the original correlated three-factor structures demonstrated poor fit to the data. For instance, the standard three-factor model yielded an RMSEA of `r round(fitMeasures(UWES.three.fac)['rmsea.robust'], 3)`, which was substantially higher than its dynamically-generated Level-0 cutoff of `r round(as.numeric(DFI_three_factor$cutoffs['Level-0', 'RMSEA']), 3)`, indicating a significant degree of misfit. This led to the testing of more complex models that would be theoretically meaningful and, at the same time, account for sources of local misfit. Thus, in the next step, we tested bi-factor models.
+
+Fitting bi-factor models, however, resulted in severe problems with estimation, making the results of these models not possible to interpret. Therefore, in the further step, we tested factor three models that reached the highest model fit in past studies. The first was the three-factor model, firstly proposed by Domínguez-Salas et al. (2022), which included correlated errors between items 1 and 2 (Vigor) and items 8 and 9 (Absorption). The second, a more complex model following Zecca et al. (2015), included these same two correlations between residuals plus a third between items 3 and 4 (Dedication). The third and the most complex was the model of Balducci et al. (2010), who proposed the same correlations between error terms as Domínguez-Salas et al. (2022), with additional correlations between items 2 and 5 (Vigor) and 6 and 8 (Absorption).
+
+It was revealed that all three of these models exhibit the best fit with the data as compared with other tested models. Thus, in the further step, we examined which of these three factor models provided the most optimal fit. The Chi-square difference test comparing these models revealed that the simpler Domínguez-Salas et al. model ($\chi^2$diff(`r df_diff_bal_dom[2]`) = `r format(round(chisq_diff_bal_dom[2], 2), nsmall = 2)`, *p* = `r format_p(p_val_bal_dom[2])`) and model of Zecca et al. (2015) ($\chi^2$diff(`r df_diff_dom_zec[2]`) = `r format(round(chisq_diff_dom_zec[2], 2), nsmall = 2)`, *p* = `r format(round(p_val_dom_zec[2], 2), nsmall = 2)`) represented a statistically significant loss of fit compared to the more complex model of Balducci et al. (2010). Therefore, the Balducci et al. (2010) model can be considered as the best-fitting in our data.
+
+Further evaluation of this final model (see Figure \@ref(fig:my-figure)) revealed an excellent values of most of fit indices: $\chi^2$(`r format(round(fitMeasures(uwes_three_fac_corr_errors_balducci)['df.scaled'], 3))`)=`r format(round(fitMeasures(uwes_three_fac_corr_errors_balducci)['chisq.scaled'], 3))`; `r format_p(format(round(fitMeasures(uwes_three_fac_corr_errors_balducci)['pvalue.scaled'], 3)))`; CFI=`r format(round(fitMeasures(uwes_three_fac_corr_errors_balducci)['cfi.robust'], 3))`; TLI=`r format(round(fitMeasures(uwes_three_fac_corr_errors_balducci)['tli.robust'], 3))`; RMSEA=`r format(round(fitMeasures(uwes_three_fac_corr_errors_balducci)['rmsea.robust'], 3))`; SRMR= `r format(round(fitMeasures(uwes_three_fac_corr_errors_balducci)['srmr'], 3))`. However, its RMSEA was higher than its dynamically generated cutoff of `r format(round(as.numeric(dfi_three_factor_corr_errors_balducci$cutoffs['Level-0', 'RMSEA']), 3), nsmall = 3)`, it still contains a non-trivial degree of misfit. This suggests that while this three-factor structure with modifications is the best representation of the data, the UWES-9 scale may not perfectly capture the construct of work engagement within the present study sample. Factor loadings ($\lambda$) in the Balducci et al. (2010) model were high (ranging from: `r round(min(select((filter(parameterestimates(uwes_three_fac_corr_errors_balducci,standardized = T), op %in% "=~")), std.all)), digits = 2)` to `r round(max(select((filter(parameterestimates(uwes_three_fac_corr_errors_balducci, standardized = T), op %in% "=~")), std.all)), digits = 2)`) as were correlations between the three factors (see Figure 1). Modification indices did not suggested high change in $\chi^2$ in case of releasing constrains between UWES items. Correlation between residuals in manifest variables was low: *r* = range(`r round(min(resid(uwes_three_fac_corr_errors_balducci, "cor")$cov), digits = 2)` - `r round(max(resid(uwes_three_fac_corr_errors_balducci, "cor")$cov), digits = 2)`). Correlation matrix depicting relationships between item residuals can be found in the Supplementary Table 1.
+
+\newpage
+
+(ref:my-figure-caption) SEM plot of the modified three-factor model (Domínguez-Salas et al., 2022) with factor loadings and item residuals.
+
+```{r SemPathGigureGeneration, message=FALSE, warning=FALSE, include=FALSE}
+# Open SVG device first
+svg("./Figures/Figure_1.svg", width = 10, height = 8)
+semPaths(uwes_three_fac_corr_errors_balducci, layout = "tree2", whatLabels = "std",
+         residuals = T, thresholds = F,
+         reorder = T, edge.label.cex = 1, fade = F,
+         intercepts = F, rotation = 1,
+         curve = 2,
+         curvePivot = FALSE,
+         nCharNodes = 20, style = "OpenMx", edge.label.position = 0.62,
+         sizeLat = 9, sizeMan = 8, edge.color = "black")
+dev.off()
+```
+
+```{r my-figure, echo=FALSE, fig.cap="Path diagram of the UWES structural equation model with standardized coefficients and residual variances.", fig.height=14, fig.width=20, message=FALSE, warning=FALSE, dpi=300, out.height="100%", out.width="100%"}
+
+knitr::include_graphics("./Figures/Figure_1.svg")
+```
+
+```{r}
+block_section(op_section)
+```
+
+```{r DFITable, echo=FALSE}
+# # # 1. Grab the object names as characters
+# names_dfi <- ls(pattern = "^DFI_|^dfi_")
+# names_dfi
+# 
+# # 2. Build the argument list
+# call_args <- list(
+#   models           = names_dfi,
+#   add_interpretation = FALSE,
+#   show_fitted_model = TRUE,
+#   add_separator_rows = FALSE,
+#   remove_duplicated_model_names = FALSE,
+#   bold_fitted_model = TRUE
+# )
+# 
+# # 3. Call the function
+# table_DFI <- do.call(create_dynamic_table, call_args)
+# table_DFI
+
+
+# Define the lookup table (dictionary) for model names
+publication_name_map <- c(
+  # "DFI_one_factor" = "1. One-Factor Model",
+  # "DFI_hierarch_factor" = "2. Hierarchical Model",
+  # "DFI_three_factor" = "3. Three-Factor Model (Standard)",
+  # "DFI_two_factor" = "4a. Two-Factor (Vigor-Dedication)",
+  # "dfi_two_factor_chaudhary" = "4b. Two-Factor (Vigor-Absorption)",
+  # "DFI_two_factor_panthee" = "4c. Two-Factor (Dedication-Absorption)",
+  # "dfi_three_factor_corr_errors_balducci" = "5a. Modified 3F (Balducci)",
+  # "dfi_three_factor_corr_error_chaudhary" = "5b. Modified 3F (Chaudhary)",
+  # "DFI_three_factor_corr_errors_Dominguez" = "5c. Modified 3F (Domínguez-Salas)",
+  # "dfi_three_factor_corr_error_littman_ovadia" = "5d. Modified 3F (Littman-Ovadia)",
+  # "dfi_three_factor_seppala" = "5e. Modified 3F (Seppala)",
+  # # "dfi_three_factor_simbula_tran" = "5f. Modified 3F (Simbula et al./Tran et al.)",
+  # "dfi_three_factor_zecca" = "5g. Modified 3F (Zecca)"
+  # # "DFI_within_factor_corr" = "5h. Modified 3F (Within-Factor Errors)",
+  # # "DFI_replicated_errors" = "6. Final Model (Replicated Errors)"
+  "DFI_one_factor"        = "Model 1 One Factor (Schaufeli)",
+  "DFI_hierarch_factor"   = "Model 2 Hierarchical (Domínguez-Salas)",
+  "DFI_three_factor"      = "Model 3 Three Factor Standard (Schaufeli)",
+  "DFI_two_factor"        = "Model 4a Two Factor Vigor Dedication (Willmer)",
+  "dfi_two_factor_chaudhary" = "Model 4b Two Factor Vigor Absorption (Chaudhary)",
+  "DFI_two_factor_panthee"   = "Model 4c Two Factor Dedication Absorption (Panthee)",
+  "dfi_three_factor_corr_errors_balducci" = "Model 5a Modified 3F (Balducci)",
+  "dfi_three_factor_corr_error_chaudhary" = "Model 5b Modified 3F (Chaudhary)",
+  "DFI_three_factor_corr_errors_Dominguez" = "Model 5c Modified 3F (Dominguez)",
+  "dfi_three_factor_corr_error_littman_ovadia" = "Model 5d Modified 3F (Littman)",
+  "dfi_three_factor_seppala"    = "Model 5e Modified 3F (Seppala)",
+  "dfi_three_factor_zecca"      = "Model 5g Modified 3F (Zecca)"
+)
+
+# STEP 2: Programmatically create new, cleanly named objectss
+# This loop creates copies of your DFI objects with valid R names based on the pretty names.
+for (old_name in names(publication_name_map)) {
+  pretty_name <- publication_name_map[[old_name]]
   
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-#....................................................
-# Table 2 preparation
-#....................................................
-mod.fit.indicies = mod.fit.indicies %>% 
-  as_tibble(.name_repair = "unique") %>% 
-  mutate(rmsea = paste0(rmsea," 90% CI (",rmsea.ci.lower,"-",rmsea.ci.upper,")")) %>% 
-  mutate(pvalue = format_p(pvalue)) %>% 
-    rename(
-         "RMSEA" = "rmsea",
-         "Tested model" = "...1",
-         "CFI" = "cfi",
-         "TLI" = "tli",
-         "SRMR" = "srmr",
-         "p-value" = "pvalue",
-         "x2" = "chisq") %>% 
-  select(!starts_with(c("rmsea.ci.","rmsea.ci.lower","rmsea.ci.upper")))
-# PRINT TABLE
-mod.fit.indicies %>% 
- apa_table(caption = "Fit statistic of the models tested in CFA", span_text_columns = F,escape = TRUE,
-           note = "x2 = chi-square, df = degrees of freedom, CFI = Comparative Fit Index, TLI = Tucker-Lewis index, RMSEA = Root Mean Square Error of Approximation , CI = Confidence Interval, SRMR = Standardized Root Mean Square Residual")
+  # Create a valid R name from the pretty name (e.g., "1. One-Factor Model" -> "One_Factor_Model")
+  valid_r_name <- gsub("[^A-Za-z0-9_]", "_", pretty_name) %>% # Replace non-alphanumeric with underscore
+                  gsub("^\\d+[a-z]?\\.\\s*", "", .) # Remove leading numbers/letters like "1. " or "4a. "
+  
+  # Use assign() to create a new object with the valid name, copying the old object
+  assign(valid_r_name, get(old_name, envir = .GlobalEnv))
+}
+
+# STEP 3: Create the character vector of the NEW, clean object names
+new_dfi_object_names <- publication_name_map %>%
+  unname() %>%
+  sapply(function(pretty_name) {
+    gsub("[^A-Za-z0-9_]", "_", pretty_name) %>%
+    gsub("^\\d+[a-z]?\\.\\s*", "", .)
+  })
+
+# STEP 4: Generate the raw table using the NEW objects
+raw_dfi_table <- create_dynamic_table(
+  new_dfi_object_names,
+  add_interpretation = FALSE,
+  show_fitted_model = TRUE,
+  add_separator_rows = FALSE,
+  remove_duplicated_model_names = FALSE,
+  bold_fitted_model = FALSE,
+  bold_model_names = TRUE
+)
+
+# --- STEP 5: Perform a final, simple cleanup on the now-predictable names ---
+DFI_table_publication_final <- raw_dfi_table %>%
+  mutate(
+    across(everything(), ~ str_replace_all(., "_", " ")), # Replace all underscores with spaces
+    across(everything(), ~ str_remove(., "Model "))     # Remove the "Model " prefix
+  )
+
+# STEP 6: Display the final, clean table
+# print(DFI_table_publication_final, n = Inf, width = Inf)
+
+# Display the final, clean table
+DFI_table_publication_final %>%
+  as_tibble() %>% 
+  mutate_all(~(replace(., is.na(.), ""))) %>% 
+  as_huxtable(add_colnames = F) %>% 
+  apa_table(col.names = c(" ", 
+                         " ", " ", " ", " ", " ",
+                         " ", " ", " ", " ", " ",
+                         " ", " ", " ", " "),
+            caption = "Empirical Fit Indices for Competing CFA Models of the UWES-9, supplemented with a Dynamic Fit Indices (DFI) Analysis of Robustness to Misspecification.", 
+            note = "SRMR = Standardized Root Mean Square Residual; RMSEA = Root Mean Square Error of Approximation; CFI = Comparative Fit Index. Bold values indicate the fitted model results. NONE indicates parameter was not estimated for that specification level. Magnitude = reflects the extent of model misspecification of the simulated error at each DFI threshold.")
+
+```
+
+```{r}
+block_section(close_section)
 ```
 
 ## Item statistic and reliability
-```{r internal consistency examination, message=FALSE, warning=FALSE, include=FALSE}
+
+```{r internal_consistency_examination, message=FALSE, warning=FALSE, include=FALSE}
 # UWES total
 UWES.rel.tot=ufs::scaleStructure(select(ends_with(c("UWES_1", "UWES_2","UWES_3","UWES_4",
                                               "UWES_5", "UWES_6", "UWES_7", "UWES_8",
@@ -1233,7 +1241,7 @@ UWES.rel.ded=ufs::scaleStructure(select(ends_with(c("UWES_3", "UWES_4", "UWES_7"
 UWES.rel.abs=ufs::scaleStructure(select(ends_with(c("UWES_6", "UWES_8", "UWES_9")), .data = data), digits = 2, poly = TRUE, samples = 5000)
 ```
 
-```{r item statistic table, message=FALSE, warning=FALSE, include=FALSE}
+```{r item_statistic_table, message=FALSE, warning=FALSE, include=FALSE}
 # there is need to drop NAs before calculation of polychoric correlations (i.e. for extraction of p-values to poly correlations) but in order to make results of previous code compatible, there is need to do this in the procedures above
 data.no.na = data %>% 
   filter(!is.na(UWES))
@@ -1290,17 +1298,61 @@ kurtosis=round(skew.kurt.UWES$kurtosis, digits = 2)
 # combine all
 UWES.items.des=cbind(poly.mat.star,M,SD,ITC,Skewness,kurtosis) 
 UWES.items.des = UWES.items.des %>% 
-  as_tibble() %>% 
+  as_tibble(rownames = "Items") %>% 
   mutate("M(SD)" = paste0("",M," (",SD,")")) %>% 
   select(!c("M","SD"))
+
+# Calculate omega hierarchical
+omega_results <- omega(select(data, matches("UWES_\\d")), 
+                       nfactors = 3,  # Number of group factors
+                       plot = FALSE, poly = TRUE)
+
+# Key metrics:
+# omega_h = reliability due to general factor
+# omega_s = reliability due to specific factors
+# If omega_h > 0.70, total score is justified
+
+# Dynamically extract values from omega_results object
+omega_h <- round(omega_results$omega_h, 2)          # 0.92
+omega_h_threshold <- 0.70
+omega_total <- round(omega_results$omega.tot, 2)    # 0.97
+
+# ECV is directly available
+ecv <- round(omega_results$ECV, 2)                  # 0.90
+ecv_threshold <- 0.70
+
+# Calculate percent general from schmid loadings (p2 column)
+schmid_loadings <- omega_results$schmid$sl
+percent_general <- round(mean(schmid_loadings[, "p2"], na.rm = TRUE) * 100, 0)
+
+# Extract group-specific omega values from omega.group dataframe
+group_omegas <- omega_results$omega.group$group
+# Remove the general factor (first value) and get min/max of specific factors
+group_omegas_specific <- group_omegas[-1]  # Remove first element (general factor)
+group_omega_min <- round(min(group_omegas_specific, na.rm = TRUE), 2)
+group_omega_max <- round(max(group_omegas_specific, na.rm = TRUE), 2)
+
+# Extract the general omega values for subscales (excluding total)
+general_omegas_subscales <- omega_results$omega.group$general[-1]  # Remove first row (total)
+general_min <- round(min(general_omegas_subscales) * 100, 0)
+general_max <- round(max(general_omegas_subscales) * 100, 0)
+
+op_section <- prop_section(type = "continuous")
+close_section <- prop_section(
+  page_size = page_size(orient = "landscape", width = 13, height = 12), 
+  type = "continuous")
 ```
 
-  Internal consistency of the UWES total score was excellent: Cronbach's $\alpha$ = `r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.tot$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.tot$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.tot$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. When assessing the internal consistency of the UWES subcales, the highest values yielded Dedication subscale: Cronbach's $\alpha$ = `r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.ded$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.ded$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.ded$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`] followed by the Vigor subscale: Cronbach's $\alpha$ = `r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.vig$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.vig$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.vig$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. The lowest internal consistency was observed in the Absorption factor: Cronbach's $\alpha$ = `r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.abs$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.abs$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.abs$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. The Table 3 illustrates statistics of UWES items. In general, correlations between these items and item-total correlations were high. The lowest item-total correlation had item 9.    
+Internal consistency of the UWES total score was excellent: Cronbach's $\alpha$ = `r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.tot$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.tot$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.tot$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.tot$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. When assessing the internal consistency of the UWES subcales, the highest values yielded Dedication subscale: Cronbach's $\alpha$ = `r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.ded$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.ded$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.ded$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.ded$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`] followed by the Vigor subscale: Cronbach's $\alpha$ = `r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.vig$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.vig$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.vig$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.vig$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. The lowest internal consistency was observed in the Absorption factor: Cronbach's $\alpha$ = `r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$est,digits=2)` 95% CI[`r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$ci.lower,digits=2)` - `r round(UWES.rel.abs$intermediate$alpha.ordinal.ci$ci.upper,digits=2)`] and McDonald's $\omega_t$ = `r round(UWES.rel.abs$intermediate$omega.ordinal$est, digits=2 )` 95% CI[`r round(UWES.rel.abs$intermediate[["omega.ordinal.ci"]]$ci.lower, digits = 2)` - `r round(UWES.rel.abs$intermediate[["omega.ordinal.ci"]]$ci.upper, digits = 2)`]. Reliability of the UWES was supported by the CR: its values for Vigor (`r cr_vigor`), Dedication (`r cr_dedication`), and Absorption (`r cr_absorption`), were excellent as they all range above the 0.70 threshold for good reliability. However, the omega hierarchical analysis ($\omega_h$ = `r omega_h`) revealed that most of the subscale reliability (`r general_min`-`r general_max`%) was attributable to the general factor rather than specific dimensions, with group-specific factors contributing only `r group_omega_min*100`-`r group_omega_max*100`% of reliable variance. In contrast, the general engagement factor accounted for `r percent_general`% of reliable variance, providing strong empirical support for using the UWES-9 as a total score. The Table \@ref(tab:ItemStats) illustrates statistics of UWES items. In general, correlations between these items and item-total correlations were high. The lowest item-total correlation was for item 9.
 
-```{r echo=FALSE}
+```{r}
+block_section(op_section)
+```
+
+```{r ItemStats, echo=FALSE}
 # creating table 
 UWES.items.des %>% 
-  as_tibble(rownames = NA) %>% 
+  as_tibble() %>% 
      mutate_all(~(replace(., is.na(.), ""))) %>% 
   as_huxtable(add_colnames = F) %>% 
   apa_table(
@@ -1308,17 +1360,24 @@ UWES.items.des %>%
           note = "* p < 0.05; ** p < 0.01; *** p < 0.001, M = Mean, SD = Standard Deviation, ITC = Item-total correlation corrected for scale reliability and item overlap")
 ```
 
-  Correlation analysis indicated that there is significant positive association between all UWES subscale and total score and extroversion. The highest correlation was found in the Vigor subscale. In addition, there was significant negative correlation between all UWES subscales and total score with neuroticism. The highest association was also found in the Vigor subscale. Moreover, the UWES total and its all subscales were associated with self-efficacy. The strongest association was observed in the Vigor subscale. Finally, there was no correlation between the UWES composite and subcale score with spirituality with exception of Dedication subscale (see Table 5).   
+```{r}
+block_section(close_section)
+```
 
-```{r correlation table, include=FALSE}
-variab.cor.data=data[, c("UWES","UWES_V","UWES_D","UWES_A",
-                         "BFI_E","BFI_N","Age","Gender","DSES","GSES")]
-# recode variables to numeric
-variab.cor.data = variab.cor.data %>% 
-  mutate_all(as.numeric) %>% 
-  as.matrix()
+### Construct Validity Evaluation
 
-iter.cor.teq.fin.data=corx(variab.cor.data, method = "spearman", triangle = "lower", describe = c(M = mean, SD = sd), stars = c(0.05, 0.01, 0.001),note = "M = mean, SD = standard devation")
+With the best-fitting model established, we conducted an evaluation of its construct validity. We first assessed convergent validity by calculating the AVE for each factor. The results for Vigor (`r ave_vigor`), Dedication (`r ave_dedication`), and Absorption (`r ave_absorption`) all exceeded the 0.50 treshold, indicating that for each factor, a majority of the variance in its items was captured by the construct itself rather than by measurement error.
+
+However, given the high inter-factor correlations (see Figure \@ref(fig:my-figure)), a specific test of discriminant validity was necessary to determine if the factors were empirically distinct. Thus, we employed the HTMT for this purpose. <!-- which is a modern and stringent test of the distinctiveness of latent factors.  -->The analysis yielded values of `r htmt_vd` (Vigor-Dedication), `r htmt_va` (Vigor-Absorption), and `r htmt_da` (Dedication-Absorption). As all values substantially exceeded the 0.90 threshold, this provided definitive evidence that the factors, while structurally sound, are not internally distinct from one another.
+
+This finding led to our final validity test, where we examined the scale's relationships with external criteria to see if the subscales behaved differently despite their internal overlap. As shown in Table \@ref(tab:CorTab), the UWES scores behaved as expected: the total score and all subscales were positively associated with extraversion and self-efficacy, and negatively associated with neuroticism. For divergent validity, no significant correlation was found with spirituality, with the exception of the Dedication subscale.
+
+To formally test whether the magnitude of these correlations differed across subscales, we used the z-test and calculated Cohen's q to quantify the effect size of the differences. The analysis revealed specific differences in the subscales' external relationships. For example, the correlation between Vigor and extraversion was significantly stronger than that of Absorption and extraversion, representing a small effect (q = `r q_val_va_e`, `r p_val_va_e`). In contrast, the difference in their correlations with neuroticism was not always statistically significant; the difference between Vigor and Dedication was negligible (q = `r q_val_vd_n`, `r p_val_vd_n`), while the difference between Vigor and Absorption was significant with a small effect (q = `r q_val_va_n`, `r p_val_va_n`). Taken together, despite a high overlap between UWES-9 dimensions, subscales of the UWES exhibit some statistically distinct relationships with external criteria.
+
+Correlation analysis indicated that there is a significant positive association between all UWES subscales and total score and extraversion. The highest correlation was found in the Vigor subscale. In addition, there was a significant negative correlation between all UWES subscales and total score with neuroticism. The highest association was also found in the Vigor subscale. Moreover, the UWES total and all its subscales were associated with self-efficacy. The strongest association was observed in the Vigor subscale. Finally, there was no correlation between the UWES composite and subcale score with spirituality, with the exception of the Dedication subscale (see Table \@ref(tab:CorTab)).
+
+```{r correlation_table, include=FALSE}
+iter.cor.teq.fin.data=corx::corx(variab.cor.data, method = "spearman", triangle = "lower", describe = c(M = mean, SD = sd), stars = c(0.05, 0.01, 0.001),note = "M = mean, SD = standard devation")
 
 # create vector of rownames
 row.nam.cor.tab=rownames(iter.cor.teq.fin.data$apa)
@@ -1330,111 +1389,229 @@ iter.cor.teq.fin.data$apa = iter.cor.teq.fin.data$apa %>%
   as.data.frame(row.names = row.nam.cor.tab)
   # rownames_to_column() %>% 
   # rename("-" = "rowname")
+
+op_section <- prop_section(type = "continuous")
+close_section <- prop_section(
+  page_size = page_size(orient = "landscape", width = 11, height = 11), 
+  type = "continuous")
 ```
 
-```{r echo=FALSE}
+```{r}
+block_section(op_section)
+```
+
+```{r CorTab, echo=FALSE}
 apa_table(iter.cor.teq.fin.data$apa, caption = "Correaltion matrix of the UWES, personality characteristics and socio-demographic indicators",
           note = "* p < 0.05; ** p < 0.01; *** p < 0.001; SD = standard deviation, M = mean, UWES = Utrecht Work Engagement Scale, BFI_N = Big Five Inventory - Neuroticism subscale, BFI_E = Big Five Inventory - Extraversion subscale, UWES_A = Utrecht Work Engagement Scale - Absorption subscale, UWES_D = Utrecht Work Engagement Scale - Dedication subscale, UWES_V = Utrecht Work Engagement Scale - Vigor subscale. DSES = Daily Spiritual Experience Scale, GSES = General Self Efficacy Scale") 
 ```
 
-## Invariance testing and factor loadings 
+```{r}
+block_section(close_section)
+```
 
-  Results of the measurement equivalence indicated that across tested invariance models (configure, metric, scalar and strict) $\Delta$ of the CFI was < 0.01. This findings strongly suggest that the UWES assess working engagement equivalently in males and females (See Table 6).    
+## Invariance testing and factor loadings
 
-```{r gender invariance UWES, include=FALSE}
-meas.invar.UWES= "Dedication =~ UWES_3 + UWES_4 + UWES_7
-                  Absorption =~ UWES_6 + UWES_8 + UWES_9
-                  Vigor =~ UWES_1 + UWES_2 + UWES_5"
+```{r gender_invariance_UWES, include=FALSE}
+# --- Step 1: Define the models with MANUAL scaling ---
 
-meas.invar.UWES.cfa=cfa(meas.invar.UWES, data = data,ordered = T,std.lv=T,
-                         meanstructure = T) # crucial in invariance testing
-# Tab x 
-tab.fit = matrix(nrow = 7, ncol = 10)
-# ODSIS Part
+# Model for the single-group (overall) baseline fit
+# We still standardize the latent variance to 1 for interpretability
+overall.model.UWES <- "
+    Vigor =~ UWES_1 + UWES_2 + UWES_5 
+    Dedication =~ UWES_3 + UWES_4 + UWES_7
+    Absorption =~ UWES_6 + UWES_8 + UWES_9
+    
+    # Correlated errors specific to the Italian sample in the study
+    UWES_1 ~~ UWES_2
+    # UWES_2 ~~ UWES_5
+    # UWES_6 ~~ UWES_8
+    UWES_8 ~~ UWES_9
+"
+# --- Step 2: Run the single-group baseline model ---
+baseline.cfa <- cfa(overall.model.UWES,
+                    data = data,
+                    ordered = TRUE,
+                    # std.lv is now FALSE because we do it manually
+                    estimator = "WLSMV",
+                    meanstructure = TRUE)
 
-colnames(tab.fit)=c("Model","x2","df","pvalue","CFI","TLI","rmsea","rmsea.ci.lower", "rmsea.ci.upper", "SRMR")
-tab.fit[1, ] = c("Overall model", round(fitMeasures(meas.invar.UWES.cfa,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
-
-data.invar = data %>%
+# --- Step 3: Prepare data for multi-group analysis (Unchanged) ---
+data.invar <- data %>%
   drop_na(UWES)
 
-mult.group.m = eqMI.main(model = meas.invar.UWES,
-                         data = data.invar,
-                         group = "Gender", 
-                         meanstructure = T,
-                         output = "both",
-                         equivalence.test = T,
-                         adjRMSEA = T,
-                         projection = T,
-                         ordered = FALSE) # in previous version of the script this was set as TRUE but due to the following error: "Error: lavaan->lavTestLRT():  
-   #method = “satorra.bentler.2001” only available when models are fitted with test = "satorra.bentler", "yuan.bentler", or "yuan.bentler.mplus""; this needed to
-#be modified
+# --- Step 4: Manually conduct multi-group invariance testing ---
+# We now use the MANUAL model and remove std.lv=TRUE from all calls
 
-# male table
-tab.fit[2, ] = c("Male model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.configural.g1,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
-# female table
-tab.fit[3, ] = c("Female model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.configural.g2,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
+# Configural Invariance
+fit.configural <- cfa(overall.model.UWES,
+                      data = data.invar,
+                      group = "Gender",
+                      ordered = TRUE,
+                      estimator = "WLSMV",
+                      meanstructure = TRUE)
 
-# Configure invariance 
-tab.fit[4, ] = c("Configural  model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.combine.groups,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
-# Metric invariance 
-tab.fit[5, ] = c("Metric  model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.metric,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
-# Scalar invariance 
-tab.fit[6, ] = c("Scalar  model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.scalar,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
-# Strict (error) invariance
-tab.fit[7, ] = c("Strict  model", round(fitMeasures(mult.group.m$convention.sem$LavaanOut$fit.strict.residuals,
-                                                    c('chisq', 'df', 'pvalue',
-                                                   'cfi',"tli",'rmsea',"rmsea.ci.lower",
-                                                   "rmsea.ci.upper", 'srmr')), digits = 3))
+# Metric Invariance
+fit.metric <- cfa(overall.model.UWES,
+                  data = data.invar,
+                  group = "Gender",
+                  group.equal = "loadings",
+                  ordered = TRUE,
+                  estimator = "WLSMV",
+                  meanstructure = TRUE)
 
-mult.group.m$eqMI.stat # checking chi-square 
+# Scalar Invariance
+fit.scalar <- cfa(overall.model.UWES,
+                  data = data.invar,
+                  group = "Gender",
+                  group.equal = c("loadings", "intercepts"),
+                  ordered = TRUE,
+                  estimator = "WLSMV",
+                  meanstructure = TRUE)
+
+# Strict Invariance
+fit.strict <- cfa(overall.model.UWES,
+                  data = data.invar,
+                  group = "Gender",
+                  group.equal = c("loadings", "intercepts", "residuals"),
+                  ordered = TRUE,
+                  estimator = "WLSMV",
+                  meanstructure = TRUE)
+
+
+# --- Step 5: Build the fit table (This part should now work correctly) ---
+fit.indices <- c('chisq.scaled', 'df.scaled', 'pvalue.scaled', 'cfi.scaled',
+                 'tli.scaled', 'rmsea.scaled', "rmsea.ci.lower.scaled",
+                 "rmsea.ci.upper.scaled", 'srmr')
+
+tab.fit <- matrix(nrow = 5, ncol = 10)
+colnames(tab.fit) <- c("Model", "x2", "df", "pvalue", "CFI", "TLI", "rmsea",
+                       "rmsea.ci.lower", "rmsea.ci.upper", "SRMR")
+
+# Populate the table
+tab.fit[1,] <- c("Baseline", round(fitMeasures(baseline.cfa, fit.indices), 3))
+tab.fit[2,] <- c("Configural", round(fitMeasures(fit.configural, fit.indices), 3))
+tab.fit[3,] <- c("Metric", round(fitMeasures(fit.metric, fit.indices), 3))
+tab.fit[4,] <- c("Scalar", round(fitMeasures(fit.scalar, fit.indices), 3))
+tab.fit[5,] <- c("Strict", round(fitMeasures(fit.strict, fit.indices), 3))
 
 tab.fit = tab.fit %>% 
   as_tibble() %>% 
   mutate(pvalue = as.numeric(pvalue)) %>% 
   mutate(pvalue = format_p(pvalue)) %>% 
   mutate(rmsea = paste0(rmsea," 90% CI (",rmsea.ci.lower,"-",rmsea.ci.upper,")")) %>% 
-  select(!starts_with(c("rmsea.ci.","rmsea.ci.lower","rmsea.ci.upper"))) %>% view()
+  select(!starts_with(c("rmsea.ci.","rmsea.ci.lower","rmsea.ci.upper")))
+
+# =============================================================================
+# MEASUREMENT INVARIANCE ANALYSIS FOR UWES ACROSS GENDER GROUPS - diagnostics
+# =============================================================================
+# Step 1: Single-group analyses to understand the technical issues
+# 
+# # Analyze male group separately to establish baseline functioning
+# fit.male <- cfa(overall.model.UWES, 
+#                 data = filter(data.invar, Gender == "Male"),
+#                 ordered = TRUE, 
+#                 estimator = "WLSMV", 
+#                 meanstructure = TRUE)
+# 
+# # Analyze female group separately to identify source of problems
+fit.female <- cfa(overall.model.UWES,
+                  data = filter(data.invar, Gender == "Female"),
+                  ordered = TRUE,
+                  estimator = "WLSMV",
+                  meanstructure = TRUE)
+# 
+# # Step 4: Extract sample sizes for reporting
+# # -------------------------------------------
+# # Get number of observations in each group for demographic reporting
+# n_male <- nobs(fit.male)
+# n_female <- nobs(fit.female)
+# 
+# # Step 5: Extract factor correlations to identify multicollinearity issues
+# # -------------------------------------------------------------------------
+# # Extract correlation matrix from male group (should be normal)
+# male_correlations <- lavInspect(fit.male, "cor.lv")
+# # Get individual correlations and round for reporting
+# cor_male_vigor_dedication <- round(male_correlations[2,1], 3)
+# cor_male_vigor_absorption <- round(male_correlations[3,1], 3)
+# cor_male_dedication_absorption <- round(male_correlations[3,2], 3)
+# # Find range of correlations for concise reporting
+# cor_male_min <- min(cor_male_vigor_dedication, cor_male_vigor_absorption, cor_male_dedication_absorption)
+# cor_male_max <- max(cor_male_vigor_dedication, cor_male_vigor_absorption, cor_male_dedication_absorption)
+# 
+# # Extract correlation matrix from female group (problematic)
+female_correlations <- lavInspect(fit.female, "cor.lv")
+# # Focus on the impossible correlation (>1.0) that causes matrix singularity
+cor_female_vigor_absorption <- round(female_correlations[3,1], 3)
+# 
+# # Step 6: Extract fit indices from scalar invariance model
+# # --------------------------------------------------------
+# # Get scaled fit indices (robust versions unavailable due to convergence issues)
+# scalar_fit_measures <- fitmeasures(fit.scalar, c("cfi.scaled", "rmsea.scaled", "pvalue.scaled"))
+# # Round for clean reporting
+# scalar_cfi <- round(scalar_fit_measures["cfi.scaled"], 3)
+# scalar_rmsea <- round(scalar_fit_measures["rmsea.scaled"], 3)
+# scalar_pvalue <- round(scalar_fit_measures["pvalue.scaled"], 3)
+# 
+# # Step 7: Calculate model comparison statistics (Delta CFI)
+# # ---------------------------------------------------------
+# # Extract CFI from each invariance level to assess model deterioration
+# configural_cfi <- round(fitmeasures(fit.configural, "cfi.scaled"), 3)
+# metric_cfi <- round(fitmeasures(fit.metric, "cfi.scaled"), 3)
+# # Calculate changes between successive models
+# delta_cfi_configural_metric <- abs(metric_cfi - configural_cfi)
+# delta_cfi_metric_scalar <- abs(scalar_cfi - metric_cfi)
+# # Find maximum change for reporting worst-case scenario
+# max_delta_cfi <- max(delta_cfi_configural_metric, delta_cfi_metric_scalar)
+
+# Step 8: Set invariance evaluation criteria
+# -------------------------------------------
+# Standard threshold for acceptable model change in invariance testing
+# delta_cfi_threshold <- 0.01
+
+# Step 9: Display extracted values for verification and transparency
+# ------------------------------------------------------------------
+# cat("Sample sizes:\n")
+# cat("Males:", n_male, "\n")
+# cat("Females:", n_female, "\n\n")
+# 
+# cat("Male factor correlations (normal range):\n")
+# cat("Vigor-Dedication:", cor_male_vigor_dedication, "\n")
+# cat("Vigor-Absorption:", cor_male_vigor_absorption, "\n")
+# cat("Dedication-Absorption:", cor_male_dedication_absorption, "\n")
+# cat("Range:", cor_male_min, "to", cor_male_max, "\n\n")
+# 
+# cat("Female problematic correlation:\n")
+# cat("Vigor-Absorption:", cor_female_vigor_absorption, "(impossible - exceeds 1.0)\n\n")
+# 
+# cat("Scalar model fit indices:\n")
+# cat("CFI:", scalar_cfi, "\n")
+# cat("RMSEA:", scalar_rmsea, "\n")
+# cat("p-value:", scalar_pvalue, "\n\n")
+# 
+# cat("Model comparison:\n")
+# cat("Configural CFI:", configural_cfi, "\n")
+# cat("Metric CFI:", metric_cfi, "\n")
+# cat("Scalar CFI:", scalar_cfi, "\n")
+# cat("Maximum Delta CFI:", round(max_delta_cfi, 3), "\n")
+# cat("Threshold:", delta_cfi_threshold, "\n")
 ```
 
-```{r echo=FALSE}
+The results of the measurement invariance testing are summarized in Table \@ref(tab:InvarTab)). In this analysis, we report the scaled fit indices, as the robust versions could not be computed for the scalar and strict invariance models. <!-- This can occure when highly constrained models are tested with the WLSMV estimator --> It was revealed that in female group, factor intercorrelations exceeded 1.0 (Vigor-Absorption r=`r cor_female_vigor_absorption`). To ensure model stability, correlated residuals from the original Italian validation were removed, as they caused identification issues in the smaller female subsample. After this removal, the model included correlated errors only between items 1 and 2 (Vigor) and items 8 and 9 (Absorption). After this modification the model was the same as the Domínguez-Salas et al. (2022) model. In this simplified three-factor model, the change in the scaled Comparative Fit Index ($\Delta$CFI) was less than 0.01 across all model comparisons. This finding strongly supports full measurement invariance and indicates that the UWES assesses work engagement equivalently in males and females.
+
+```{r InvarTab, echo=FALSE}
 # creating table 
 tab.fit %>% 
   as_tibble() %>% 
      mutate_all(~(replace(., is.na(.), ""))) %>% 
   as_huxtable(add_colnames = F) %>% 
   apa_table(col.names=c("Model","x2","df","p-value","CFI","TLI","RMSEA","SRMR"),
-          caption = "Measurement eqivalence of the UWES between genders", 
+          caption = "Measurement equivalence of the UWES between genders", 
           note = "x2 = chi-square, df = degrees of freedom, CFI = Comparative Fit Index, TLI = Tucker-Lewis index, RMSEA = Root Mean Square Error of Approximation, SRMR = Standardized Root Mean Square Residual, CI = confidence interval")
-
-# rmarkdown::pandoc_convert("pokus.docx", output = "pokus.html")
-# {r child = "pokus.html"}
 ```
 
-```{r eval=FALSE, child= "pokus.md", include=FALSE}
-```
+## Association of the UWES with chronic health ilnesses
 
-## Association of the UWES with chronic health ilnesses 
-
-```{r frist regression, include=FALSE}
+```{r frist_regression, include=FALSE}
 # Side-by-side Regression Models
 # logistic regression model
 # we have 34 analysis thus 0.05/34 = 0.001470588 = criterion P-value
@@ -1695,7 +1872,7 @@ tbls = list(ra.b.tab.pok1,ra.b.tab.pok2),
 tab_span = c("**ADJ(ra)**", "**NA(ra)**"))
 ```
 
-```{r convert gtsum tab into tible, include=FALSE}
+```{r convert_gtsum_tab_into_tible, include=FALSE}
 table.2=ra.b.t1
 
 #show_header_names(table.2)
@@ -1771,7 +1948,7 @@ names(table.2.tib) <- names.tab2
          t()
 ```
 
-```{r preparation to print tab, message=FALSE, warning=FALSE, include=FALSE}
+```{r preparation_to_print_tab, message=FALSE, warning=FALSE, include=FALSE}
 
 # the only step here which is required here is to manually divide dataset into four parts and then rbind these togather 
 
@@ -1797,9 +1974,9 @@ tr.4=tab.wide.1[,c(10,11,12,13,16)] %>% as_tibble(rownames = NA)
 # dec.re.be.oas=(exp(dec.re.be.oas$coefficients[-1])-1)*100  # percentage
 ```
 
-Results of the regression analysis revealed that work engagement is significantly related with chronic diseases. Specifically, higher work engagement was significantly related with lower probability of developing skin diseases or eczema (in crude effect) pain of unclear origin (both crude and adjusted effect see Table 6). 
+Results of the regression analysis revealed that work engagement is significantly related with chronic diseases. Specifically, higher work engagement was significantly related to a lower probability of developing skin diseases or eczema (in crude effect), pain of unclear origin (both crude and adjusted effect (see Table \@ref(tab:LogRegChronicDiseas)).
 
-```{r echo=FALSE}
+```{r LogRegChronicDiseas, echo=FALSE}
 # creating table 
 tab %>% 
   apa_table(
@@ -1807,9 +1984,9 @@ tab %>%
           note = "* p < 0.05; ** p < 0.01; *** p < 0.001, results are reported in odds ratios; Education and Work position were covariates in adjusted effect; values in brackets refers to 95% confidence interval for odds ratios")
 ```
 
-# Association of the UWES with health risk behaviour 
+# Association of the UWES with health risk behaviour
 
-```{r second regression, include=FALSE}
+```{r second_regression, include=FALSE}
 # Side-by-side Regression Models
 # logistic regression model
 # we have 44 analysis thus 0.05/44 = 0.001136364 = criterion P-value
@@ -1902,7 +2079,7 @@ tbls = list(ra.c.tab.pok1,ra.c.tab.pok2),
 tab_span = c("**ADJ(ra)**", "**NA(ra)**"))
 ```
 
-```{r convert gtsum tab 2 into tible, include=FALSE}
+```{r convert_gtsum_tab_2_into_tible, include=FALSE}
 table.3=ra.c.t1
 
 #show_header_names(table.3)
@@ -1979,7 +2156,7 @@ names(table.3.tib) <- names.tab2
          t()
 ```
 
-```{r preparation to print tab 2, message=FALSE, warning=FALSE, include=FALSE}
+```{r preparation_to_print_tab_2, message=FALSE, warning=FALSE, include=FALSE}
 # the only step here which is required here is to manually divide dataset into four parts and then rbind these togather 
 
 # even a little bit wider
@@ -1994,9 +2171,69 @@ names(table.3.tib) <- names.tab2
            janitor::row_to_names(row_number = 1) 
 ```
 
-Results of logistic regression suggested that there is no relationship between work engagement and the smoking, alcohol drinking, drug abuse, coffee drinking or using computer or television for recreation in both crude and adjusted effect. Variable smoking was the most closer to the significance treshold. 
+Results of logistic regression suggested that there is no relationship between work engagement and smoking, alcohol drinking, drug abuse, coffee drinking, or using a computer or television for recreation in both crude and adjusted effects (Supplementary Table 2). Variable smoking was the closest to the significance threshold.
 
-```{r echo=FALSE}
+# Discussion
+
+\newpage
+
+---
+appendix: "R/appendix.Rmd"
+---
+
+# References
+
+```{=tex}
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+```
+::: {#refs custom-style="Bibliography"}
+:::
+
+```{=tex}
+\endgroup
+```
+\newpage
+
+<!-- # (Supplementary Table 1) Appendix {-} -->
+
+# (Supplementary Table 1)
+
+```{r}
+op_section <- prop_section(type = "continuous")
+close_section <- prop_section(
+    page_size = page_size(orient = "landscape", width = 10, height = 10), 
+    type = "continuous")
+```
+
+```{r}
+block_section(op_section)
+```
+
+```{r child = "R/appendix.Rmd"}
+```
+
+```{r}
+block_section(close_section)
+```
+
+<!-- # (Supplementary Table 2) Appendix {-} -->
+
+# (Supplementary Table 2)
+
+```{r}
+op_section <- prop_section(type = "continuous")
+close_section <- prop_section(
+    page_size = page_size(orient = "landscape", width = 10, height = 10), 
+    type = "continuous")
+```
+
+```{r}
+block_section(op_section)
+```
+
+```{r LogRegChronicRisk, echo=FALSE}
 # creating table 
 tab.wide.2 %>% 
   apa_table(
@@ -2004,16 +2241,6 @@ tab.wide.2 %>%
           note = "* p < 0.05; ** p < 0.01; *** p < 0.001, results are reported in odds ratios; Education and Work position were covariates in adjusted effect; values in brackets refers to 95% confidence interval for odds ratios")
 ```
 
-# Discussion
-
-
-\newpage
-
-# References
-
-\begingroup
-\setlength{\parindent}{-0.5in}
-\setlength{\leftskip}{0.5in}
-
-<div id="refs" custom-style="Bibliography"></div>
-\endgroup
+```{r}
+block_section(close_section)
+```
